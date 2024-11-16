@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 400px; margin: auto; }
+        input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {
+            width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box;
+        }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #218838; }
+    </style>
+    <script src="basic.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>用户注册</h2>
+        <form id="registerForm">
+            <input type="text" placeholder="用户名" name="username" required><br>
+            <input type="text" placeholder="真实姓名" name="real_name" required><br>
+            <input type="text" placeholder="学校" name="school" required><br>
+            <input type="text" placeholder="年级" name="grade" required><br>
+            <input type="tel" placeholder="手机号" name="phone" required><br>
+            <input type="email" placeholder="电子邮箱" name="email" required><br>
+            <input type="password" placeholder="密码" name="password" required><br>
+            <button type="submit">注册</button>
+        </form>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            connect('/register',JSON.stringify(data),(data)=>{
+                document.getElementById('message').textContent=data.message;
+            },(data)=>{
+                document.getElementById('message').textContent=data.error;
+            });
+        });
+    </script>
+</body>
+</html>
