@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: 'jzq20100505',
     database: 'guangfang'
 });
 
@@ -131,10 +131,8 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/');
     },
     filename: (req, file, cb) => {
-        console.log(req.body);
-        const userId = JSON.req.body;
-        console.log("jijiji",userId);
-        const uniqueSuffix = Date.now() + '-' + toString(userId);
+        const userId = req.body.userId;
+        const uniqueSuffix = Date.now() + '-' + userId;
         file.originalname = Buffer.from(file.originalname, "latin1").toString("utf8");
         cb(null, uniqueSuffix + '-' + file.originalname);
     }
@@ -145,16 +143,20 @@ const upload = multer({ storage: storage });
 
 // 提交记录的路由
 app.post('/submit', upload.single('file'), async (req, res) => {
-    const { user_id, phase_id, subject } = req.body;
+    console.log(req.body);
+    const { userId, phase_id, subject } = req.body;
     const file_path = req.file ? req.file.path : null;
-    console.log(file_path);
     try {
-        const [result] = await db.query(
+        db.query(
             'INSERT INTO submissions (user_id, phase_id, subject, file_path) VALUES (?, ?, ?, ?)',
-            [user_id, phase_id, subject, file_path]
+            [userId, phase_id, subject, file_path],
+            (err,result)=>{
+                if(err){
+                    res.status(500).json({ error: '数据库错误'+err});
+                }
+                res.status(200).json({ message: '提交成功', submissionId: result.insertId });
+            }
         );
-
-        res.json({ message: '提交成功', submissionId: result.insertId });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: '服务器错误' });
@@ -164,8 +166,13 @@ app.post('/submit', upload.single('file'), async (req, res) => {
 // 显示提交记录的路由
 app.get('/submissions', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM submissions');
-        res.json(rows);
+        db.query('SELECT * FROM submissions',(err,result)=>{
+            if(err){
+                res.status(500).json({error:'数据库错误'+error});
+            }
+            console.log(result);
+            res.status(200).json(result);
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: '服务器错误' });
