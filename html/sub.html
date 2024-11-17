@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提交记录</title>
+</head>
+<body>
+    <h2>提交记录表单</h2>
+    <form id="submissionForm" enctype="multipart/form-data">
+        
+        <label for="phase_id">期号 (Phase ID):</label>
+        <input type="number" id="phase_id" name="phase_id" required><br>
+        
+        <label for="subject">学科:</label>
+        <input type="text" id="subject" name="subject" required><br>
+        
+        <label for="file">上传文件:</label>
+        <input type="file" id="file" name="file"><br><br>
+        
+        <button type="submit">提交</button>
+    </form>
+
+    <h2>提交记录</h2>
+    <ul id="submissionList"></ul>
+
+    <script>
+        document.getElementById('submissionForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            try {
+                var userId=await fetch("http://localhost:3000/dashboard", {
+                    "headers": {
+                        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                        "accept-language": "zh-CN,zh;q=0.9",
+                        "cache-control": "max-age=0",
+                        "if-none-match": "W/\"25-Ip6/lKkngCOJpWi9yI3NaPD/G0E\"",
+                        "sec-ch-ua": "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+                        "sec-ch-ua-mobile": "?0",
+                        "sec-ch-ua-platform": "\"macOS\"",
+                        "sec-fetch-dest": "document",
+                        "sec-fetch-mode": "navigate",
+                        "sec-fetch-site": "none",
+                        "sec-fetch-user": "?1",
+                        "upgrade-insecure-requests": "1"
+                    },
+                    "referrerPolicy": "strict-origin-when-cross-origin",
+                    "body": null,
+                    "method": "GET",
+                    "mode": "cors",
+                    "credentials": "include"
+                });
+                console.log(userId);
+                userId = await userId.json();
+                userId = userId.userId;
+                console.log(userId);
+                formData.append('userId',userId.toString());
+                console.log(formData);
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                alert(result.message || result.error);
+                if (result.message) {
+                    loadSubmissions();
+                }
+            }
+            catch (error) {
+                    console.error('提交失败:', error);
+            }
+        });
+
+        async function loadSubmissions() {
+            try {
+                const response = await fetch('/submissions');
+                const submissions = await response.json();
+
+                const list = document.getElementById('submissionList');
+                list.innerHTML = '';
+                submissions.forEach(sub => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `ID: ${sub.id}, Phase ID: ${sub.phase_id}, Time: ${sub.time}, Subject: ${sub.subject}, File: ${sub.file_path}`;
+                    list.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('加载提交记录失败:', error);
+            }
+        }
+
+        // 加载提交记录
+        loadSubmissions();
+    </script>
+</body>
+</html>

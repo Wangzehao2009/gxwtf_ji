@@ -1,4 +1,5 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
@@ -11,13 +12,18 @@ const app = express();
 const saltRounds = 10;
 
 app.use(express.text());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-var urlencodedParser=bodyParser.urlencoded({ extended: false });
+const urlencodedParser=bodyParser.urlencoded({ extended: false });
+app.use(express.static('public'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // 配置数据库连接
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'jzq20100505',
+    password: '',
     database: 'guangfang'
 });
 
@@ -28,18 +34,6 @@ db.connect(err => {
     }
     console.log('guangfang 数据库连接成功');
 });
-
-
-// 配置文件上传
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
-const upload = multer({ storage });
 
 // 引擎
 fs.readdir('html',(err,files)=>{
@@ -93,12 +87,16 @@ app.post('/login', urlencodedParser, (req, res) => {
     
             const user = results[0];
             const passwordMatch = await bcrypt.compare(password, user.password);
-            // console.log(passwordMatch);
             if (!passwordMatch) {
                 return res.status(401).send(JSON.stringify({ error: '用户名或密码错误' }));
             }
             // console.log(JSON.stringify({ message: '登录成功', userId: user.id }));
+            const userId = user.id;
+            console.log("userId =",userId);
+            // 设置一个 cookie 存储 userId，有效期为 1 天
+            res.cookie('userId', userId, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
             res.status(200).send(JSON.stringify({ message: '登录成功', userId: user.id }));
+            console.log('登录成功，userId 已存储在 cookie 中');
         });
     }
     catch(err){
@@ -107,38 +105,71 @@ app.post('/login', urlencodedParser, (req, res) => {
     }
 });
 
-// 提交试题答案（文本或文件）
-app.post('/submit', urlencodedParser, upload.single('file'), (req, res) => {
-    const { userId, questionName, textSubmission } = req.body;
-    const fileSubmission = req.file ? req.file.filename : null;
-    console.log(fileSubmission);
-    const query = 'INSERT INTO submissions (user_id, question_name, text_submission, file_submission) VALUES (?, ?, ?, ?)';
-    db.query(query, [userId, questionName, textSubmission, fileSubmission], (err, result) => {
-        if (err) {
-            return res.status(500).send(JSON.stringify({ error: '提交失败' }));
-        }
-        res.status(201).send(JSON.stringify({ message: '提交成功' }));
-    });
+// 退出登录
+app.get('/logout', (req, res) => {
+    // 清空 userId 的 cookie
+    res.clearCookie('userId');
+    res.send('您已登出，userId cookie 已清除');
 });
 
-// 获取提交记录
-app.get('/submissions/:userId', (req, res) => {
-    const userId = req.params.userId;
+// 获取并使用 cookie 的路由示例
+app.get('/dashboard', (req, res) => {
+    const userId = req.cookies.userId; // 读取 'userId' 的 cookie
 
-    const query = `
-        SELECT u.real_name, s.submission_time, s.question_name
-        FROM submissions s
-        JOIN users u ON s.user_id = u.id
-        WHERE s.user_id = ?
-        ORDER BY s.submission_time DESC
-    `;
+    if (userId) {
+        // 这里可以查询数据库来获取用户的详细信息
+        res.json({ message: `欢迎回来，用户ID：${userId}` ,userId: userId});
+        
+    } else {
+        res.status(401).json({ error: '未授权访问，请登录' });
+    }
+});
 
-    db.query(query, [userId], (err, results) => {
-        if (err) {
-            return res.status(500).send(JSON.stringify({ error: '获取提交记录失败' }));
-        }
-        res.status(200).send(JSON.stringify(results));
-    });
+// 设置文件上传存储
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        console.log(req.body);
+        const userId = JSON.req.body;
+        console.log("jijiji",userId);
+        const uniqueSuffix = Date.now() + '-' + toString(userId);
+        file.originalname = Buffer.from(file.originalname, "latin1").toString("utf8");
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+
+// 提交记录的路由
+app.post('/submit', upload.single('file'), async (req, res) => {
+    const { user_id, phase_id, subject } = req.body;
+    const file_path = req.file ? req.file.path : null;
+    console.log(file_path);
+    try {
+        const [result] = await db.query(
+            'INSERT INTO submissions (user_id, phase_id, subject, file_path) VALUES (?, ?, ?, ?)',
+            [user_id, phase_id, subject, file_path]
+        );
+
+        res.json({ message: '提交成功', submissionId: result.insertId });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+});
+
+// 显示提交记录的路由
+app.get('/submissions', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM submissions');
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
