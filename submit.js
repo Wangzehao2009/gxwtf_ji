@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'jzq20100505',
+    password: '',
     database: 'guangfang'
 });
 
@@ -144,12 +144,12 @@ const upload = multer({ storage: storage });
 // 提交记录的路由
 app.post('/submit', upload.single('file'), async (req, res) => {
     console.log(req.body);
-    const { userId, phase_id, subject } = req.body;
+    const { userId, issue, subject } = req.body;
     const file_path = req.file ? req.file.path : null;
     try {
         db.query(
-            'INSERT INTO submissions (user_id, phase_id, subject, file_path) VALUES (?, ?, ?, ?)',
-            [userId, phase_id, subject, file_path],
+            'INSERT INTO submissions (user_id, issue, subject, file_path) VALUES (?, ?, ?, ?)',
+            [userId, issue, subject, file_path],
             (err,result)=>{
                 if(err){
                     res.status(500).json({ error: '数据库错误'+err});
@@ -178,6 +178,53 @@ app.get('/submissions', async (req, res) => {
         res.status(500).json({ error: '服务器错误' });
     }
 });
+
+// 新建题目的路由
+app.post('/newproblem', upload.single('file'), async (req, res) => {
+    console.log(req.body);
+    const { name, subject, author } = req.body;
+    const file_path = req.file ? req.file.path : null;
+    console.log(file_path);
+    try {
+        db.query(
+            'INSERT INTO problems (name, subject, author, file_path) VALUES (?, ?, ?, ?)',
+            [name, subject, author, file_path],
+            (err,result)=>{
+                if(err){
+                    res.status(500).json({ error: '数据库错误'+err});
+                }
+                res.status(200).json({ message: '提交成功', submissionId: result.insertId });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+});
+
+// 新建一期的路由
+app.post('/newissue', upload.single('file'), async (req, res) => {
+    console.log(req.body);
+    const { name, subject, author } = req.body;
+    const file_path = req.file ? req.file.path : null;
+    console.log(file_path);
+    try {
+        db.query(
+            'INSERT INTO problems (name, subject, author, file_path) VALUES (?, ?, ?, ?)',
+            [name, subject, author, file_path],
+            (err,result)=>{
+                if(err){
+                    res.status(500).json({ error: '数据库错误'+err});
+                }
+                res.status(200).json({ message: '提交成功', submissionId: result.insertId });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

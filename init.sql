@@ -16,8 +16,25 @@ CREATE TABLE users (
 CREATE TABLE submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    phase_id INT NOT NULL,
+    issue INT NOT NULL,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     subject VARCHAR(255),
+    file_path VARCHAR(255)
+);
+
+CREATE TABLE issues (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		name VARCHAR(255)
+);
+
+CREATE TABLE problems (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    name VARCHAR(255),
+    subject VARCHAR(255),
+    submit_num INT,
+    score INT,
+    author VARCHAR(255),
     file_path VARCHAR(255)
 );

@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>提交记录</title>
+    <title>新建题目</title>
 </head>
 <body>
-    <h2>提交记录表单</h2>
-    <form id="submissionForm" enctype="multipart/form-data">
+    <h2>新建题目表单</h2>
+    <form id="newproblemForm" enctype="multipart/form-data">
         <input type="text" id="userId" name="userId" style="display: none;" readonly>
 
-        <label for="issue">期号 (issue):</label>
-        <input type="number" id="issue" name="issue" required><br>
+        <label for="name">题目名称 (name):</label>
+        <input type="text" id="name" name="name" required><br>
         
-        <label for="subject">学科:</label>
+        <label for="subject">学科 (subject):</label>
         <input type="text" id="subject" name="subject" required><br>
         
-        <label for="file">上传文件:</label>
+        <label for="file">上传文件 (file):</label>
         <input type="file" id="file" name="file"><br><br>
         
         <button type="submit">提交</button>
     </form>
 
-    <h2>提交记录</h2>
-    <ul id="submissionList"></ul>
+    <h2>题目列表</h2>
+    <ul id="problemList"></ul>
 
     <script>
         window.onload=async function(event){
@@ -36,11 +36,11 @@
             document.getElementById('userId').value=userId;
         };
 
-        document.getElementById('submissionForm').addEventListener('submit', async function (event) {
+        document.getElementById('newproblemForm').addEventListener('newproblem', async function (event) {
             event.preventDefault();
             const formData = new FormData(this);
             console.log(formData);
-            const response = await fetch('/submit', {
+            const response = await fetch('/newproblem', {
                 method: 'POST',
                 body: formData,
                 credentials: 'include'
@@ -48,20 +48,20 @@
             const result = await response.json();
             alert(result.message || result.error);
             if (result.message) {
-                loadSubmissions();
+                loadproblems();
             }
         });
 
-        async function loadSubmissions() {
+        async function loadproblems() {
             try {
-                const response = await fetch('/submissions');
-                const submissions = await response.json();
+                const response = await fetch('/newproblem');
+                const problems = await response.json();
 
-                const list = document.getElementById('submissionList');
+                const list = document.getElementById('problemList');
                 list.innerHTML = '';
-                submissions.forEach(sub => {
+                problems.forEach(sub => {
                     const listItem = document.createElement('li');
-                    listItem.textContent = `ID: ${sub.id}, Issue: ${sub.issue}, Time: ${sub.time}, Subject: ${sub.subject}, File: ${sub.file_path}`;
+                    listItem.textContent = `ID: ${sub.id}, Name: ${sub.name}, Time: ${sub.time}, Subject: ${sub.subject}, Author: ${sub.author}, File: ${sub.file_path}`;
                     list.appendChild(listItem);
                 });
             } catch (error) {
@@ -70,7 +70,7 @@
         }
 
         // 加载提交记录
-        loadSubmissions();
+        loadproblems();
     </script>
 </body>
 </html>
