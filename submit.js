@@ -242,7 +242,7 @@ app.post('/newissue', upload.single('file'), async (req, res) => {
 
 // 获取题目列表
 app.get('/problems', (req, res) => {
-    const { subject, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 10 } = req.query;
+    const { subject, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 15 } = req.query;
 
     // 构建 SQL 查询条件
     let query = 'SELECT * FROM problems WHERE 1=1';
@@ -251,7 +251,7 @@ app.get('/problems', (req, res) => {
     if (subject) {
         query += ` AND subject = '${subject}'`;
     }
-    
+
     // 如果有搜索
     if (search) {
         query += ` AND (name LIKE '%${search}%' OR author LIKE '%${search}%')`;

@@ -34,7 +34,7 @@
         <thead>
             <tr>
                 <th><a href="#" onclick="sortTable('id')">编号</a></th>
-                <th>时间</th>
+                <th><a href="#" onclick="sortTable('time')">时间</a></th>
                 <th>题目名称</th>
                 <th>学科</th>
                 <th><a href="#" onclick="sortTable('submit_num')">提交次数</a></th>
@@ -51,7 +51,7 @@
 
     <script>
         let currentPage = 1;
-        let pageSize = 10;
+        let pageSize = 15;
         let sortField = 'id';
         let sortOrder = 'ASC';
         
@@ -98,8 +98,14 @@
         }
 
         function sortTable(field) {
-            sortField = field;
-            sortOrder = sortOrder === 'ASC' ? 'DESC' : 'ASC';
+            if (sortField === field) {
+                // Toggle sort order when clicking the same field
+                sortOrder = sortOrder === 'ASC' ? 'DESC' : 'ASC';
+            } else {
+                // Default to ascending order when switching fields
+                sortField = field;
+                sortOrder = 'ASC';
+            }
             loadProblems();
         }
 
