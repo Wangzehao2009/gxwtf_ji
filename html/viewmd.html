@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown 预览</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .markdown-content {
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #f9f9f9;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Markdown 预览</h1>
+    <div class="markdown-content">
+        <%- content %> <!-- 渲染解析后的 HTML 内容 -->
+    </div>
+    <a href="/">返回首页</a>
+</body>
+</html>

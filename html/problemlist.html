@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题目列表</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 8px; text-align: center; }
+        .pagination { list-style-type: none; display: flex; }
+        .pagination li { margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>题目列表</h1>
+    <div>
+        <label for="subject">选择学科:</label>
+        <select id="subject">
+            <option value="">全部</option>
+            <option value="数学">数学</option>
+            <option value="物理">物理</option>
+            <option value="化学">化学</option>
+            <option value="生物">生物</option>
+            <option value="信息">信息</option>
+        </select>
+        
+        <input type="text" id="search" placeholder="搜索题目或作者">
+        
+        <button onclick="loadProblems()">查询</button>
+    </div>
+    
+    <table id="problemsTable">
+        <thead>
+            <tr>
+                <th><a href="#" onclick="sortTable('id')">编号</a></th>
+                <th>时间</th>
+                <th>题目名称</th>
+                <th>学科</th>
+                <th><a href="#" onclick="sortTable('submit_num')">提交次数</a></th>
+                <th><a href="#" onclick="sortTable('score')">评分</a></th>
+                <th>作者</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+    <ul class="pagination" id="pagination"></ul>
+
+    <script>
+        let currentPage = 1;
+        let pageSize = 10;
+        let sortField = 'id';
+        let sortOrder = 'ASC';
+        
+        function loadProblems() {
+            const subject = document.getElementById('subject').value;
+            const search = document.getElementById('search').value;
+
+            fetch(`/problems?subject=${subject}&search=${search}&sortField=${sortField}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('#problemsTable tbody');
+                    tableBody.innerHTML = '';
+                    data.forEach(problem => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${problem.id}</td>
+                            <td>${problem.time}</td>
+                            <td>${problem.name}</td>
+                            <td>${problem.subject}</td>
+                            <td>${problem.submit_num}</td>
+                            <td>${problem.score}</td>
+                            <td>${problem.author}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                    loadPagination(subject, search);
+                });
+        }
+
+        function loadPagination(subject, search) {
+            fetch(`/problems/count?subject=${subject}&search=${search}`)
+                .then(response => response.json())
+                .then(data => {
+                    const totalPages = Math.ceil(data.count / pageSize);
+                    const pagination = document.getElementById('pagination');
+                    pagination.innerHTML = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageItem = document.createElement('li');
+                        pageItem.textContent = i;
+                        pageItem.onclick = () => { currentPage = i; loadProblems(); };
+                        pagination.appendChild(pageItem);
+                    }
+                });
+        }
+
+        function sortTable(field) {
+            sortField = field;
+            sortOrder = sortOrder === 'ASC' ? 'DESC' : 'ASC';
+            loadProblems();
+        }
+
+        // 初次加载
+        loadProblems();
+    </script>
+</body>
+</html>

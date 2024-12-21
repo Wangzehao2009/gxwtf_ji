@@ -181,10 +181,8 @@ app.get('/submissions', async (req, res) => {
 
 // 新建题目的路由
 app.post('/newproblem', upload.single('file'), async (req, res) => {
-    console.log(req.body);
     const { name, subject, author } = req.body;
     const file_path = req.file ? req.file.path : null;
-    console.log(file_path);
     try {
         db.query(
             'INSERT INTO problems (name, subject, author, file_path) VALUES (?, ?, ?, ?)',
@@ -201,6 +199,23 @@ app.post('/newproblem', upload.single('file'), async (req, res) => {
         res.status(500).json({ error: '服务器错误' });
     }
 });
+
+// 显示提交记录的路由
+app.get('/newproblem', async (req, res) => {
+    try {
+        db.query('SELECT * FROM problems',(err,result)=>{
+            if(err){
+                res.status(500).json({error:'数据库错误'+error});
+            }
+            console.log(result);
+            res.status(200).json(result);
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+});
+
 
 // 新建一期的路由
 app.post('/newissue', upload.single('file'), async (req, res) => {
@@ -225,6 +240,65 @@ app.post('/newissue', upload.single('file'), async (req, res) => {
     }
 });
 
+// 获取题目列表
+app.get('/problems', (req, res) => {
+    const { subject, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 10 } = req.query;
+
+    // 构建 SQL 查询条件
+    let query = 'SELECT * FROM problems WHERE 1=1';
+    
+    // 如果有学科筛选
+    if (subject) {
+        query += ` AND subject = '${subject}'`;
+    }
+    
+    // 如果有搜索
+    if (search) {
+        query += ` AND (name LIKE '%${search}%' OR author LIKE '%${search}%')`;
+    }
+    
+    // 排序
+    query += ` ORDER BY ${sortField} ${sortOrder}`;
+
+    // 分页
+    const offset = (page - 1) * pageSize;
+    query += ` LIMIT ${pageSize} OFFSET ${offset}`;
+
+    // 查询数据
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: '查询失败', details: err });
+        }
+        res.json(results);
+    });
+});
+
+// 获取总记录数，用于分页
+app.get('/problems/count', (req, res) => {
+    const { subject, search = '' } = req.query;
+
+    let query = 'SELECT COUNT(*) AS count FROM problems WHERE 1=1';
+    
+    if (subject) {
+        query += ` AND subject = '${subject}'`;
+    }
+
+    if (search) {
+        query += ` AND (name LIKE '%${search}%' OR author LIKE '%${search}%')`;
+    }
+
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: '查询失败', details: err });
+        }
+        res.json(results[0]);
+    });
+});
+
+app.post('/mdreader',(req,res) =>{
+    var data=fs.readFileSync('markdown_files/'+req.name);
+    res.send(data);
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

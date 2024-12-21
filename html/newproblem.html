@@ -15,6 +15,9 @@
         
         <label for="subject">学科 (subject):</label>
         <input type="text" id="subject" name="subject" required><br>
+
+        <label for="subject">作者 (author):</label>
+        <input type="text" id="author" name="author" required><br>
         
         <label for="file">上传文件 (file):</label>
         <input type="file" id="file" name="file"><br><br>
@@ -36,7 +39,7 @@
             document.getElementById('userId').value=userId;
         };
 
-        document.getElementById('newproblemForm').addEventListener('newproblem', async function (event) {
+        document.getElementById('newproblemForm').addEventListener('submit', async function (event) {
             event.preventDefault();
             const formData = new FormData(this);
             console.log(formData);
