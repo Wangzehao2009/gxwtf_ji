@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: 'jzq20100505',
     database: 'guangfang'
 });
 
@@ -296,8 +296,10 @@ app.get('/problems/count', (req, res) => {
 });
 
 app.post('/mdreader',(req,res) =>{
-    var data=fs.readFileSync('markdown_files/'+req.name);
-    res.send(data);
+    var name=JSON.parse(req.body).name;
+    console.log('markdown_files/'+name);
+    var data=fs.readFileSync('markdown_files/'+name,'utf-8');
+    res.send({data: data});
 });
 
 const PORT = process.env.PORT || 3000;

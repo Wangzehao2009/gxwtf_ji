@@ -25,13 +25,13 @@
         }
     </style>
     <!-- KaTaX:LaTeX -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.css" integrity="sha384-ko6T2DjISesD0S+wOIeHKMyKsHvWpdQ1s/aiaQMbL+TIXx3jg6uyf9hlv3WWfwYv" crossorigin="anonymous">
-	<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.js" integrity="sha384-tsPOhveNsi36uhglzMBNOAA2xd7LlEqQuQHFKi4DwP+6UKrrLGub1MD77Zx18F8e" crossorigin="anonymous"></script>
-	<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.min.css" integrity="sha384-veTAhWILPOotXm+kbR5uY7dRamYLJf58I7P+hJhjeuc7hsMAkJHTsPahAl0hBST0" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.min.js" integrity="sha384-v6mkHYHfY/4BWq54f7lQAdtIsoZZIByznQ3ZqN38OL4KCsrxo31SLlPiak7cj/Mg" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"></script>
 	<!-- showdown:markdown -->
 	<script src="https://unpkg.com/showdown/dist/showdown.min.js"></script>
 	<!-- highlight -->
-	<link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/a11y-dark.min.css">
+	<link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/github.min.css">
 	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
 </head>
 <body>
@@ -41,20 +41,49 @@
         <input type="text" id="fileName" name="fileName" required />
         <button type="submit">预览</button>
     </form>
+    <div id="display"></div>
     <script>
-        let converter=new showdown.Converter();
-        document.getElementById("display").innerHTML=converter.makeHtml(document.getElementById("edit").value);
-        renderMathInElement(document.getElementById("display"), {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: true},
-                {left: '\\(', right: '\\)', display: true},
-                {left: '\\[', right: '\\]', display: true}
-            ],
-            // • rendering keys, e.g.:
-            throwOnError : false
+        // document.getElementById('form').addEventListener('submit', async function (event) {
+        //     event.preventDefault();
+        //     const formData = new FormData(this);
+        //     console.log(formData);
+        //     const response = await fetch('/submit', {
+        //         method: 'POST',
+        //         body: formData,
+        //         credentials: 'include'
+        //     });
+        //     const result = await response.json();
+        //     alert(result.message || result.error);
+        //     if (result.message) {
+        //         loadSubmissions();
+        //     }
+        // });
+        document.getElementById('form').addEventListener('submit',async function(event){
+            event.preventDefault();
+            let fileName=document.getElementById('fileName').value;
+            console.log(fileName);
+            let response=await fetch('/mdreader',{
+                method: 'POST',
+                body: JSON.stringify({
+                    name: fileName
+                }),
+                mode: "cors"
+            });
+            let res=await response.json();
+            let converter=new showdown.Converter();
+            document.getElementById("display").innerHTML=converter.makeHtml(res.data);
+            renderMathInElement(document.getElementById("display"), {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: true},
+                    {left: '\\(', right: '\\)', display: true},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                // • rendering keys, e.g.:
+                throwOnError : false
+            });
+            hljs.highlightAll();
         });
-        hljs.highlightAll();
     </script>
 </body>
 </html>
