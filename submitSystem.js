@@ -2,7 +2,6 @@ const db=require('./mysql.js');
 
 // 保存提交
 async function submit(req, res) {
-    console.log(req.body);
     const { userId, issue, subject } = req.body;
     const file_path = req.file ? req.file.path : null;
     try {
@@ -25,7 +24,6 @@ async function submissions(req,res){
     try {
         db.query('SELECT * FROM submissions',(err,result)=>{
             if(err) return res.status(500).json({error:'数据库错误'+error});
-            console.log(result);
             return res.status(200).json(result);
         });
     } catch (error) {
