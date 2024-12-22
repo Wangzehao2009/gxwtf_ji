@@ -24,7 +24,7 @@ function previewPage(req, res) {
     }
 
     // 使用 pandoc 将 Markdown 转换为 HTML
-    exec(`pandoc ${filePath} -f markdown+tex_math_dollars -t html --mathjax`, (err, stdout, stderr) => {
+    exec(`pandoc ${filePath} -f markdown -t html --mathml`, (err, stdout, stderr) => {
         if (err) {
             console.error(`执行 pandoc 时出错: ${stderr}`);
             return res.status(500).send('文件转换失败');
@@ -35,32 +35,12 @@ function previewPage(req, res) {
     });
 }
 
-// 新增的 /markdown 路由
-function markdownPage(req, res) {
-    const markdownFilePath = path.join(__dirname, 'path_to_your_markdown_file.md');
-    fs.readFile(markdownFilePath, 'utf8', (err, data) => {
-        if (err) {
-            res.status(500).send('Error reading markdown file');
-            return;
-        }
-        exec(`pandoc ${markdownFilePath} -f markdown -t html`, (err, stdout, stderr) => {
-            if (err) {
-                console.error(`执行 pandoc 时出错: ${stderr}`);
-                return res.status(500).send('文件转换失败');
-            }
-            res.send(stdout);
-        });
-    });
-}
-
 function init(app) {
     app.set('view engine', 'ejs'); // 设置视图引擎为 EJS
     app.set('views', path.join(__dirname, 'views')); // 设置视图目录
     app.use(express.static(path.join(__dirname, 'public'))); // 设置静态文件目录
-
     app.get('/mdreader', homePage); // 主页路由
     app.get('/mdreader/preview', previewPage); // 预览路由
-    app.get('/mdreader/markdown', markdownPage); // 新增的 /markdown 路由
 }
 
 module.exports = init;

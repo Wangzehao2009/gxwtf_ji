@@ -1,11 +1,13 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 const userSystem = require('./userSystem.js');
 const fileStorage = require('./fileStorage.js');
 const submitSystem = require('./submitSystem.js');
 const problemSystem = require('./problemSystem.js');
 const issueSystem = require('./issueSystem.js');
 const mdreader = require('./mdreader.js');
+const imageUpload = require('./imageUpload.js');
 
 const app = express();
 app.use(express.text());
@@ -23,8 +25,10 @@ userSystem(app); // 用户系统
 submitSystem(app, fileStorage); // 提交系统
 problemSystem(app, fileStorage); // 题目系统
 issueSystem(app, fileStorage); // 期刊系统
-
 mdreader(app); // Markdown 阅读器
+app.use('/image', imageUpload); // 图床功能
+// 提供静态文件服务
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

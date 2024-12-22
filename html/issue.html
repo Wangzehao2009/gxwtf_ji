@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Management</title>
+    <style>
+        .draggable {
+            cursor: move;
+        }
+    </style>
+</head>
+<body>
+    <h2>新建 Issue</h2>
+    <form id="newIssueForm">
+        <label for="name">Issue 名称:</label>
+        <input type="text" id="name" name="name" required><br>
+        <label for="problemIds">题目 ID (用逗号分隔):</label>
+        <input type="text" id="problemIds" name="problemIds"><br>
+        <button type="submit">提交</button>
+    </form>
+
+    <h2>搜索题目</h2>
+    <form id="searchForm">
+        <label for="query">搜索:</label>
+        <input type="text" id="query" name="query" required><br>
+        <button type="submit">搜索</button>
+    </form>
+    <ul id="searchResults"></ul>
+
+    <h2>当前 Issue 中的题目</h2>
+    <ul id="issueProblems" class="sortable"></ul>
+
+    <button id="saveIssue">保存</button>
+
+    <script>
+        document.getElementById('newIssueForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            data.problemIds = data.problemIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+            const response = await fetch('/newissue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        });
+
+        document.getElementById('searchForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            const response = await fetch(`/searchProblems?query=${data.query}`);
+            const problems = await response.json();
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            problems.forEach(problem => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
+                const addButton = document.createElement('button');
+                addButton.textContent = '添加';
+                addButton.addEventListener('click', () => addProblemToIssue(problem.id));
+                listItem.appendChild(addButton);
+                searchResults.appendChild(listItem);
+            });
+        });
+
+        async function addProblemToIssue(problemId) {
+            const issueId = document.getElementById('issueId').value;
+            const response = await fetch('/addProblemToIssue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ issueId, problemId })
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+            loadIssueProblems(issueId);
+        }
+
+        async function loadIssueProblems(issueId) {
+            const response = await fetch(`/getProblemsInIssue?issueId=${issueId}`);
+            const problems = await response.json();
+            const issueProblems = document.getElementById('issueProblems');
+            issueProblems.innerHTML = '';
+            problems.forEach(problem => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('draggable');
+                listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
+                const removeButton = document.createElement('button');
+                removeButton.textContent = '×';
+                removeButton.addEventListener('click', () => removeProblemFromIssue(problem.id));
+                listItem.appendChild(removeButton);
+                issueProblems.appendChild(listItem);
+            });
+        }
+
+        async function removeProblemFromIssue(problemId) {
+            const issueId = document.getElementById('issueId').value;
+            const response = await fetch('/removeProblemFromIssue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ issueId, problemId })
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+            loadIssueProblems(issueId);
+        }
+
+        document.getElementById('saveIssue').addEventListener('click', async function () {
+            const issueId = document.getElementById('issueId').value;
+            const problemIds = Array.from(document.getElementById('issueProblems').children).map(li => parseInt(li.dataset.id));
+            const response = await fetch('/saveIssue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ issueId, problemIds })
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        });
+
+        // 初始化拖拽排序功能
+        new Sortable(document.getElementById('issueProblems'), {
+            animation: 150,
+            ghostClass: 'sortable-ghost'
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+</body>
+</html>
