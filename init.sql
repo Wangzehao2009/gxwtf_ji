@@ -41,5 +41,5 @@ CREATE TABLE problems (
 
 CREATE TABLE issue_problem_graph (
     issue_id INT,
-		problem_id INT
+    problem_id INT
 );

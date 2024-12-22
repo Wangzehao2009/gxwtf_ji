@@ -3,6 +3,8 @@ const db = require('./mysql.js');
 // 新建一期并插入多个题目
 async function newissue(req, res) {
     const { name, problemIds } = req.body; // 接收问题 ID 列表
+    console.log(name);
+    console.log(problemIds);
     try {
         db.query(
             'INSERT INTO issues (name) VALUES (?)',
@@ -10,6 +12,7 @@ async function newissue(req, res) {
             (err, result) => {
                 if (err) return res.status(500).json({ error: '未登录' });
                 const issueId = result.insertId;
+                console.log(issueId);
 
                 // 插入多个题目
                 if (problemIds && problemIds.length > 0) {

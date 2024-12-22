@@ -9,7 +9,7 @@
         table, th, td { border: 1px solid black; }
         th, td { padding: 8px; text-align: center; }
         .pagination { list-style-type: none; display: flex; }
-        .pagination li { margin: 5px; }
+        .pagination li { margin: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -26,6 +26,7 @@
         </select>
         
         <input type="text" id="search" placeholder="搜索题目或作者">
+        <input type="text" id="problemId" placeholder="输入题目ID">
         
         <button onclick="currentPage=1;loadProblems()">查询</button>
     </div>
@@ -58,8 +59,14 @@
         function loadProblems() {
             const subject = document.getElementById('subject').value;
             const search = document.getElementById('search').value;
+            const id = document.getElementById('problemId').value;
 
-            fetch(`/problems?subject=${subject}&search=${search}&sortField=${sortField}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`)
+            let url = `/problems?subject=${subject}&search=${search}&sortField=${sortField}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`;
+            if (id) {
+                url = `/problems?id=${id}`;
+            }
+
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     const tableBody = document.querySelector('#problemsTable tbody');
@@ -77,7 +84,9 @@
                         `;
                         tableBody.appendChild(row);
                     });
-                    loadPagination(subject, search);
+                    if (!id) {
+                        loadPagination(subject, search);
+                    }
                 });
         }
 
