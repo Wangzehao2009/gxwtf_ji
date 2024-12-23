@@ -11,11 +11,14 @@
         .sortable-ghost {
             opacity: 0.4;
         }
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         table, th, td { border: 1px solid black; }
-        th, td { padding: 8px; text-align: center; }
+        th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pagination { list-style-type: none; display: flex; }
         .pagination li { margin: 5px; cursor: pointer; }
+        .sortable-header { cursor: pointer; }
+        .sortable-header .arrow { color: black; }
+        .sortable-header.sorted .arrow { color: red; }
     </style>
     <!-- 引入 Sortable 库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
@@ -34,17 +37,11 @@
         <input type="text" id="problemId" name="problemId" required>
         <button type="submit">添加</button>
     </form>
-    <form id="addProblemBySearching">
-        <label for="query">搜索题目</label>
-        <input type="text" id="query" name="query" required><br>
-        <button type="submit">搜索</button>
-    </form>
-    <ul id="searchResults"></ul>
 
     <h2>题目列表</h2>
     <div>
         <label for="subject">选择学科:</label>
-        <select id="subject">
+        <select id="subject" onchange="resetPageAndLoadProblems()">
             <option value="">全部</option>
             <option value="数学">数学</option>
             <option value="物理">物理</option>
@@ -54,20 +51,19 @@
         </select>
         
         <input type="text" id="search" placeholder="搜索题目或作者">
-        <input type="text" id="problemIdSearch" placeholder="输入题目ID">
         
-        <button onclick="currentPage=1;loadProblems()">查询</button>
+        <button onclick="resetPageAndLoadProblems()">查询</button>
     </div>
     
     <table id="problemsTable">
         <thead>
             <tr>
-                <th><a href="#" onclick="sortTable('id')">编号</a></th>
-                <th><a href="#" onclick="sortTable('time')">时间</a></th>
+                <th class="sortable-header" onclick="sortTable('id')">编号 <span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="sortTable('time')">时间 <span class="arrow">▲▼</span></th>
                 <th>题目名称</th>
                 <th>学科</th>
-                <th><a href="#" onclick="sortTable('submit_num')">提交次数</a></th>
-                <th><a href="#" onclick="sortTable('score')">评分</a></th>
+                <th class="sortable-header" onclick="sortTable('submit_num')">提交次数 <span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="sortTable('score')">评分 <span class="arrow">▲▼</span></th>
                 <th>作者</th>
                 <th>操作</th>
             </tr>
@@ -106,25 +102,6 @@
             var problemId = data.problemId.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
             problems = problems.concat(problemId);
             loadIssueProblems();
-        });
-
-        document.getElementById('addProblemBySearching').addEventListener('submit', async function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-            const response = await fetch(`/searchProblems?query=${data.query}`);
-            const problems = await response.json();
-            const searchResults = document.getElementById('searchResults');
-            searchResults.innerHTML = '';
-            problems.forEach(problem => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
-                const addButton = document.createElement('button');
-                addButton.textContent = '添加';
-                addButton.addEventListener('click', () => addProblemToIssue(problem.id));
-                listItem.appendChild(addButton);
-                searchResults.appendChild(listItem);
-            });
         });
 
         async function addProblemToIssue(problemId) {
@@ -191,17 +168,18 @@
         let currentPage = 1;
         let pageSize = 15;
         let sortField = 'id';
-        let sortOrder = 'ASC';
+        let sortOrder = 'DESC'; // 默认降序
         
+        function resetPageAndLoadProblems() {
+            currentPage = 1;
+            loadProblems();
+        }
+
         function loadProblems() {
             const subject = document.getElementById('subject').value;
             const search = document.getElementById('search').value;
-            const id = document.getElementById('problemIdSearch').value;
 
             let url = `/problems?subject=${subject}&search=${search}&sortField=${sortField}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`;
-            if (id) {
-                url = `/problems?id=${id}`;
-            }
 
             fetch(url)
                 .then(response => response.json())
@@ -222,9 +200,8 @@
                         `;
                         tableBody.appendChild(row);
                     });
-                    if (!id) {
-                        loadPagination(subject, search);
-                    }
+                    loadPagination(subject, search);
+                    updateSortIndicators();
                 });
         }
 
@@ -249,11 +226,26 @@
                 // Toggle sort order when clicking the same field
                 sortOrder = sortOrder === 'ASC' ? 'DESC' : 'ASC';
             } else {
-                // Default to ascending order when switching fields
+                // Default to descending order when switching fields
                 sortField = field;
-                sortOrder = 'ASC';
+                sortOrder = 'DESC';
             }
             loadProblems();
+        }
+
+        function updateSortIndicators() {
+            const headers = document.querySelectorAll('.sortable-header');
+            headers.forEach(header => {
+                const field = header.getAttribute('onclick').match(/sortTable\('(.+)'\)/)[1];
+                const arrow = header.querySelector('.arrow');
+                if (field === sortField) {
+                    arrow.innerHTML = sortOrder === 'ASC' ? '▲' : '▼';
+                    header.classList.add('sorted');
+                } else {
+                    arrow.innerHTML = '▲▼';
+                    header.classList.remove('sorted');
+                }
+            });
         }
 
         // 初次加载
