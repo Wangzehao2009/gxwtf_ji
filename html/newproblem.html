@@ -14,9 +14,15 @@
         <input type="text" id="name" name="name" required><br>
         
         <label for="subject">学科 (subject):</label>
-        <input type="text" id="subject" name="subject" required><br>
+        <select id="subject" name="subject" required>
+            <option value="数学">数学</option>
+            <option value="物理">物理</option>
+            <option value="化学">化学</option>
+            <option value="生物">生物</option>
+            <option value="信息">信息</option>
+        </select><br>
 
-        <label for="subject">作者 (author):</label>
+        <label for="author">作者 (author):</label>
         <input type="text" id="author" name="author" required><br>
         
         <label for="file">上传文件 (file):</label>
@@ -26,34 +32,27 @@
     </form>
 
     <script>
-        window.onload=async function(event){
-            var userId=await fetch("http://localhost:3000/dashboard", {
+        window.onload = async function(event) {
+            var userId = await fetch("http://localhost:3000/dashboard", {
                 "mode": "cors",
                 "credentials": "include"
             });
             userId = await userId.json();
             userId = userId.userId;
-            document.getElementById('userId').value=userId;
+            document.getElementById('userId').value = userId;
         };
 
-        document.getElementById('newproblemForm').addEventListener('submit', async function (event) {
+        document.getElementById('newproblemForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const formData = new FormData(this);
             console.log(formData);
             const response = await fetch('/newproblem', {
                 method: 'POST',
-                body: formData,
-                credentials: 'include'
+                body: formData
             });
             const result = await response.json();
             alert(result.message || result.error);
-            if (result.message) {
-                loadproblems();
-            }
         });
-
-        // 加载提交记录
-        loadproblems();
     </script>
 </body>
 </html>

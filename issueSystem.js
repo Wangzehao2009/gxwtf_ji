@@ -36,6 +36,24 @@ async function newissue(req, res) {
     }
 }
 
+// 保存 issue 基本信息
+async function saveIssueBasicInfo(req, res) {
+    const { issueId, name } = req.body;
+    try {
+        db.query(
+            'UPDATE issues SET name = ? WHERE id = ?',
+            [name, issueId],
+            (err, result) => {
+                if (err) return res.status(500).json({ error: '数据库错误' + err });
+                return res.status(200).json({ message: '基本信息保存成功' });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+}
+
 // 搜索题目
 async function searchProblems(req, res) {
     const { query } = req.query;
@@ -143,6 +161,7 @@ async function saveIssue(req, res) {
 
 function init(app, fileStorage) {
     app.post('/newissue', fileStorage.single('file'), newissue);
+    app.post('/saveIssueBasicInfo', saveIssueBasicInfo);
     app.get('/searchProblems', searchProblems);
     app.post('/addProblemToIssue', addProblemToIssue);
     app.post('/removeProblemFromIssue', removeProblemFromIssue);

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Management</title>
+    <style>
+        .draggable {
+            cursor: move;
+        }
+        .sortable-ghost {
+            opacity: 0.4;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 8px; text-align: center; }
+        .pagination { list-style-type: none; display: flex; }
+        .pagination li { margin: 5px; cursor: pointer; }
+    </style>
+    <!-- 引入 Sortable 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+</head>
+<body>
+    <h2>Issue 基本信息</h2>
+    <div class="name">
+        <p>Issue 名称:</p>
+        <input id="name">
+    </div>
+    <button id="saveBasicInfo">保存</button>
+
+    <h2>添加题目</h2>
+    <form id="addProblemById">
+        <label for="problemId">用ID添加（多个题目用半角逗号分隔）：</label>
+        <input type="text" id="problemId" name="problemId" required>
+        <button type="submit">添加</button>
+    </form>
+    <form id="addProblemBySearching">
+        <label for="query">搜索题目</label>
+        <input type="text" id="query" name="query" required><br>
+        <button type="submit">搜索</button>
+    </form>
+    <ul id="searchResults"></ul>
+
+    <h2>题目列表</h2>
+    <div>
+        <label for="subject">选择学科:</label>
+        <select id="subject">
+            <option value="">全部</option>
+            <option value="数学">数学</option>
+            <option value="物理">物理</option>
+            <option value="化学">化学</option>
+            <option value="生物">生物</option>
+            <option value="信息">信息</option>
+        </select>
+        
+        <input type="text" id="search" placeholder="搜索题目或作者">
+        <input type="text" id="problemIdSearch" placeholder="输入题目ID">
+        
+        <button onclick="currentPage=1;loadProblems()">查询</button>
+    </div>
+    
+    <table id="problemsTable">
+        <thead>
+            <tr>
+                <th><a href="#" onclick="sortTable('id')">编号</a></th>
+                <th><a href="#" onclick="sortTable('time')">时间</a></th>
+                <th>题目名称</th>
+                <th>学科</th>
+                <th><a href="#" onclick="sortTable('submit_num')">提交次数</a></th>
+                <th><a href="#" onclick="sortTable('score')">评分</a></th>
+                <th>作者</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+    <ul class="pagination" id="pagination"></ul>
+
+    <h2>当前 Issue 中的题目</h2>
+    <ul id="issueProblems" class="sortable"></ul>
+
+    <button id="saveIssue">保存题单</button>
+
+    <script>
+        var issueId = -1;
+        let problems = [];
+
+        document.getElementById('saveBasicInfo').addEventListener('click', async function () {
+            const name = document.getElementById('name').value;
+            const response = await fetch('/saveIssueBasicInfo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ issueId, name })
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        });
+
+        document.getElementById('addProblemById').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            var problemId = data.problemId.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+            problems = problems.concat(problemId);
+            loadIssueProblems();
+        });
+
+        document.getElementById('addProblemBySearching').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            const response = await fetch(`/searchProblems?query=${data.query}`);
+            const problems = await response.json();
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            problems.forEach(problem => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
+                const addButton = document.createElement('button');
+                addButton.textContent = '添加';
+                addButton.addEventListener('click', () => addProblemToIssue(problem.id));
+                listItem.appendChild(addButton);
+                searchResults.appendChild(listItem);
+            });
+        });
+
+        async function addProblemToIssue(problemId) {
+            problems.push(problemId);
+            loadIssueProblems();
+        }
+
+        async function loadIssueProblems() {
+            const issueProblems = document.getElementById('issueProblems');
+            issueProblems.innerHTML = '';
+            for (let i = 0; i < problems.length; i++) {
+                const problemId = problems[i];
+                const listItem = document.createElement('li');
+                listItem.classList.add('draggable');
+                await fetch('/problems?id=' + problemId)
+                    .then(response => response.json())
+                    .then(problem => {
+                        problem = problem[0];
+                        listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
+                        const removeButton = document.createElement('button');
+                        removeButton.textContent = '×';
+                        (function (index) {
+                            removeButton.addEventListener('click', () => removeProblemFromIssue(index));
+                        })(i);
+                        listItem.appendChild(removeButton);
+                        issueProblems.appendChild(listItem);
+                    });
+            }
+        }
+
+        async function removeProblemFromIssue(index) {
+            problems.splice(index, 1);
+            loadIssueProblems();
+        }
+
+        document.getElementById('saveIssue').addEventListener('click', async function () {
+            if (issueId !== -1) {
+                const response = await fetch('/saveIssue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ issueId: issueId, problemIds: problems })
+                });
+                const result = await response.json();
+                alert(result.message || result.error);
+            } else {
+                const response = await fetch('/newissue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: document.getElementById('name').value, problemIds: problems })
+                });
+                const result = await response.json();
+                if (response.ok) issueId = result.issueId;
+                alert(result.message || result.error);
+            }
+        });
+
+        // 初始化拖拽排序功能
+        new Sortable(document.getElementById('issueProblems'), {
+            animation: 150,
+            ghostClass: 'sortable-ghost'
+        });
+
+        // 题目列表功能
+        let currentPage = 1;
+        let pageSize = 15;
+        let sortField = 'id';
+        let sortOrder = 'ASC';
+        
+        function loadProblems() {
+            const subject = document.getElementById('subject').value;
+            const search = document.getElementById('search').value;
+            const id = document.getElementById('problemIdSearch').value;
+
+            let url = `/problems?subject=${subject}&search=${search}&sortField=${sortField}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`;
+            if (id) {
+                url = `/problems?id=${id}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('#problemsTable tbody');
+                    tableBody.innerHTML = '';
+                    data.forEach(problem => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${problem.id}</td>
+                            <td>${problem.time}</td>
+                            <td>${problem.name}</td>
+                            <td>${problem.subject}</td>
+                            <td>${problem.submit_num}</td>
+                            <td>${problem.score}</td>
+                            <td>${problem.author}</td>
+                            <td><button onclick="addProblemToIssue(${problem.id})">添加</button></td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                    if (!id) {
+                        loadPagination(subject, search);
+                    }
+                });
+        }
+
+        function loadPagination(subject, search) {
+            fetch(`/problems/count?subject=${subject}&search=${search}`)
+                .then(response => response.json())
+                .then(data => {
+                    const totalPages = Math.ceil(data.count / pageSize);
+                    const pagination = document.getElementById('pagination');
+                    pagination.innerHTML = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageItem = document.createElement('li');
+                        pageItem.textContent = i;
+                        pageItem.onclick = () => { currentPage = i; loadProblems(); };
+                        pagination.appendChild(pageItem);
+                    }
+                });
+        }
+
+        function sortTable(field) {
+            if (sortField === field) {
+                // Toggle sort order when clicking the same field
+                sortOrder = sortOrder === 'ASC' ? 'DESC' : 'ASC';
+            } else {
+                // Default to ascending order when switching fields
+                sortField = field;
+                sortOrder = 'ASC';
+            }
+            loadProblems();
+        }
+
+        // 初次加载
+        loadProblems();
+    </script>
+</body>
+</html>

@@ -33,8 +33,10 @@
             const formData = new FormData(event.target);
             const data = Object.fromEntries(formData);
             connect('/login',JSON.stringify(data),(data)=>{
+                alert("登录成功");
                 document.getElementById('message').textContent=data.message;
             },(data)=>{
+                alert("用户名或密码错误");
                 document.getElementById('message').textContent=data.error;
             });
         });

@@ -8,7 +8,7 @@ function engineInit(app){
         }
         for(var i=0;i<files.length;i++){
             app.get('/'+files[i],(req,res)=>{
-                var data=fs.readFileSync('html'+req.originalUrl);
+                const data=fs.readFileSync('html'+req.originalUrl);
                 res.end(data);
             });
         }
