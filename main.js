@@ -18,6 +18,23 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// 设置 CSP 规则
+app.use(helmet.contentSecurityPolicy({
+    directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://cdn.jsdelivr.net"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        imgSrc: ["'self'", "data:", "https://pic.imgdb.cn", "https://picx.zhimg.com", "https://pic1.zhimg.com"],
+        fontSrc: ["'self'", "data:"],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+    },
+}));
+
+// 提供静态文件服务
+app.use(express.static(path.join(__dirname, 'html')));
+
 // 引擎
 const engine = require('./engine.js');
 engine(app);
@@ -30,6 +47,11 @@ mdreader(app); // Markdown 阅读器
 app.use('/image', imageUpload); // 图床功能
 // 提供静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+// 新增路由处理 /editissue/:id
+app.get('/editissue/:id', (req, res) => {
+    res.sendFile(path.join(__dirname, 'html', 'editissue.html'));
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

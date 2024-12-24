@@ -85,14 +85,14 @@
         let problems = [];
 
         // 获取 URL 参数
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
+        function getIssueIdFromUrl() {
+            const pathParts = window.location.pathname.split('/');
+            return pathParts[pathParts.length - 1];
         }
 
         // 加载 Issue 基本信息
         async function loadIssueInfo() {
-            issueId = getQueryParam('issueId');
+            issueId = getIssueIdFromUrl();
             if (issueId) {
                 const response = await fetch(`/issues?id=${issueId}`);
                 const issue = await response.json();
@@ -131,28 +131,23 @@
         async function loadIssueProblems() {
             const issueProblems = document.getElementById('issueProblems');
             issueProblems.innerHTML = '';
-            for (let i = 0; i < problems.length; i++) {
-                const problemId = problems[i];
+            const response = await fetch(`/getProblemsInIssue?issueId=${issueId}`);
+            const data = await response.json();
+            problems = data.map(problem => problem.id);
+            data.forEach(problem => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('draggable');
-                await fetch('/problems?id=' + problemId)
-                    .then(response => response.json())
-                    .then(problem => {
-                        problem = problem[0];
-                        listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
-                        const removeButton = document.createElement('button');
-                        removeButton.textContent = '×';
-                        (function (index) {
-                            removeButton.addEventListener('click', () => removeProblemFromIssue(index));
-                        })(i);
-                        listItem.appendChild(removeButton);
-                        issueProblems.appendChild(listItem);
-                    });
-            }
+                listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
+                const removeButton = document.createElement('button');
+                removeButton.textContent = '×';
+                removeButton.addEventListener('click', () => removeProblemFromIssue(problem.id));
+                listItem.appendChild(removeButton);
+                issueProblems.appendChild(listItem);
+            });
         }
 
-        async function removeProblemFromIssue(index) {
-            problems.splice(index, 1);
+        async function removeProblemFromIssue(problemId) {
+            problems = problems.filter(id => id !== problemId);
             loadIssueProblems();
         }
 
