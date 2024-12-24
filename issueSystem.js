@@ -168,7 +168,7 @@ async function issueList(req, res) {
     if (id) {
         query += ` WHERE id = ${db.escape(id)}`;
     } else if (search) {
-        query += ` WHERE name LIKE ${db.esce('%' + search + '%')}`;
+        query += ` WHERE name LIKE ${db.escape('%' + search + '%')}`;
     }
     // 排序
     query += ` ORDER BY ${sortField} ${sortOrder}`;

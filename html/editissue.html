@@ -85,14 +85,14 @@
         let problems = [];
 
         // 获取 URL 参数
-        function getIssueIdFromUrl() {
-            const pathParts = window.location.pathname.split('/');
-            return pathParts[pathParts.length - 1];
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
         }
 
         // 加载 Issue 基本信息
         async function loadIssueInfo() {
-            issueId = getIssueIdFromUrl();
+            issueId = getQueryParam('issueId');
             if (issueId) {
                 const response = await fetch(`/issues?id=${issueId}`);
                 const issue = await response.json();
@@ -101,6 +101,15 @@
                 }
                 loadIssueProblems();
             }
+        }
+
+        function initProblems(){
+            fetch('/getProblemsInIssue?issueId=' + issueId)
+                .then(response => response.json())
+                .then(async data => {
+                    problems = data.map(problem => problem.id);
+                    await loadIssueProblems();
+                });
         }
 
         document.getElementById('saveBasicInfo').addEventListener('click', async function () {
@@ -131,23 +140,28 @@
         async function loadIssueProblems() {
             const issueProblems = document.getElementById('issueProblems');
             issueProblems.innerHTML = '';
-            const response = await fetch(`/getProblemsInIssue?issueId=${issueId}`);
-            const data = await response.json();
-            problems = data.map(problem => problem.id);
-            data.forEach(problem => {
+            for (let i = 0; i < problems.length; i++) {
+                const problemId = problems[i];
                 const listItem = document.createElement('li');
                 listItem.classList.add('draggable');
-                listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
-                const removeButton = document.createElement('button');
-                removeButton.textContent = '×';
-                removeButton.addEventListener('click', () => removeProblemFromIssue(problem.id));
-                listItem.appendChild(removeButton);
-                issueProblems.appendChild(listItem);
-            });
+                await fetch('/problems?id=' + problemId)
+                    .then(response => response.json())
+                    .then(problem => {
+                        problem = problem[0];
+                        listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
+                        const removeButton = document.createElement('button');
+                        removeButton.textContent = '×';
+                        (function (index) {
+                            removeButton.addEventListener('click', () => removeProblemFromIssue(index));
+                        })(i);
+                        listItem.appendChild(removeButton);
+                        issueProblems.appendChild(listItem);
+                    });
+            }
         }
 
-        async function removeProblemFromIssue(problemId) {
-            problems = problems.filter(id => id !== problemId);
+        async function removeProblemFromIssue(index) {
+            problems.splice(index, 1);
             loadIssueProblems();
         }
 
@@ -183,7 +197,7 @@
         let pageSize = 15;
         let sortField = 'id';
         let sortOrder = 'DESC'; // 默认降序
-        
+
         function resetPageAndLoadProblems() {
             currentPage = 1;
             loadProblems();
@@ -265,6 +279,7 @@
         // 初次加载
         loadIssueInfo();
         loadProblems();
+        initProblems();
     </script>
 </body>
 </html>
