@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Issue</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pagination { list-style-type: none; display: flex; }
+        .pagination li { margin: 5px; cursor: pointer; }
+    </style>
+    <script>
+        var issueId = -1;
+        let problems = [];
+
+        // 获取 URL 参数
+        function getIssueIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('issueId');
+        }
+
+        // 加载 Issue 题目列表
+        async function loadIssueProblems() {
+            issueId = getIssueIdFromUrl();
+            if (issueId) {
+                const response = await fetch(`/getProblemsInIssue?issueId=${issueId}`);
+                const data = await response.json();
+                problems = data;
+                displayProblems();
+            }
+        }
+
+        // 显示题目列表
+        function displayProblems() {
+            const issueProblems = document.getElementById('issueProblems');
+            issueProblems.innerHTML = '';
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // 表头
+            thead.innerHTML = `
+                <tr>
+                    <th>编号</th>
+                    <th>时间</th>
+                    <th>题目名称</th>
+                    <th>学科</th>
+                    <th>提交次数</th>
+                    <th>评分</th>
+                    <th>作者</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+
+            // 表格内容
+            problems.forEach(problem => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${problem.id}</td>
+                    <td>${problem.time}</td>
+                    <td>${problem.name}</td>
+                    <td>${problem.subject}</td>
+                    <td>${problem.submit_num}</td>
+                    <td>${problem.score}</td>
+                    <td>${problem.author}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            issueProblems.appendChild(table);
+        }
+
+        // 初次加载
+        document.addEventListener('DOMContentLoaded', () => {
+            loadIssueProblems();
+        });
+    </script>
+</head>
+<body>
+    <h2>Issue 题目列表</h2>
+    <div id="issueProblems"></div>
+</body>
+</html>

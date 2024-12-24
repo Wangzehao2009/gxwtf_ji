@@ -36,6 +36,42 @@ async function newissue(req, res) {
     }
 }
 
+// 删除 issue
+async function deleteIssue(req, res) {
+    const { issueId } = req.query;
+    try {
+        db.query(
+            'DELETE FROM issues WHERE id = ?',
+            [issueId],
+            (err, result) => {
+                if (err) return res.status(500).json({ error: '数据库错误' + err });
+                return res.status(200).json({ message: '删除成功' });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+}
+
+// 删除空的 issue
+async function deleteEmptyIssue(req, res) {
+    const { issueId } = req.query;
+    try {
+        db.query(
+            'DELETE FROM issues WHERE id = ? AND name=""',
+            [issueId],
+            (err, result) => {
+                if (err) return res.status(500).json({ error: '数据库错误' + err });
+                return res.status(200).json({ message: '删除成功' });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+}
+
 // 保存 issue 基本信息
 async function saveIssueBasicInfo(req, res) {
     const { issueId, name } = req.body;
@@ -202,6 +238,8 @@ async function issueCount(req, res) {
 
 function init(app, fileStorage) {
     app.post('/newissue', fileStorage.single('file'), newissue);
+    app.delete('/deleteissue', deleteIssue);
+    app.post('/deleteEmptyIssue', deleteEmptyIssue);
     app.post('/saveIssueBasicInfo', saveIssueBasicInfo);
     app.get('/searchProblems', searchProblems);
     app.post('/addProblemToIssue', addProblemToIssue);
