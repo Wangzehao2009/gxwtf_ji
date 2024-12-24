@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue List</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pagination { list-style-type: none; display: flex; }
+        .pagination li { margin: 5px; cursor: pointer; }
+        .sortable-header { cursor: pointer; }
+        .sortable-header .arrow { color: black; }
+        .sortable-header.sorted .arrow { color: red; }
+    </style>
+</head>
+<body>
+    <h2>Issue 列表</h2>
+    <div>
+        <input type="text" id="search" placeholder="搜索关键词">
+        <input type="text" id="issueId" placeholder="输入Issue编号">
+        <button onclick="resetPageAndLoadIssues()">查询</button>
+    </div>
+    
+    <table id="issuesTable">
+        <thead>
+            <tr>
+                <th class="sortable-header" onclick="sortTable('id')">编号 <span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="sortTable('time')">时间 <span class="arrow">▲▼</span></th>
+                <th>名称</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+    <ul class="pagination" id="pagination"></ul>
+
+    <script>
+        let currentPage = 1;
+        let pageSize = 15;
+        let sortField = 'id';
+        let sortOrder = 'DESC'; // 默认降序
+        
+        function resetPageAndLoadIssues() {
+            currentPage = 1;
+            loadIssues();
+        }
+
+        function loadIssues() {
+            const search = document.getElementById('search').value;
+            const id = document.getElementById('issueId').value;
+
+            let url = `/issues?sortField=${sortField}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`;
+            if (id) {
+                url = `/issues?id=${id}`;
+            } else if (search) {
+                url += `&search=${search}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('#issuesTable tbody');
+                    tableBody.innerHTML = '';
+                    data.forEach(issue => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${issue.id}</td>
+                            <td>${issue.time}</td>
+                            <td>${issue.name}</td>
+                            <td>
+                                <button onclick="editIssue(${issue.id})">编辑</button>
+                                <button onclick="viewIssue(${issue.id})">浏览</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                    if (!id) {
+                        loadPagination(search);
+                    }
+                    updateSortIndicators();
+                });
+        }
+
+        function loadPagination(search) {
+            let url = `/issues/count`;
+            if (search) {
+                url += `?search=${search}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const totalPages = Math.ceil(data.count / pageSize);
+                    const pagination = document.getElementById('pagination');
+                    pagination.innerHTML = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageItem = document.createElement('li');
+                        pageItem.textContent = i;
+                        pageItem.onclick = () => { currentPage = i; loadIssues(); };
+                        pagination.appendChild(pageItem);
+                    }
+                });
+        }
+
+        function sortTable(field) {
+            if (sortField === field) {
+                // Toggle sort order when clicking the same field
+                sortOrder = sortOrder === 'ASC' ? 'DESC' : 'ASC';
+            } else {
+                // Default to descending order when switching fields
+                sortField = field;
+                sortOrder = 'DESC';
+            }
+            loadIssues();
+        }
+
+        function updateSortIndicators() {
+            const headers = document.querySelectorAll('.sortable-header');
+            headers.forEach(header => {
+                const field = header.getAttribute('onclick').match(/sortTable\('(.+)'\)/)[1];
+                const arrow = header.querySelector('.arrow');
+                if (field === sortField) {
+                    arrow.innerHTML = sortOrder === 'ASC' ? '▲' : '▼';
+                    header.classList.add('sorted');
+                } else {
+                    arrow.innerHTML = '▲▼';
+                    header.classList.remove('sorted');
+                }
+            });
+        }
+
+        function editIssue(issueId) {
+            window.location.href = `/html/editissue.html?issueId=${issueId}`;
+        }
+
+        function viewIssue(issueId) {
+            window.location.href = `/html/viewissue.html?issueId=${issueId}`;
+        }
+
+        // 初次加载
+        loadIssues();
+    </script>
+</body>
+</html>

@@ -15,6 +15,7 @@
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "fs": "^0.0.1-security",
+    "helmet": "^8.0.0",
     "hexo-renderer-syzoj-renderer": "^1.2.2",
     "highlight.js": "^11.11.0",
     "i": "^0.3.7",

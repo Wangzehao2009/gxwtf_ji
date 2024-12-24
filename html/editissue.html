@@ -84,6 +84,25 @@
         var issueId = -1;
         let problems = [];
 
+        // 获取 URL 参数
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // 加载 Issue 基本信息
+        async function loadIssueInfo() {
+            issueId = getQueryParam('issueId');
+            if (issueId) {
+                const response = await fetch(`/issues?id=${issueId}`);
+                const issue = await response.json();
+                if (issue.length > 0) {
+                    document.getElementById('name').value = issue[0].name;
+                }
+                loadIssueProblems();
+            }
+        }
+
         document.getElementById('saveBasicInfo').addEventListener('click', async function () {
             const name = document.getElementById('name').value;
             const response = await fetch('/saveIssueBasicInfo', {
@@ -249,6 +268,7 @@
         }
 
         // 初次加载
+        loadIssueInfo();
         loadProblems();
     </script>
 </body>

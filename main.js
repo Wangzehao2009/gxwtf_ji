@@ -8,6 +8,7 @@ const problemSystem = require('./problemSystem.js');
 const issueSystem = require('./issueSystem.js');
 const mdreader = require('./mdreader.js');
 const imageUpload = require('./imageUpload.js');
+const helmet = require('helmet');
 
 const app = express();
 app.use(express.text());
@@ -18,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 引擎
-const engine=require('./engine.js');
+const engine = require('./engine.js');
 engine(app);
 
 userSystem(app); // 用户系统

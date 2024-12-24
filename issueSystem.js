@@ -159,6 +159,47 @@ async function saveIssue(req, res) {
     }
 }
 
+// 获取 issue 列表
+async function issueList(req, res) {
+    const { sortField = 'id', sortOrder = 'DESC', page = 1, pageSize = 15, search, id } = req.query;
+
+    // 构建 SQL 查询条件
+    let query = 'SELECT * FROM issues';
+    if (id) {
+        query += ` WHERE id = ${db.escape(id)}`;
+    } else if (search) {
+        query += ` WHERE name LIKE ${db.escape('%' + search + '%')}`;
+    }
+    // 排序
+    query += ` ORDER BY ${sortField} ${sortOrder}`;
+    // 分页
+    const offset = (page - 1) * pageSize;
+    query += ` LIMIT ${pageSize} OFFSET ${offset}`;
+
+    // 查询数据
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: '查询失败', details: err });
+        }
+        res.json(results);
+    });
+}
+
+// 获取 issue 总数
+async function issueCount(req, res) {
+    const { search } = req.query;
+    let query = 'SELECT COUNT(*) AS count FROM issues';
+    if (search) {
+        query += ` WHERE name LIKE ${db.escape('%' + search + '%')}`;
+    }
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: '查询失败', details: err });
+        }
+        res.json(results[0]);
+    });
+}
+
 function init(app, fileStorage) {
     app.post('/newissue', fileStorage.single('file'), newissue);
     app.post('/saveIssueBasicInfo', saveIssueBasicInfo);
@@ -167,6 +208,8 @@ function init(app, fileStorage) {
     app.post('/removeProblemFromIssue', removeProblemFromIssue);
     app.get('/getProblemsInIssue', getProblemsInIssue);
     app.post('/saveIssue', saveIssue);
+    app.get('/issues', issueList); // 添加获取 issue 列表的路由
+    app.get('/issues/count', issueCount); // 添加获取 issue 总数的路由
 }
 
 module.exports = init;
