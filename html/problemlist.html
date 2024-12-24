@@ -13,38 +13,58 @@
         .sortable-header { cursor: pointer; }
         .sortable-header .arrow { color: black; }
         .sortable-header.sorted .arrow { color: red; }
+        .new-issue-button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px; /* 圆角矩形 */
+        }
+        .delete-button {
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            position: relative;
+            background-color: white;
+            border-style: solid;
+            border-color:black;
+            color:black;
+            border-radius: 5px; /* 圆角矩形 */
+        }
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 5px;
+            background-color: red;
+            width: 0;
+            border-radius: 5px; /* 圆角矩形 */
+        }
     </style>
-    <script src="problemList.js"></script>
 </head>
 <body>
-    <h2>题目列表</h2>
+    <h2>问题列表</h2>
     <div>
-        <label for="subject">选择学科:</label>
-        <select id="subject" onchange="resetPageAndLoadProblems()">
-            <option value="">全部</option>
-            <option value="数学">数学</option>
-            <option value="物理">物理</option>
-            <option value="化学">化学</option>
-            <option value="生物">生物</option>
-            <option value="信息">信息</option>
-        </select>
-        
-        <input type="text" id="search" placeholder="搜索题目或作者">
-        <input type="text" id="problemId" placeholder="输入题目ID">
-        
-        <button onclick="resetPageAndLoadProblems()">查询</button>
+        <label for="search">搜索:</label>
+        <input type="text" id="search" placeholder="搜索问题">
+        <button onclick="resetPageAndLoadIssues()">查询</button>
+        <button class="new-issue-button" onclick="createNewIssue()">新建问题</button>
     </div>
     
-    <table id="problemsTable">
+    <table id="issuesTable">
         <thead>
             <tr>
                 <th class="sortable-header" onclick="sortTable('id')">编号 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="sortTable('time')">时间 <span class="arrow">▲▼</span></th>
-                <th>题目名称</th>
-                <th>学科</th>
-                <th class="sortable-header" onclick="sortTable('submit_num')">提交次数 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="sortTable('score')">评分 <span class="arrow">▲▼</span></th>
-                <th>作者</th>
+                <th class="sortable-header" onclick="sortTable('name')">名称 <span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="sortTable('created_at')">创建时间 <span class="arrow">▲▼</span></th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
@@ -55,20 +75,152 @@
     <ul class="pagination" id="pagination"></ul>
 
     <script>
-        transProblemObjectIntoString=(problem)=>{
-            return `
-                <td>${problem.id}</td>
-                <td>${problem.time}</td>
-                <td>${problem.name}</td>
-                <td>${problem.subject}</td>
-                <td>${problem.submit_num}</td>
-                <td>${problem.score}</td>
-                <td>${problem.author}</td>
-            `;
+        let currentPage = 1;
+        let pageSize = 15;
+        let sortField = 'id';
+        let sortOrder = 'DESC'; // 默认降序
+        let newIssueId = null;
+        let deleteTimeout;
+        let progressInterval;
+
+        function resetPageAndLoadIssues() {
+            currentPage = 1;
+            loadIssues();
         }
 
+        function loadIssues() {
+            const search = document.getElementById('search').value;
+
+            let url = `/issues?search=${search}&sortField=${sortField}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('#issuesTable tbody');
+                    tableBody.innerHTML = '';
+                    data.filter(issue => issue.name!='').forEach(issue => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${issue.id}</td>
+                            <td>${issue.name}</td>
+                            <td>${issue.created_at}</td>
+                            <td>
+                                <button onclick="editIssue(${issue.id})">编辑</button>
+                                <button onclick="viewIssue(${issue.id})">查看</button>
+                                <button class="delete-button" onmousedown="startDelete(${issue.id}, this)" onmouseup="cancelDelete(this)" onmouseleave="cancelDelete(this)">
+                                    ×
+                                    <div class="progress-bar"></div>
+                                </button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                    loadPagination(search);
+                    updateSortIndicators();
+                });
+        }
+
+        function loadPagination(search) {
+            fetch(`/issues/count?search=${search}`)
+                .then(response => response.json())
+                .then(data => {
+                    const totalPages = Math.ceil(data.count / pageSize);
+                    const pagination = document.getElementById('pagination');
+                    pagination.innerHTML = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageItem = document.createElement('li');
+                        pageItem.textContent = i;
+                        pageItem.onclick = () => { currentPage = i; loadIssues(); };
+                        pagination.appendChild(pageItem);
+                    }
+                });
+        }
+
+        function sortTable(field) {
+            if (sortField === field) {
+                // Toggle sort order when clicking the same field
+                sortOrder = sortOrder === 'ASC' ? 'DESC' : 'ASC';
+            } else {
+                // Default to descending order when switching fields
+                sortField = field;
+                sortOrder = 'DESC';
+            }
+            loadIssues();
+        }
+
+        function updateSortIndicators() {
+            const headers = document.querySelectorAll('.sortable-header');
+            headers.forEach(header => {
+                const field = header.getAttribute('onclick').match(/sortTable\('(.+)'\)/)[1];
+                const arrow = header.querySelector('.arrow');
+                if (field === sortField) {
+                    arrow.innerHTML = sortOrder === 'ASC' ? '▲' : '▼';
+                    header.classList.add('sorted');
+                } else {
+                    arrow.innerHTML = '▲▼';
+                    header.classList.remove('sorted');
+                }
+            });
+        }
+
+        function editIssue(issueId) {
+            window.location.href = `/editissue?issueId=${issueId}`;
+        }
+
+        function viewIssue(issueId) {
+            window.location.href = `/viewissue?issueId=${issueId}`;
+        }
+
+        async function createNewIssue() {
+            // 直接调用 issue system 中的 new issue
+            const response = await fetch('/newissue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: '' })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                newIssueId = result.issueId;
+                window.location.href = `/editissue?issueId=${newIssueId}`;
+            } else {
+                alert(result.error);
+            }
+        }
+
+        function startDelete(issueId, button) {
+            const progressBar = button.querySelector('.progress-bar');
+            progressBar.style.width = '0';
+            let progress = 0;
+
+            progressInterval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                }
+            }, 200);
+
+            deleteTimeout = setTimeout(async () => {
+                const response = await fetch(`/deleteissue?issueId=${issueId}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    loadIssues();
+                } else {
+                    alert(result.error);
+                }
+            }, 2000); // 长按 2 秒触发删除
+        }
+
+        function cancelDelete(button) {
+            clearTimeout(deleteTimeout);
+            clearInterval(progressInterval);
+            const progressBar = button.querySelector('.progress-bar');
+            progressBar.style.width = '0';
+        }
         // 初次加载
-        loadProblems();
+        loadIssues();
     </script>
 </body>
 </html>

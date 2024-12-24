@@ -209,7 +209,7 @@
                 } else {
                     alert(result.error);
                 }
-            }, 3000); // 长按 2 秒触发删除
+            }, 2000); // 长按 2 秒触发删除
         }
 
         function cancelDelete(button) {
@@ -221,12 +221,18 @@
 
         window.addEventListener('beforeunload', async function (event) {
             if (newIssueId !== null) {
-                const response = await fetch(`/deleteEmptyIssue?issueId=${newIssueId}`, {
-                    method: 'DELETE'
-                });
-                const result = await response.json();
-                if (!response.ok) {
-                    console.error(result.error);
+                try {
+                    const response = await fetch(`/deleteEmptyIssue?issueId=${newIssueId}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    if (!response.ok) {
+                        console.error(result.error);
+                    } else {
+                        console.log('未保存的 issue 已删除');
+                    }
+                } catch (error) {
+                    console.error('删除请求失败:', error);
                 }
             }
         });
