@@ -1,5 +1,24 @@
 const db = require('./mysql.js');
 
+// 新建 issue 并保存基本信息
+async function newEmptyIssue(req, res) {
+    const { name } = req.body;
+    try {
+        db.query(
+            'INSERT INTO issues (name) VALUES (?)',
+            [name],
+            (err, result) => {
+                if (err) return res.status(500).json({ error: '数据库错误' + err });
+                const issueId = result.insertId;
+                return res.status(200).json({ message: '提交成功', issueId: issueId });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+}
+
 // 新建一期并插入多个题目
 async function newissue(req, res) {
     const { name, problemIds } = req.body; // 接收问题 ID 列表
@@ -40,30 +59,22 @@ async function newissue(req, res) {
 async function deleteIssue(req, res) {
     const { issueId } = req.query;
     try {
+        // 删除 issue_problem_graph 表中相关记录
         db.query(
-            'DELETE FROM issues WHERE id = ?',
+            'DELETE FROM issue_problem_graph WHERE issue_id = ?',
             [issueId],
             (err, result) => {
                 if (err) return res.status(500).json({ error: '数据库错误' + err });
-                return res.status(200).json({ message: '删除成功' });
-            }
-        );
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: '服务器错误' });
-    }
-}
 
-// 删除空的 issue
-async function deleteEmptyIssue(req, res) {
-    const { issueId } = req.query;
-    try {
-        db.query(
-            'DELETE FROM issues WHERE id = ? AND name=""',
-            [issueId],
-            (err, result) => {
-                if (err) return res.status(500).json({ error: '数据库错误' + err });
-                return res.status(200).json({ message: '删除成功' });
+                // 删除 issues 表中相关记录
+                db.query(
+                    'DELETE FROM issues WHERE id = ?',
+                    [issueId],
+                    (err, result) => {
+                        if (err) return res.status(500).json({ error: '数据库错误' + err });
+                        return res.status(200).json({ message: '删除成功' });
+                    }
+                );
             }
         );
     } catch (error) {
@@ -237,9 +248,9 @@ async function issueCount(req, res) {
 }
 
 function init(app, fileStorage) {
+    app.post('/newEmptyIssue', newEmptyIssue);
     app.post('/newissue', fileStorage.single('file'), newissue);
     app.delete('/deleteissue', deleteIssue);
-    app.post('/deleteEmptyIssue', deleteEmptyIssue);
     app.post('/saveIssueBasicInfo', saveIssueBasicInfo);
     app.get('/searchProblems', searchProblems);
     app.post('/addProblemToIssue', addProblemToIssue);
