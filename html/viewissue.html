@@ -53,14 +53,15 @@
                 </tr>
             `;
             table.appendChild(thead);
-
             // 表格内容
             problems.forEach(problem => {
                 const row = document.createElement('tr');
+                var file_path=problem.file_path;
+                file_path=file_path.substring(file_path.lastIndexOf('/')+1);
                 row.innerHTML = `
                     <td>${problem.id}</td>
                     <td>${problem.time}</td>
-                    <td>${problem.name}</td>
+                    <td><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></td>
                     <td>${problem.subject}</td>
                     <td>${problem.submit_num}</td>
                     <td>${problem.score}</td>

@@ -12,8 +12,8 @@ function resetPageAndLoadProblems() {
 function loadProblems() {
     const subject = document.getElementById('subject').value;
     const search = document.getElementById('search').value;
-
-    let url = `/problems?subject=${subject}&search=${search}&sortField=${sortField}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`;
+    const problemId = document.getElementById('problemIdInput').value;
+    let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${sortField}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`;
 
     fetch(url)
         .then(response => response.json())
@@ -23,16 +23,6 @@ function loadProblems() {
             data.forEach(problem => {
                 const row = document.createElement('tr');
                 row.innerHTML = transProblemObjectIntoString(problem);
-                // row.innerHTML = `
-                //     <td>${problem.id}</td>
-                //     <td>${problem.time}</td>
-                //     <td>${problem.name}</td>
-                //     <td>${problem.subject}</td>
-                //     <td>${problem.submit_num}</td>
-                //     <td>${problem.score}</td>
-                //     <td>${problem.author}</td>
-                //     <td><button onclick="addProblemToIssue(${problem.id})">添加</button></td>
-                // `;
                 tableBody.appendChild(row);
             });
             loadPagination(subject, search);

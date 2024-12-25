@@ -30,7 +30,7 @@
         </select>
         
         <input type="text" id="search" placeholder="搜索题目或作者">
-        <input type="text" id="problemId" placeholder="输入题目ID">
+        <input type="text" id="problemIdInput" placeholder="输入题目ID">
         
         <button onclick="resetPageAndLoadProblems()">查询</button>
     </div>
@@ -45,6 +45,7 @@
                 <th class="sortable-header" onclick="sortTable('submit_num')">提交次数 <span class="arrow">▲▼</span></th>
                 <th class="sortable-header" onclick="sortTable('score')">评分 <span class="arrow">▲▼</span></th>
                 <th>作者</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
@@ -56,17 +57,36 @@
 
     <script>
         transProblemObjectIntoString=(problem)=>{
+            var file_path=problem.file_path;
+            file_path=file_path.substring(file_path.lastIndexOf('/')+1);
             return `
                 <td>${problem.id}</td>
                 <td>${problem.time}</td>
-                <td>${problem.name}</td>
+                <td><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></td>
                 <td>${problem.subject}</td>
                 <td>${problem.submit_num}</td>
                 <td>${problem.score}</td>
                 <td>${problem.author}</td>
+                <td><button onclick="deleteProblem(${problem.id})">删除</button></td>
             `;
         }
 
+        function deleteProblem(problemId) {
+        if (confirm('确定要删除这个题目吗？')) {
+            fetch(`/problems/${problemId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('题目删除成功');
+                    loadProblems();
+                } else {
+                    alert('删除失败: ' + data.error);
+                }
+            });
+        }
+        }
         // 初次加载
         loadProblems();
     </script>

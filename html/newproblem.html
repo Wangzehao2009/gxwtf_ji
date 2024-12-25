@@ -45,13 +45,26 @@
         document.getElementById('newproblemForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const formData = new FormData(this);
-            console.log(formData);
-            const response = await fetch('/newproblem', {
+
+            // 获取最新的 problem_id
+            const response = await fetch('/problems/latestId');
+            const result = await response.json();
+            const problemId = result.latestId + 1;
+
+            // 重命名文件
+            const fileInput = document.getElementById('file');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const newFileName = `problem_${problemId}${file.name.substring(file.name.lastIndexOf('.'))}`;
+                formData.set('file', new File([file], newFileName, { type: file.type }));
+            }
+
+            const submitResponse = await fetch('/newproblem', {
                 method: 'POST',
                 body: formData
             });
-            const result = await response.json();
-            alert(result.message || result.error);
+            const submitResult = await submitResponse.json();
+            alert(submitResult.message || submitResult.error);
         });
     </script>
 </body>
