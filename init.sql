@@ -16,7 +16,8 @@ CREATE TABLE users (
 CREATE TABLE submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    issue INT NOT NULL,
+    issue_id INT NOT NULL,
+    problem_id INT NOT NULL,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     subject VARCHAR(255),
     file_path VARCHAR(255)

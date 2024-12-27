@@ -8,7 +8,6 @@ const problemSystem = require('./problemSystem.js');
 const issueSystem = require('./issueSystem.js');
 const mdreader = require('./mdreader.js');
 const imageUpload = require('./imageUpload.js');
-const helmet = require('helmet');
 
 const app = express();
 app.use(express.text());

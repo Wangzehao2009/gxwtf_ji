@@ -4,17 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>提交记录</title>
+    <style>
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {background-color: #f1f1f1}
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .form-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .form-row > div {
+            flex: 1;
+            margin-right: 10px; /* 调整这里的值来控制距离 */
+        }
+        .form-row > div:last-child {
+            margin-right: 0;
+        }
+    </style>
 </head>
 <body>
     <h2>提交记录表单</h2>
     <form id="submissionForm" enctype="multipart/form-data">
         <input type="text" id="userId" name="userId" style="display: none;" readonly>
 
-        <label for="issue">期号 (issue):</label>
-        <input type="number" id="issue" name="issue" required><br>
-        
-        <label for="subject">学科:</label>
-        <input type="text" id="subject" name="subject" required><br>
+        <div class="form-row">
+            <div>
+                <label for="issue_id">期号 (issue):</label>
+                <div class="dropdown">
+                    <input type="text" id="issue_input" name="issue_input" required>
+                    <input type="hidden" id="issue_id" name="issue_id" required>
+                    <div class="dropdown-content" id="issueDropdown">
+                        <!-- 动态加载期号 -->
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label for="problem_id">题目号 (problem):</label>
+                <div class="dropdown">
+                    <input type="text" id="problem_input" name="problem_input" required>
+                    <input type="hidden" id="problem_id" name="problem_id" required>
+                    <div class="dropdown-content" id="problemDropdown">
+                        <!-- 动态加载题目号 -->
+                    </div>
+                </div>
+            </div>
+        </div><br>
         
         <label for="file">上传文件:</label>
         <input type="file" id="file" name="file"><br><br>
@@ -22,55 +76,99 @@
         <button type="submit">提交</button>
     </form>
 
-    <h2>提交记录</h2>
-    <ul id="submissionList"></ul>
-
     <script>
-        window.onload=async function(event){
-            var userId=await fetch("http://localhost:3000/dashboard", {
+        let issues = [];
+        let problems = [];
+
+        window.onload = async function(event) {
+            var userId = await fetch("http://localhost:3000/dashboard", {
                 "mode": "cors",
                 "credentials": "include"
             });
             userId = await userId.json();
             userId = userId.userId;
-            document.getElementById('userId').value=userId;
+            document.getElementById('userId').value = userId;
+
+            // 加载期号
+            const issueResponse = await fetch('/issues');
+            issues = await issueResponse.json();
+            const issueDropdown = document.getElementById('issueDropdown');
+            issues.forEach(issue => {
+                const issueLink = document.createElement('a');
+                issueLink.textContent = issue.name;
+                issueLink.onclick = () => {
+                    document.getElementById('issue_id').value = issue.id;
+                    document.getElementById('issue_input').value = issue.name;
+                    loadProblems(issue.id);
+                };
+                issueDropdown.appendChild(issueLink);
+            });
+
+            document.getElementById('issue_input').addEventListener('input', function() {
+                const input = this.value;
+                const issue = issues.find(issue => issue.id == input || issue.name == input);
+                if (issue) {
+                    document.getElementById('issue_id').value = issue.id;
+                    document.getElementById('issue_input').value = issue.name;
+                    loadProblems(issue.id);
+                } else {
+                    document.getElementById('issue_id').value = '';
+                    document.getElementById('problem_input').value = '';
+                    document.getElementById('problem_id').value = '';
+                    document.getElementById('problemDropdown').innerHTML = '';
+                }
+            });
         };
 
-        document.getElementById('submissionForm').addEventListener('submit', async function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            console.log(formData);
-            const response = await fetch('/submit', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
+        async function loadProblems(issueId) {
+            const problemResponse = await fetch(`/getProblemsInIssue?issueId=${issueId}`);
+            problems = await problemResponse.json();
+            const problemDropdown = document.getElementById('problemDropdown');
+            problemDropdown.innerHTML = ''; // 清空之前的内容
+            problems.forEach(problem => {
+                const problemLink = document.createElement('a');
+                problemLink.textContent = problem.name;
+                problemLink.onclick = () => {
+                    document.getElementById('problem_id').value = problem.id;
+                    document.getElementById('problem_input').value = problem.name;
+                };
+                problemDropdown.appendChild(problemLink);
             });
-            const result = await response.json();
-            alert(result.message || result.error);
-            if (result.message) {
-                loadSubmissions();
-            }
-        });
 
-        async function loadSubmissions() {
-            try {
-                const response = await fetch('/submissions');
-                const submissions = await response.json();
-
-                const list = document.getElementById('submissionList');
-                list.innerHTML = '';
-                submissions.forEach(sub => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `ID: ${sub.id}, Issue: ${sub.issue}, Time: ${sub.time}, Subject: ${sub.subject}, File: ${sub.file_path}`;
-                    list.appendChild(listItem);
-                });
-            } catch (error) {
-                console.error('加载提交记录失败:', error);
-            }
+            document.getElementById('problem_input').addEventListener('input', function() {
+                const input = this.value;
+                const problem = problems.find(problem => problem.id == input || problem.name == input);
+                if (problem) {
+                    document.getElementById('problem_id').value = problem.id;
+                    document.getElementById('problem_input').value = problem.name;
+                } else {
+                    document.getElementById('problem_id').value = '';
+                }
+            });
         }
 
-        // 加载提交记录
-        loadSubmissions();
+        document.getElementById('submissionForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const issueId = document.getElementById('issue_id').value;
+            const problemId = document.getElementById('problem_id').value;
+            if (!issueId || !problemId) {
+                alert('期号或题目号不存在');
+                return;
+            }
+            const formData = new FormData(this);
+            console.log('提交表单数据:', formData);
+            const response = await fetch('/submit', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            console.log('提交结果:', result);
+            if (result.error) {
+                alert(result.error);
+            } else {
+                alert('提交成功');
+            }
+        });
     </script>
 </body>
 </html>

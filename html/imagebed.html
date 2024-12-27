@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图床</title>
+</head>
+<body>
+    <h1>上传图片</h1>
+    <form id="uploadForm" action="/image/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*">
+        <button type="submit">上传</button>
+    </form>
+    <div id="result"></div>
+
+    <h1>图床</h1>
+    <div id="imageList"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/image/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('result').innerText = data.error;
+                } else {
+                    const imageUrl = data.imageUrl;
+                    document.getElementById('result').innerHTML = `
+                        <p>图片上传成功！</p>
+                        <p>图片 URL: <a href="${imageUrl}" target="_blank">${imageUrl}</a></p>
+                    `;
+                    loadImages(); // 上传成功后重新加载图片列表
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        function loadImages() {
+            fetch('/image/list')
+                .then(response => response.json())
+                .then(data => {
+                    const imageList = document.getElementById('imageList');
+                    imageList.innerHTML = ''; // 清空之前的内容
+                    data.images.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+                    data.images.forEach(image => {
+                        const imageItem = document.createElement('div');
+                        imageItem.innerHTML = `
+                            <p>图片名称: ${image.name}</p>
+                            <p>上传时间: ${new Date(image.uploadTime).toLocaleString()}</p>
+                            <p>图片大小: ${(image.size / 1024).toFixed(2)} KB</p>
+                            <p>图片 URL: <a href="${image.url}" target="_blank">${image.url}</a></p>
+                            <img src="${image.url}" alt="${image.name}" style="max-width: 100px;">
+                        `;
+                        imageList.appendChild(imageItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // 初次加载图片列表
+        loadImages();
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提交记录列表</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pagination { list-style-type: none; display: flex; }
+        .pagination li { margin: 5px; cursor: pointer; }
+        .sortable-header { cursor: pointer; }
+        .sortable-header .arrow { color: black; }
+        .sortable-header.sorted .arrow { color: red; }
+    </style>
+    <script src="submitlist.js"></script>
+</head>
+<body>
+    <h2>提交记录列表</h2>
+    <div>
+        <label for="subject">选择学科:</label>
+        <select id="subject" onchange="resetPageAndLoadSubmissions()">
+            <option value="">全部</option>
+            <option value="数学">数学</option>
+            <option value="物理">物理</option>
+            <option value="化学">化学</option>
+            <option value="生物">生物</option>
+            <option value="信息">信息</option>
+        </select>
+        
+        <input type="text" id="search" placeholder="搜索提交记录">
+        <input type="text" id="submissionIdInput" placeholder="输入提交记录ID">
+        
+        <button onclick="resetPageAndLoadSubmissions()">查询</button>
+    </div>
+    
+    <table id="submissionsTable">
+        <thead>
+            <tr>
+                <th class="sortable-header" onclick="sortTable('id')">编号 <span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="sortTable('time')">时间 <span class="arrow">▲▼</span></th>
+                <th>用户名</th>
+                <th>issue</th>
+                <th>problem</th>
+                <th>学科</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+    <ul class="pagination" id="pagination"></ul>
+
+    <script>
+        transSubmissionObjectIntoString = (submission) => {
+            return `
+                <td>${submission.id}</td>
+                <td>${submission.time}</td>
+                <td>${submission.username}</td>
+                <td>${submission.issue_name}</td>
+                <td>${submission.problem_name}</td>
+                <td>${submission.subject}</td>
+            `;
+        }
+
+        // 初次加载
+        loadSubmissions();
+    </script>
+</body>
+</html>
