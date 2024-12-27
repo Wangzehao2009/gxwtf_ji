@@ -4,35 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Markdown 预览</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .markdown-content {
-            border: 1px solid #ddd;
-            padding: 20px;
-            background-color: #f9f9f9;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        table {
-            width: auto;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-        img {
-            max-width: 100%; /* 图片最大宽度为容器宽度 */
-            height: auto; /* 高度自动调整 */
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
     <!-- 引入 MathJax CDN -->
     <script type="text/javascript"
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
@@ -49,23 +21,29 @@
         });
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Markdown 预览</h1>
-    <div class="markdown-content">
-        <!-- 渲染解析后的 HTML 内容 -->
+    <article class="markdown-body">
         <%- content %>
-    </div>
-    <br>
-    <a href="/mdreader">返回首页</a>
-
+    </article>
     <!-- 在页面加载完成后，MathJax 会自动查找并渲染 LaTeX 数学公式 -->
     <script>
         window.onload = function() {
             MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
         };
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
 </body>
 </html>
