@@ -15,6 +15,7 @@
         .sortable-header.sorted .arrow { color: red; }
     </style>
     <script src="submitlist.js"></script>
+    <script src="basic.js"></script>
 </head>
 <body>
     <h2>提交记录列表</h2>
@@ -57,7 +58,7 @@
         transSubmissionObjectIntoString = (submission) => {
             return `
                 <td>${submission.id}</td>
-                <td>${submission.time}</td>
+                <td>${formatTime(submission.time)}</td>
                 <td>${submission.username}</td>
                 <td>${submission.issue_name}</td>
                 <td>${submission.problem_name}</td>

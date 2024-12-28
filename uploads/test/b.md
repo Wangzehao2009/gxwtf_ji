@@ -53,3 +53,11 @@ $\iint\limits_{D}\left(\frac{\partial Q}{\partial x} - \frac{\partial P}{\partia
 + 有两条腿
 + 有两个眼睛
 + 有性繁殖
+
+```js
+// first, find all the div.code blocks
+document.querySelectorAll('div.code').forEach(el => {
+  // then highlight each
+  hljs.highlightElement(el);
+});
+```

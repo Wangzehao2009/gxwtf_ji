@@ -83,6 +83,7 @@
             cursor: pointer;
         }
     </style>
+    <script src="basic.js"></script>
 </head>
 <body>
     <h2>Issue 列表</h2>
@@ -152,7 +153,7 @@
                         row.innerHTML = `
                             <td>${issue.id}</td>
                             <td>${issue.name}</td>
-                            <td>${issue.created_at}</td>
+                            <td>${formatTime(issue.time)}</td>
                             <td>
                                 <button onclick="editIssue(${issue.id})">编辑</button>
                                 <button onclick="viewIssue(${issue.id})">查看</button>

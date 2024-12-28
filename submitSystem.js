@@ -36,7 +36,16 @@ async function submit(req, res) {
                                 console.error('插入提交记录时出错:', err);
                                 return res.status(500).json({ error: '未登录' });
                             }
-                            return res.status(200).json({ message: '提交成功', submissionId: result.insertId });
+                            db.query(
+                                `UPDATE problems set submit_num=${problem.submit_num+1} where id=${problem.id}`,
+                                (err,result2)=>{
+                                    if(err){
+                                        console.error('数据库错误', err);
+                                        return res.status(500).json({ error: '数据库错误' });
+                                    }
+                                    return res.status(200).json({ message: '提交成功', submissionId: result.insertId });
+                                }
+                            );
                         }
                     );
                 })

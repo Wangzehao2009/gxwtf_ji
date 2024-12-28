@@ -15,6 +15,7 @@
         .sortable-header.sorted .arrow { color: red; }
     </style>
     <script src="problemList.js"></script>
+    <script src="basic.js"></script>
 </head>
 <body>
     <h2>题目列表</h2>
@@ -61,7 +62,7 @@
             file_path=file_path.substring(file_path.lastIndexOf('/')+1);
             return `
                 <td>${problem.id}</td>
-                <td>${problem.time}</td>
+                <td>${formatTime(problem.time)}</td>
                 <td><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></td>
                 <td>${problem.subject}</td>
                 <td>${problem.submit_num}</td>
