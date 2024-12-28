@@ -14,14 +14,14 @@
         .sortable-header .arrow { color: black; }
         .sortable-header.sorted .arrow { color: red; }
     </style>
-    <script src="submitlist.js"></script>
     <script src="basic.js"></script>
+    <script src="table.js"></script>
 </head>
 <body>
     <h2>提交记录列表</h2>
     <div>
         <label for="subject">选择学科:</label>
-        <select id="subject" onchange="resetPageAndLoadSubmissions()">
+        <select id="subject" onchange="table.reset()">
             <option value="">全部</option>
             <option value="数学">数学</option>
             <option value="物理">物理</option>
@@ -33,21 +33,21 @@
         <input type="text" id="search" placeholder="搜索提交记录">
         <input type="text" id="submissionIdInput" placeholder="输入提交记录ID">
         
-        <button onclick="resetPageAndLoadSubmissions()">查询</button>
+        <button onclick="table.reset()">查询</button>
     </div>
     
     <table id="submissionsTable">
         <thead>
             <tr>
-                <th class="sortable-header" onclick="sortTable('id')">编号 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="sortTable('time')">时间 <span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="table.sortTable('time')">时间 <span class="arrow">▲▼</span></th>
                 <th>用户名</th>
                 <th>issue</th>
                 <th>problem</th>
                 <th>学科</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="tbody">
             <!-- Data will be inserted here -->
         </tbody>
     </table>
@@ -55,19 +55,30 @@
     <ul class="pagination" id="pagination"></ul>
 
     <script>
-        transSubmissionObjectIntoString = (submission) => {
-            return `
-                <td>${submission.id}</td>
-                <td>${formatTime(submission.time)}</td>
-                <td>${submission.username}</td>
-                <td>${submission.issue_name}</td>
-                <td>${submission.problem_name}</td>
-                <td>${submission.subject}</td>
-            `;
-        }
+        const table=new Table('tbody',
+            (submission) => {
+                return `
+                    <td>${submission.id}</td>
+                    <td>${formatTime(submission.time)}</td>
+                    <td>${submission.username}</td>
+                    <td>${submission.issue_name}</td>
+                    <td>${submission.problem_name}</td>
+                    <td>${submission.subject}</td>
+                `;
+            },
+            (tb)=>{
+                const subject = document.getElementById('subject').value;
+                const search = document.getElementById('search').value;
+                const submissionId = document.getElementById('submissionIdInput').value;
+                let url = `/submissions?id=${submissionId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {tb.generate(data);});
+            }
+        )
 
         // 初次加载
-        loadSubmissions();
+        table.load(table);
     </script>
 </body>
 </html>

@@ -59,7 +59,7 @@ async function submit(req, res) {
 
 // 获取提交记录列表
 function submitlist(req, res) {
-    const { userId, issue_id, problem_id, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 15 } = req.query;
+    const { userId, issue_id, subject, problem_id, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 15 } = req.query;
 
     // 构建 SQL 查询条件
     let query = `
@@ -76,6 +76,7 @@ function submitlist(req, res) {
     if (issue_id) {
         query += ` AND submissions.issue_id = ${db.escape(issue_id)}`;
     }
+    if(subject) query+=` AND submissions.subject=${db.escape(subject)}`;
     if (problem_id) {
         query += ` AND submissions.problem_id = ${db.escape(problem_id)}`;
     }
@@ -91,6 +92,7 @@ function submitlist(req, res) {
     // 查询数据
     db.query(query, (err, results) => {
         if (err) {
+            console.error(err);
             return res.status(500).json({ error: '查询失败', details: err });
         }
         res.json(results);
