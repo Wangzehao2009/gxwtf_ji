@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
 const express = require('express');
+const os = require('os');
 
 // 主页路由：展示上传 Markdown 文件的表单
 function homePage(req, res) {
@@ -35,12 +36,53 @@ function previewPage(req, res) {
     });
 }
 
+function render(req, res)
+{
+    const markdownContent = req.body.markdown;
+
+    if (!markdownContent) {
+        return res.status(400).send('Missing markdown content');
+    }
+
+    // 创建临时文件路径
+    const tempFilePath = path.join(os.tmpdir(), 'temp.md');
+
+    // 将Markdown内容写入临时文件
+    fs.writeFile(tempFilePath, markdownContent, (err) => {
+        if (err) {
+            console.error('Error writing to file', err);
+            return res.status(500).send('Error saving markdown content');
+        }
+
+        exec(`pandoc "${tempFilePath}" -f markdown -t html --mathml`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+                return res.status(500).send('Error rendering markdown');
+            }
+
+            if (stderr) {
+                console.error(`stderr: ${stderr}`);
+                return res.status(500).send('Error rendering markdown');
+            }
+
+            // 返回渲染后的 HTML
+            res.send({ html: stdout });
+
+            // 清理临时文件
+            fs.unlink(tempFilePath, (err) => {
+                if (err) console.error('Error deleting temp file', err);
+            });
+        });
+    });
+}
+
 function init(app) {
     app.set('view engine', 'ejs'); // 设置视图引擎为 EJS
     app.set('views', path.join(__dirname, 'views')); // 设置视图目录
     app.use(express.static(path.join(__dirname, 'public'))); // 设置静态文件目录
     app.get('/mdreader', homePage); // 主页路由
     app.get('/mdreader/preview', previewPage); // 预览路由
+    app.post('/mdreader/render', render); // 渲染路由
 }
 
 module.exports = init;
