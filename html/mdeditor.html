@@ -9,9 +9,9 @@
     <script type="text/javascript">
         MathJax.Hub.Config({
             tex2jax: {
-                skipTags: ["script","noscript","style","textarea"],
+                skipTags: ["script", "noscript", "style", "textarea"],
                 inlineMath: [['$', '$'], ['\\(', '\\)']],   // 支持使用 $ 来包裹行内公式
-                displayMath: [ ['$$','$$'] ],  // 支持使用 $$ 来包裹块级公式
+                displayMath: [ ['$$', '$$'] ],  // 支持使用 $$ 来包裹块级公式
                 processEscapes: true
             }
         });
@@ -31,68 +31,6 @@
         ></textarea> 
         <div class="markdown-body"></div>
     </div>
-    <script>
-        const textEditor = document.querySelector('.text-editor');
-        const preview = document.querySelector('.markdown-body');
-
-        let controllingWindow = null;
-
-        // 监听 textEditor 的滚动事件
-        textEditor.addEventListener('scroll', () => {
-            if (controllingWindow === 'textEditor') return; // 如果当前是 textEditor 控制滚动，则不做任何处理
-
-            // 让 preview 跟随 textEditor 滚动
-            preview.scrollTop = textEditor.scrollTop;
-
-            // 更新控制窗口的标志
-            controllingWindow = 'textEditor';
-        });
-
-        // 监听 preview 的滚动事件
-        preview.addEventListener('scroll', () => {
-            if (controllingWindow === 'preview') return; // 如果当前是 preview 控制滚动，则不做任何处理
-
-            // 让 textEditor 跟随 preview 滚动
-            textEditor.scrollTop = preview.scrollTop;
-
-            // 更新控制窗口的标志
-            controllingWindow = 'preview';
-        });
-
-        // 使用 requestAnimationFrame 来保证同步流畅
-        function syncScroll() {
-            if (controllingWindow === 'textEditor') {
-                preview.scrollTop = textEditor.scrollTop;
-            } else if (controllingWindow === 'preview') {
-                textEditor.scrollTop = preview.scrollTop;
-            }
-            requestAnimationFrame(syncScroll); // 继续进行下一帧的同步
-        }
-
-        // 启动滚动同步
-        requestAnimationFrame(syncScroll);
-
-        // Markdown 渲染与 MathJax 支持
-        textEditor.addEventListener("keyup", async (evt) => {
-            const { value } = evt.target; // 获取输入内容
-            const response = await fetch('/mdreader/render', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ markdown: value })
-            });
-            if (response.ok) {
-                const result = await response.json();
-                // 将渲染的HTML插入到 preview 中
-                preview.innerHTML = result.html;
-
-                // 使用 MathJax 重新渲染数学公式
-                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-                // 使用 highlight.js 对新渲染的代码块进行高亮
-                hljs.highlightAll();
-            }
-        });
-    </script>
+    <script src="mdeditor.js"></script>
 </body>
 </html>

@@ -31,8 +31,7 @@ body{
     flex: 1;
     border: 0;
     padding: 50px;
-    background: #f3f3f3;
-    color: #3d3d3d;
+    background: #ffffff;
     scroll-behavior: smooth;
     overflow: auto;
 }
