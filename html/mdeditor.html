@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="ch">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown在线编辑器</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Markdown Editor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
-    <!-- 引入 MathJax CDN -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-    
     <script type="text/javascript">
         MathJax.Hub.Config({
             tex2jax: {
@@ -19,57 +16,81 @@
             }
         });
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/github.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css">
 </head>
 <body>
-    <div id="container">
-        <div id="editor-container">
-            <textarea id="editor" placeholder="输入Markdown..."></textarea>
-        </div>
-        <div id="preview-container">
-            <div id="preview" class="markdown-body">
-                <!-- 渲染的Markdown内容将被放在这里 -->
-            </div>
-        </div>
+    <div class="main-content">
+        <textarea
+            class="text-editor"
+            spellcheck="false"
+            autocomplete="off"
+            autofocus
+            placeholder="## Create Your Markdown"
+        ></textarea> 
+        <div class="markdown-body"></div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/highlight.min.js"></script>
     <script>
-        window.onload = function() {
-            // 在页面加载时，强制刷新 MathJax
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-        };
-    </script>
-    <script>
-        const editor = document.getElementById('editor');
-        const preview = document.getElementById('preview');
+        const textEditor = document.querySelector('.text-editor');
+        const preview = document.querySelector('.markdown-body');
 
-        // 每次输入时，将Markdown内容发送到后端进行渲染
-        editor.addEventListener('input', async function () {
-            const markdownContent = editor.value;
+        let controllingWindow = null;
 
-            // 发送Markdown内容到后端进行渲染
+        // 监听 textEditor 的滚动事件
+        textEditor.addEventListener('scroll', () => {
+            if (controllingWindow === 'textEditor') return; // 如果当前是 textEditor 控制滚动，则不做任何处理
+
+            // 让 preview 跟随 textEditor 滚动
+            preview.scrollTop = textEditor.scrollTop;
+
+            // 更新控制窗口的标志
+            controllingWindow = 'textEditor';
+        });
+
+        // 监听 preview 的滚动事件
+        preview.addEventListener('scroll', () => {
+            if (controllingWindow === 'preview') return; // 如果当前是 preview 控制滚动，则不做任何处理
+
+            // 让 textEditor 跟随 preview 滚动
+            textEditor.scrollTop = preview.scrollTop;
+
+            // 更新控制窗口的标志
+            controllingWindow = 'preview';
+        });
+
+        // 使用 requestAnimationFrame 来保证同步流畅
+        function syncScroll() {
+            if (controllingWindow === 'textEditor') {
+                preview.scrollTop = textEditor.scrollTop;
+            } else if (controllingWindow === 'preview') {
+                textEditor.scrollTop = preview.scrollTop;
+            }
+            requestAnimationFrame(syncScroll); // 继续进行下一帧的同步
+        }
+
+        // 启动滚动同步
+        requestAnimationFrame(syncScroll);
+
+        // Markdown 渲染与 MathJax 支持
+        textEditor.addEventListener("keyup", async (evt) => {
+            const { value } = evt.target; // 获取输入内容
             const response = await fetch('/mdreader/render', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ markdown: markdownContent })
+                body: JSON.stringify({ markdown: value })
             });
-
             if (response.ok) {
                 const result = await response.json();
-                // 将渲染的HTML插入到preview中
+                // 将渲染的HTML插入到 preview 中
                 preview.innerHTML = result.html;
-                
-                
-                // 使用MathJax重新渲染数学公式
-                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 
-                // 使用highlight.js对新渲染的代码块进行高亮
+                // 使用 MathJax 重新渲染数学公式
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                // 使用 highlight.js 对新渲染的代码块进行高亮
                 hljs.highlightAll();
-            } else {
-                preview.innerHTML = '渲染错误';
             }
         });
     </script>

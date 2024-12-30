@@ -67,11 +67,6 @@ function render(req, res)
 
             // 返回渲染后的 HTML
             res.send({ html: stdout });
-
-            // 清理临时文件
-            fs.unlink(tempFilePath, (err) => {
-                if (err) console.error('Error deleting temp file', err);
-            });
         });
     });
 }
