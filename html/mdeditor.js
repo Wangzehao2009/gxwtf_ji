@@ -60,6 +60,37 @@ const preview = document.querySelector('.markdown-body');
 //     initPreviewSync();
 // });
 
+textEditor.addEventListener('keydown', (event) => {
+    if (event.key === 'Tab') {
+        event.preventDefault(); // 阻止默认行为（页面滚动）
+        
+        // 获取光标的位置
+        const cursorPos = textEditor.selectionStart;
+        const text = textEditor.value;
+        
+        // 在光标位置插入 4 个空格
+        textEditor.value = text.substring(0, cursorPos) + '    ' + text.substring(cursorPos); // 插入四个空格
+        
+        // 将光标移动到 Tab 后的位置
+        textEditor.selectionStart = textEditor.selectionEnd = cursorPos + 4; // 因为插入了四个空格，所以光标位置增加4
+    }
+
+    // 处理 Backspace 键
+    if (event.key === 'Backspace') {
+        const cursorPos = textEditor.selectionStart;
+        const text = textEditor.value;
+
+        // 检查光标前是否是 4 个空格
+        if (cursorPos >= 4 && text.substring(cursorPos - 4, cursorPos) === '    ') {
+            event.preventDefault(); // 阻止默认的删除行为
+            // 删除前面的 4 个空格
+            textEditor.value = text.substring(0, cursorPos - 4) + text.substring(cursorPos);
+            // 将光标移动到删除后的正确位置
+            textEditor.selectionStart = textEditor.selectionEnd = cursorPos - 4;
+        }
+    }
+});
+
 textEditor.addEventListener("keyup", async (evt) => {
     const { value } = evt.target; // 获取输入内容
     const response = await fetch('/mdreader/render', {

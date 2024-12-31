@@ -9,7 +9,6 @@ function homePage(req, res) {
     res.render('index');
 }
 
-// 预览路由：处理 Markdown 文件并渲染
 function previewPage(req, res) {
     const fileName = req.query.file;
     
@@ -40,32 +39,23 @@ function render(req, res)
 {
     const markdownContent = req.body.markdown;
 
-    if (!markdownContent) {
-        return res.status(400).send('Missing markdown content');
-    }
-
     // 创建临时文件路径
-    const tempFilePath = path.join(os.tmpdir(), 'temp.md');
+    const fileName = "tmp_" + Math.floor(Math.random()*(1e6)).toString() + '.md';
+    const tempFilePath = path.join(os.tmpdir(), fileName);
 
     // 将Markdown内容写入临时文件
-    fs.writeFile(tempFilePath, markdownContent, (err) => {
-        if (err) {
-            console.error('Error writing to file', err);
-            return res.status(500).send('Error saving markdown content');
-        }
-
+    fs.writeFile(tempFilePath,markdownContent, (err) => {
+        if (err) return res.status(500).send('文件写入错误');
         exec(`pandoc "${tempFilePath}" -f markdown -t html --mathml`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
-                return res.status(500).send('Error rendering markdown');
+                return res.status(500).send('渲染错误');
             }
-
             if (stderr) {
                 console.error(`stderr: ${stderr}`);
-                return res.status(500).send('Error rendering markdown');
+                return res.status(500).send('渲染错误');
             }
-
-            // 返回渲染后的 HTML
+            
             res.send({ html: stdout });
         });
     });
