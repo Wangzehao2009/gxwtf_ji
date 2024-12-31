@@ -30,8 +30,9 @@
             <option value="信息">信息</option>
         </select>
         
-        <input type="text" id="search" placeholder="搜索提交记录">
-        <input type="text" id="submissionIdInput" placeholder="输入提交记录ID">
+        <input type="text" id="searchUser" placeholder="搜索用户名或ID">
+        <input type="text" id="searchIssue" placeholder="搜索issue名或ID">
+        <input type="text" id="searchProblem" placeholder="搜索problem名或ID">
         
         <button onclick="table.reset()">查询</button>
     </div>
@@ -68,9 +69,10 @@
             },
             (tb)=>{
                 const subject = document.getElementById('subject').value;
-                const search = document.getElementById('search').value;
-                const submissionId = document.getElementById('submissionIdInput').value;
-                let url = `/submissions?id=${submissionId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
+                const searchUser = document.getElementById('searchUser').value;
+                const searchIssue = document.getElementById('searchIssue').value;
+                const searchProblem = document.getElementById('searchProblem').value;
+                let url = `/submissions?subject=${subject}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}&userId=${searchUser}&issue_id=${searchIssue}&problem_id=${searchProblem}`;
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {tb.generate(data);});

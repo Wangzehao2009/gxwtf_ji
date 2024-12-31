@@ -1,12 +1,12 @@
 const axios = require('axios');
 const db = require('./mysql.js');
+const fs = require('fs');
+const path = require('path');
 
 // 保存提交
 async function submit(req, res) {
     const { userId, issue_id, problem_id } = req.body;
     const file_path = req.file ? req.file.path : null;
-
-    console.log('提交数据:', { userId, issue_id, problem_id, file_path });
 
     // 检查 problem_id 是否属于 issue_id
     db.query(
@@ -58,9 +58,8 @@ async function submit(req, res) {
 }
 
 // 获取提交记录列表
-function submitlist(req, res) {
-    const { userId, issue_id, subject, problem_id, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 15 } = req.query;
-
+async function submitlist(req, res) {
+    const { userId, issue_id, subject, problem_id, sortField = 'id', sortOrder = 'ASC', page = 1, pageSize = 15 } = req.query;
     // 构建 SQL 查询条件
     let query = `
         SELECT submissions.*, users.username, issues.name AS issue_name, problems.name AS problem_name, submissions.time
@@ -71,17 +70,38 @@ function submitlist(req, res) {
         WHERE 1=1
     `;
     if (userId) {
-        query += ` AND submissions.user_id = ${db.escape(userId)}`;
+        await axios.get(`http://localhost:3000/users?name="${userId}"`)
+        .then(response => {
+            if(response.data.length === 0){
+                query += ` AND submissions.user_id = ${db.escape(userId)}`;
+                return;
+            }
+            const realuser_id = response.data[0].id;
+            query += ` AND (submissions.user_id = ${db.escape(userId)} OR submissions.user_id = ${db.escape(realuser_id)})`;
+        });
     }
     if (issue_id) {
-        query += ` AND submissions.issue_id = ${db.escape(issue_id)}`;
+        await axios.get(`http://localhost:3000/issues?search=${issue_id}`)
+            .then(response => {
+                if(response.data.length === 0){
+                    query += ` AND submissions.issue_id = ${db.escape(issue_id)}`;
+                    return;
+                }
+                const realissue_id = response.data[0].id;
+                query += ` AND (submissions.issue_id = ${db.escape(issue_id)} OR submissions.issue_id = ${db.escape(realissue_id)})`;
+            });
     }
     if(subject) query+=` AND submissions.subject=${db.escape(subject)}`;
     if (problem_id) {
-        query += ` AND submissions.problem_id = ${db.escape(problem_id)}`;
-    }
-    if (search) {
-        query += ` AND (submissions.subject LIKE '%${search}%' OR submissions.file_path LIKE '%${search}%')`;
+        await axios.get(`http://localhost:3000/problems?search=${problem_id}`)
+            .then(response => {
+                if(response.data.length === 0){
+                    query += ` AND submissions.problem_id = ${db.escape(problem_id)}`;
+                    return;
+                }
+                const realproblem_id = response.data[0].id;
+                query += ` AND (submissions.problem_id = ${db.escape(problem_id)} OR submissions.problem_id = ${db.escape(realproblem_id)})`;
+            });
     }
     // 排序
     query += ` ORDER BY ${sortField} ${sortOrder}`;
@@ -101,7 +121,7 @@ function submitlist(req, res) {
 
 // 获取提交记录总数
 function submitcount(req, res) {
-    const { userId, issue_id, problem_id, search = '' } = req.query;
+    const { userId, issue_id, submission_id} = req.query;
     let query = 'SELECT COUNT(*) AS count FROM submissions WHERE 1=1';
     if (userId) {
         query += ` AND user_id = ${db.escape(userId)}`;
@@ -109,11 +129,8 @@ function submitcount(req, res) {
     if (issue_id) {
         query += ` AND issue_id = ${db.escape(issue_id)}`;
     }
-    if (problem_id) {
-        query += ` AND problem_id = ${db.escape(problem_id)}`;
-    }
-    if (search) {
-        query += ` AND (subject LIKE '%${search}%' OR file_path LIKE '%${search}%')`;
+    if (submission_id) {
+        query += ` AND problem_id = ${db.escape(submission_id)}`;
     }
     db.query(query, (err, results) => {
         if (err) {
@@ -123,10 +140,56 @@ function submitcount(req, res) {
     });
 }
 
+// 删除提交记录
+function deleteSubmission(req, res) {
+    const submissionId = req.params.id;
+    // 查询题目文件路径
+    db.query('SELECT * FROM submissions WHERE id = ?', [submissionId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: '查询失败', details: err });
+        }
+        const submission = results[0];
+        const filePath = submission.file_path;
+        const problemId = submission.problem_id;
+        axios.get(`http://localhost:3000/problems?id=${problemId}`)
+            .then(response => {
+                const problem = response.data[0];
+                // 删除题目记录
+                db.query('DELETE FROM submissions WHERE id = ?', [submissionId], (err) => {
+                    if (err) {
+                        return res.status(500).json({ success: false, error: '删除失败', details: err });
+                    }
+        
+                    db.query(
+                        `UPDATE problems set submit_num=${problem.submit_num-1} where id=${problem.id}`,
+                        (err)=>{if(err) console.error('数据库错误', err);}
+                    );
+        
+                    // 删除文件
+                    if (filePath) {
+                        fs.unlink(path.join(__dirname, filePath), (err) => {
+                            if (err) {
+                                return res.status(500).json({ success: false, error: '文件删除失败', details: err });
+                            }
+                            res.json({ success: true, message: '提交记录及文件删除成功' });
+                        });
+                    } else {
+                        res.json({ success: true, message: '提交记录删除成功，但未找到文件路径' });
+                    }
+                });
+            })
+            .catch(error => {
+            console.error('查询题目信息时出错:', error);
+        });
+
+    });
+}
+
 function init(app, fileStorage) {
     app.post('/submit', fileStorage.single('file'), submit);
     app.get('/submissions', submitlist);
     app.get('/submissions/count', submitcount);
+    app.delete('/submissions/:id', deleteSubmission);
 }
 
 module.exports = init;

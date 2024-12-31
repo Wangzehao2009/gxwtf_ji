@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Problem List</title>
+    <title>提交记录列表</title>
     <style>
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         table, th, td { border: 1px solid black; }
@@ -14,12 +14,11 @@
         .sortable-header .arrow { color: black; }
         .sortable-header.sorted .arrow { color: red; }
     </style>
-    <!-- <script src="problemList.js"></script> -->
     <script src="basic.js"></script>
     <script src="table.js"></script>
 </head>
 <body>
-    <h2>题目列表</h2>
+    <h2>提交记录列表</h2>
     <div>
         <label for="subject">选择学科:</label>
         <select id="subject" onchange="table.reset()">
@@ -31,22 +30,23 @@
             <option value="信息">信息</option>
         </select>
         
-        <input type="text" id="search" placeholder="搜索题目或作者">
-        <input type="text" id="problemIdInput" placeholder="输入题目ID">
+        <input type="text" id="searchUser" placeholder="搜索用户名或ID">
+        <input type="text" id="searchIssue" placeholder="搜索issue名或ID">
+        <input type="text" id="searchProblem" placeholder="搜索problem名或ID">
         
         <button onclick="table.reset()">查询</button>
     </div>
     
-    <table id="problemsTable">
+    <table id="submissionsTable">
         <thead>
             <tr>
                 <th class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow">▲▼</span></th>
                 <th class="sortable-header" onclick="table.sortTable('time')">时间 <span class="arrow">▲▼</span></th>
-                <th>题目名称</th>
+                <th>用户名</th>
+                <th>issue</th>
+                <th>problem</th>
                 <th>学科</th>
-                <th class="sortable-header" onclick="table.sortTable('submit_num')">提交次数 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="table.sortTable('score')">评分 <span class="arrow">▲▼</span></th>
-                <th>作者</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -58,29 +58,46 @@
 
     <script>
         const table=new Table('tbody',
-            (problem)=>{
-                var file_path=problem.file_path;
-                file_path=file_path.substring(file_path.lastIndexOf('/')+1);
+            (submission) => {
                 return `
-                    <td>${problem.id}</td>
-                    <td>${formatTime(problem.time)}</td>
-                    <td><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></td>
-                    <td>${problem.subject}</td>
-                    <td>${problem.submit_num}</td>
-                    <td>${problem.score}</td>
-                    <td>${problem.author}</td>
+                    <td>${submission.id}</td>
+                    <td>${formatTime(submission.time)}</td>
+                    <td>${submission.username}</td>
+                    <td>${submission.issue_name}</td>
+                    <td>${submission.problem_name}</td>
+                    <td>${submission.subject}</td>
+                    <td><button onclick="deleteSubmission(${submission.id})">删除</button></td>
                 `;
             },
             (tb)=>{
                 const subject = document.getElementById('subject').value;
-                const search = document.getElementById('search').value;
-                const problemId = document.getElementById('problemIdInput').value;
-                let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
+                const searchUser = document.getElementById('searchUser').value;
+                const searchIssue = document.getElementById('searchIssue').value;
+                const searchProblem = document.getElementById('searchProblem').value;
+                let url = `/submissions?subject=${subject}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}&userId=${searchUser}&issue_id=${searchIssue}&problem_id=${searchProblem}`;
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {tb.generate(data);});
             }
-        );
+        )
+
+        //删除提交记录
+        function deleteSubmission(submissionId) {
+            if (confirm('确定要删除这个提交记录吗？')) {
+                fetch(`/submissions/${submissionId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('提交记录删除成功');
+                        table.loadProblems();
+                    } else {
+                        alert('删除失败: ' + data.error);
+                    }
+                });
+            }
+        }
         // 初次加载
         table.load(table);
     </script>

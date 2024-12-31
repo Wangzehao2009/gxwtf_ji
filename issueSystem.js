@@ -106,8 +106,8 @@ async function searchProblems(req, res) {
     const { query } = req.query;
     try {
         db.query(
-            'SELECT * FROM problems WHERE id LIKE ? OR name LIKE ?',
-            [`%${query}%`, `%${query}%`],
+            'SELECT * FROM problems WHERE id=? OR name LIKE ?',
+            [`${query}`, `%${query}%`],
             (err, results) => {
                 if (err) return res.status(500).json({ error: '数据库错误' + err });
                 return res.status(200).json(results);

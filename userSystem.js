@@ -75,11 +75,34 @@ function loginStatus(req,res){
     }
 }
 
+// 用户列表
+function userList(req, res) {
+    const { id, name, sortField = 'id', sortOrder = 'ASC', page = 1, pageSize = 15 } = req.query;
+
+    // 构建 SQL 查询条件
+    let query = 'SELECT * FROM users WHERE 1=1';
+    if (id) query += ` AND id = ${id}`;
+    if(name) query += ` AND (username = ${name} or real_name = ${name})`;
+    // 排序
+    query += ` ORDER BY ${sortField} ${sortOrder}`;
+    // 分页
+    const offset = (page - 1) * pageSize;
+    query += ` LIMIT ${pageSize} OFFSET ${offset}`;
+    // 查询数据
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: '查询失败', details: err });
+        }
+        res.json(results);
+    });
+}
+
 function init(app){
     app.post('/register', register);
     app.post('/login', login);
     app.get('/logout', logout);
     app.get('/dashboard', loginStatus);
+    app.get('/users', userList);
 }
 
 module.exports = init;

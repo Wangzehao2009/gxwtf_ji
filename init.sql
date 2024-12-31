@@ -34,8 +34,8 @@ CREATE TABLE problems (
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     name VARCHAR(255),
     subject VARCHAR(255),
-    submit_num INT,
-    score INT,
+    submit_num INT DEFAULT 0,
+    score INT DEFAULT 0,
     author VARCHAR(255),
     file_path VARCHAR(255)
 );
