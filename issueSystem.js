@@ -250,7 +250,7 @@ async function issueCount(req, res) {
 function init(app, fileStorage) {
     app.post('/newEmptyIssue', newEmptyIssue);
     app.post('/newissue', fileStorage.single('file'), newissue);
-    app.delete('/deleteissue', deleteIssue);
+    app.get('/deleteissue', deleteIssue);
     app.post('/saveIssueBasicInfo', saveIssueBasicInfo);
     app.get('/searchProblems', searchProblems);
     app.post('/addProblemToIssue', addProblemToIssue);

@@ -58,14 +58,16 @@
         <label for="search">搜索:</label>
         <input type="text" id="search" placeholder="搜索 Issue">
         <button onclick="resetPageAndLoadIssues()">查询</button>
+        <button class="new-issue-button" onclick="openModal()">新建 Issue</button>
     </div>
     
     <table id="issuesTable">
         <thead>
             <tr>
                 <th class="sortable-header" onclick="sortTable('id')">编号 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="sortTable('created_at')">创建时间 <span class="arrow">▲▼</span></th>
                 <th class="sortable-header" onclick="sortTable('name')">名称 <span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="sortTable('created_at')">创建时间 <span class="arrow">▲▼</span></th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
@@ -74,6 +76,20 @@
     </table>
 
     <ul class="pagination" id="pagination"></ul>
+
+    <!-- 模态窗口 -->
+    <div id="newIssueModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>新建 Issue</h2>
+            <form id="newIssueForm">
+                <label for="name">名称:</label>
+                <input type="text" id="name" name="name" required><br>
+                <button type="submit">保存</button>
+            </form>
+            <p id="message"></p>
+        </div>
+    </div>
 
     <script>
         let currentPage = 1;
@@ -103,8 +119,13 @@
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${issue.id}</td>
-                            <td>${formatTime(issue.time)}</td>
                             <td><a href="/viewissue?issueId=${issue.id}">${issue.name}</a></td>
+                            <td>${formatTime(issue.time)}</td>
+                            <td>
+                                <button onclick="editIssue(${issue.id})">编辑</button>
+                                <button onclick="deleteIssue(${issue.id})">删除</button>
+                                </button>
+                            </td>
                         `;
                         tableBody.appendChild(row);
                     });
@@ -155,6 +176,50 @@
                 }
             });
         }
+
+        function editIssue(issueId) {
+            window.location.href = `/editissue?issueId=${issueId}`;
+        }
+
+        function openModal() {
+            document.getElementById('newIssueModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('newIssueModal').style.display = 'none';
+        }
+
+        document.getElementById('newIssueForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            if (!name) {
+                alert('名称不能为空');
+                return;
+            }
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            const response = await fetch('/newEmptyIssue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (response.ok) {
+                closeModal(); // 隐藏模态窗口
+                window.location.href = `/editissue?issueId=${result.issueId}`;
+            } else {
+                document.getElementById('message').textContent = result.error;
+            }
+        });
+
+        function deleteIssue(issueId) {
+            if (confirm('确定要删除这个issue吗？')) {
+                fetch(`/deleteissue?issueId=${issueId}`);
+                alert('issue 删除成功');
+                loadIssues();
+            }
+        }
+
         // 初次加载
         loadIssues();
     </script>
