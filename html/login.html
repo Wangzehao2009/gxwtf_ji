@@ -6,17 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录页面</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 400px; margin: auto; }
+        .container { font-family: 'Microsoft YaHei', sans-serif; max-width: 30%; margin: auto; padding: 70px 0; }
         input[type="text"], input[type="password"] {
-            width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box;
+            width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box;
         }
         button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #0056b3; }
     </style>
     <script src="basic.js"></script>
+    <link rel="stylesheet" href="banner.css">
 </head>
 <body>
+    <div class="banner">
+        <img src="http://localhost:3000/uploads/1735823331237-841608623.png" alt="Logo">
+        <div>竞赛贯通·广学五题坊</div>
+        <div class="english">Class 14·Xuguang Olympiad Workshop</div>
+    </div>
+
     <div class="container">
         <h2>用户登录</h2>
         <form id="loginForm">

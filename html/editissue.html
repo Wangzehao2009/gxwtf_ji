@@ -12,7 +12,7 @@
             opacity: 0.4;
         }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        table, th, td { border: 1px solid black; }
+        table, th, td { border: 0px solid black; }
         th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pagination { list-style-type: none; display: flex; }
         .pagination li { margin: 5px; cursor: pointer; }
@@ -24,8 +24,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <!-- 引入 problemList.js -->
     <script src="/problemList.js"></script>
+    <link rel="stylesheet" href="banner.css">
 </head>
 <body>
+    <div class="banner">
+        <img src="http://localhost:3000/uploads/1735823331237-841608623.png" alt="Logo">
+        <div>竞赛贯通·广学五题坊</div>
+        <div class="english">Class 14·Xuguang Olympiad Workshop</div>
+    </div>
     <h2>Issue 基本信息</h2>
     <div class="name">
         <p>Issue 名称:</p>

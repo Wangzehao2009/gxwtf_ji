@@ -30,6 +30,10 @@ app.use('/image', imageUpload); // 图床功能
 // 提供静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'html', 'index.html'));
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`服务器运行在 http://localhost:${PORT}`);
