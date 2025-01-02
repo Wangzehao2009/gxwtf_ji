@@ -14,14 +14,90 @@
             margin: 0 15px;
             text-decoration: none;
             color: black;
-            font-family: 'Microsoft YaHei', sans-serif;
             font-weight: bold;
-            font-size: 2vh;
         }
         .navbar a:hover {
             text-decoration: underline;
         }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        .dropdown.show .dropdown-content {
+            display: block;
+        }
     </style>
+    <script>
+        async function checkLoginStatus() {
+            const response = await fetch('/dashboard');
+            const registerLink = document.querySelector('.register-link');
+            const loginLink = document.querySelector('.login-link');
+            if (response.ok) {
+                const data = await response.json();
+                const navbar = document.querySelector('.navbar');
+                const dropdown = document.createElement('div');
+                dropdown.className = 'dropdown';
+                const userLink = document.createElement('a');
+                userLink.href = '#';
+                userLink.textContent = `欢迎, ${data.userId}`;
+                userLink.onclick = function() {
+                    dropdown.classList.toggle('show');
+                };
+                dropdown.appendChild(userLink);
+                const dropdownContent = document.createElement('div');
+                dropdownContent.className = 'dropdown-content';
+                const logoutLink = document.createElement('a');
+                logoutLink.href = '#';
+                logoutLink.textContent = '登出';
+                logoutLink.onclick = async function() {
+                    const response = await fetch('/logout');
+                    if (response.ok) {
+                        alert('成功登出');
+                        window.location.href = '/';
+                    }
+                };
+                dropdownContent.appendChild(logoutLink);
+                dropdown.appendChild(dropdownContent);
+                navbar.appendChild(dropdown);
+                // 隐藏注册和登录链接
+                registerLink.style.display = 'none';
+                loginLink.style.display = 'none';
+            } else {
+                // 显示注册和登录链接
+                registerLink.style.display = 'inline';
+                loginLink.style.display = 'inline';
+            }
+        }
+        window.onload = checkLoginStatus;
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropdown a')) {
+                const dropdowns = document.getElementsByClassName('dropdown-content');
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="banner">
@@ -33,8 +109,8 @@
         <a href="issuelist">Issue</a>
         <a href="problemlist">Problem</a>
         <a href="submitlist">Submissions</a>
-        <a href="register">注册</a>
-        <a href="login">登录</a>
+        <a href="register" class="register-link">注册</a>
+        <a href="login" class="login-link">登录</a>
     </div>
 </body>
 </html>
