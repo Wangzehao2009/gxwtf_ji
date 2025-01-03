@@ -48,6 +48,20 @@
             text-decoration: none;
             cursor: pointer;
         }
+        a {
+            color:#a31f23d7;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #7b1a15;
+            text-decoration: none;
+        }
+        .sortable-header {
+            cursor: pointer;
+        }
+        .arrow {
+            font-size: 0.8em;
+        }
     </style>
     <script src="basic.js"></script>
     <script src="table.js"></script>
@@ -73,8 +87,8 @@
         <thead>
             <tr>
                 <th class="sortable-header" onclick="sortTable('id')">编号 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="sortTable('name')">名称 <span class="arrow">▲▼</span></th>
                 <th class="sortable-header" onclick="sortTable('created_at')">创建时间 <span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="sortTable('name')">名称 <span class="arrow">▲▼</span></th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -127,8 +141,8 @@
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${issue.id}</td>
-                            <td><a href="/viewissue?issueId=${issue.id}">${issue.name}</a></td>
                             <td>${formatTime(issue.time)}</td>
+                            <td><a href="/viewissue?issueId=${issue.id}">${issue.name}</a></td>
                             <td>
                                 <button onclick="editIssue(${issue.id})">编辑</button>
                                 <button onclick="deleteIssue(${issue.id})">删除</button>
