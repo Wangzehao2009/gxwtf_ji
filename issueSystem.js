@@ -211,11 +211,12 @@ async function issueList(req, res) {
     const { sortField = 'id', sortOrder = 'DESC', page = 1, pageSize = 15, search, id } = req.query;
 
     // 构建 SQL 查询条件
-    let query = 'SELECT * FROM issues';
+    let query = 'SELECT * FROM issues WHERE 1=1';
     if (id) {
-        query += ` WHERE id = ${db.escape(id)}`;
-    } else if (search) {
-        query += ` WHERE name LIKE ${db.escape('%' + search + '%')}`;
+        query += ` AND id = ${db.escape(id)}`;
+    }
+    if (search) {
+        query += ` AND name LIKE ${db.escape('%' + search + '%')}`;
     }
     // 排序
     query += ` ORDER BY ${sortField} ${sortOrder}`;
@@ -234,10 +235,13 @@ async function issueList(req, res) {
 
 // 获取 issue 总数
 async function issueCount(req, res) {
-    const { search } = req.query;
-    let query = 'SELECT COUNT(*) AS count FROM issues';
+    const { id,search } = req.query;
+    let query = 'SELECT COUNT(*) AS count FROM issues WHERE 1=1';
+    if (id) {
+        query += ` AND id=${id}`;
+    }
     if (search) {
-        query += ` WHERE name LIKE ${db.escape('%' + search + '%')}`;
+        query += ` AND name LIKE ${db.escape('%' + search + '%')}`;
     }
     db.query(query, (err, results) => {
         if (err) {

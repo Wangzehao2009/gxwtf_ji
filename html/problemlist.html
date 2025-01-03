@@ -83,7 +83,7 @@
                 file_path=file_path.substring(file_path.lastIndexOf('/')+1);
                 return `
                     <td>${problem.id}</td>
-                    <td>${formatTime(problem.time)}</td>
+                    <td>${problem.time}</td>
                     <td><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></td>
                     <td>${problem.subject}</td>
                     <td>${problem.submit_num}</td>
@@ -98,7 +98,12 @@
                 let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
                 fetch(url)
                     .then(response => response.json())
-                    .then(data => {tb.generate(data);});
+                    .then(data => {
+                        url=`/problems/count?id=${problemId}&subject=${subject}&search=${search}`;
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(count => {tb.generate(data,count.count)});
+                    });
             }
         );
         // 初次加载

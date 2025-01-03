@@ -29,8 +29,11 @@ function problemlist(req, res) {
 
 // 题目总数
 function problemcount(req,res){
-    const { subject, search = '' } = req.query;
+    const { id, subject, search = '' } = req.query;
     let query = 'SELECT COUNT(*) AS count FROM problems WHERE 1=1';
+    if (id) {
+        query += ` AND id = ${id}`;
+    }
     if (subject) {
         query += ` AND subject = '${subject}'`;
     }

@@ -13,10 +13,3 @@ function connect(target,data,result,reject){
         else result(data);
     })
 }
-
-function formatTime(s){
-    s=s.replaceAll('-','/');
-    s=s.replaceAll('T',' ');
-    s=s.replaceAll(/.[0-9][0-9][0-9]Z/g,'');
-    return s;
-}

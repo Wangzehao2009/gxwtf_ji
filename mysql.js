@@ -3,8 +3,9 @@ const mysql=require('mysql2');
 const db=mysql.createConnection({
     host:'localhost',
     user:'root',
-    password:'',
-    database:'guangfang'
+    password:'jzq20100505',
+    database:'guangfang',
+    dateStrings:true
 });
 
 db.connect(err=>{

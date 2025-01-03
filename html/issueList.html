@@ -124,7 +124,7 @@
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${issue.id}</td>
-                            <td>${formatTime(issue.time)}</td>
+                            <td>${issue.time}</td>
                             <td><a href="/viewissue?issueId=${issue.id}">${issue.name}</a></td>
                         `;
                         tableBody.appendChild(row);

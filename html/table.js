@@ -24,9 +24,10 @@ class Table{
         table.appendChild(row);
         this.count++;
     }
-    generate(list){
+    generate(list,count){
         this.clear();
         list.forEach(obj=>{this.addRow(obj);});
+        this.count=count;
         this.loadPagination();
         this.updateSortIndicators();
     }
@@ -37,7 +38,7 @@ class Table{
         for (let i = 1; i <= totalPages; i++) {
             const pageItem = document.createElement('li');
             pageItem.textContent = i;
-            pageItem.onclick = () => { currentPage = i; this.load(this); };
+            pageItem.onclick = () => { this.currentPage = i; this.load(this); };
             pagination.appendChild(pageItem);
         }
     }

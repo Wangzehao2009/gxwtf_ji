@@ -82,7 +82,7 @@
             (submission) => {
                 return `
                     <td>${submission.id}</td>
-                    <td>${formatTime(submission.time)}</td>
+                    <td>${submission.time}</td>
                     <td>${submission.username}</td>
                     <td>${submission.issue_name}</td>
                     <td>${submission.problem_name}</td>
@@ -97,7 +97,12 @@
                 let url = `/submissions?subject=${subject}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}&userId=${searchUser}&issue_id=${searchIssue}&problem_id=${searchProblem}`;
                 fetch(url)
                     .then(response => response.json())
-                    .then(data => {tb.generate(data);});
+                    .then(data => {
+                        url=`/submissions/count?subject=${subject}&userId=${searchUser}&issue_id=${searchIssue}&problem_id=${searchProblem}`;
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(count => {tb.generate(data,count.count)});
+                    });
             }
         )
 
