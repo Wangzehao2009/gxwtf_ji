@@ -107,6 +107,14 @@ function deleteProblem(req, res) {
     });
 }
 
+function problemList(req, res){
+    res.redirect('http://localhost:3000/problemlist');
+}
+
+function problemListEdit(req, res){
+    res.redirect('http://localhost:3000/problemlist_edit');
+}
+
 
 function init(app, fileStorage) {
     app.post('/newproblem', fileStorage.single('file'), newproblem);
@@ -114,6 +122,8 @@ function init(app, fileStorage) {
     app.get('/problems/count', problemcount);
     app.get('/problems/latestId', getLatestProblemId); // 添加获取最新 problem_id 的路由
     app.delete('/problems/:id', deleteProblem);
+    app.get('/problem/list',problemList);
+    app.get('/problem/list/edit',problemListEdit);
 }
 
 module.exports = init;

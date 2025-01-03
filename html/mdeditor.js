@@ -60,7 +60,91 @@ const preview = document.querySelector('.markdown-body');
 //     initPreviewSync();
 // });
 
-textEditor.addEventListener('keydown', (event) => {
+let historyStack = [];
+let redoStack = [];
+let isUndoing = false;
+let isRedoing = false;
+let lastContent = '';
+let lastSavedContent = '';
+
+// 获取文件内容并显示在编辑器中
+async function loadFileContent() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fileName = urlParams.get('file');
+    if (!fileName) {
+        console.error('File name is null or undefined');
+        return;
+    }
+    const filePath = `/filecontent/${fileName}`;
+    console.log(`Fetching file from: ${filePath}`); // 调试信息
+    try {
+        const response = await fetch(filePath);
+        if (response.ok) {
+            const data = await response.json();
+            console.log('File content loaded successfully'); // 调试信息
+            textEditor.value = data.content;
+            lastContent = data.content;
+            lastSavedContent = data.content;
+            // 触发一次 keyup 事件以渲染预览
+            textEditor.dispatchEvent(new Event('keyup'));
+            // 初始化历史记录
+            historyStack.push(data.content);
+        } else {
+            console.error('Failed to load file content'); // 调试信息
+            alert('无法加载文件内容');
+        }
+    } catch (error) {
+        console.error('Error fetching file:', error); // 调试信息
+        alert('无法加载文件内容');
+    }
+}
+
+// 监听 command+s 组合键
+textEditor.addEventListener('keydown', async (event) => {
+    if (event.metaKey && event.key === 's') {
+        event.preventDefault(); // 阻止默认保存行为
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const filePath = urlParams.get('file');
+        if (!filePath) {
+            console.error('File name is null or undefined');
+            return;
+        }
+        const content = textEditor.value;
+
+        try {
+            const response = await fetch('/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ filePath, content })
+            });
+
+            if (response.ok) {
+                lastSavedContent = content;
+                console.log('File saved successfully'); // 调试信息
+                alert('文件已保存');
+            } else {
+                console.error('Failed to save file'); // 调试信息
+                alert('保存失败');
+            }
+        } catch (error) {
+            console.error('Error saving file:', error); // 调试信息
+            alert('保存失败');
+        }
+    }
+
+    if (event.metaKey && event.key === 'z') {
+        event.preventDefault(); // 阻止默认撤回行为
+        undo();
+    }
+
+    if (event.metaKey && event.key === 'y') {
+        event.preventDefault(); // 阻止默认重做行为
+        redo();
+    }
+
     if (event.key === 'Tab') {
         event.preventDefault(); // 阻止默认行为（页面滚动）
         
@@ -91,8 +175,26 @@ textEditor.addEventListener('keydown', (event) => {
     }
 });
 
+textEditor.addEventListener("input", () => {
+    const value = textEditor.value;
+    if (value !== lastContent) {
+        if (!isUndoing && !isRedoing) {
+            historyStack.push(value);
+            redoStack = []; // 清空重做栈
+        }
+        lastContent = value;
+        isUndoing = false;
+        isRedoing = false;
+        renderMarkdown(value); // 实时渲染
+    }
+});
+
 textEditor.addEventListener("keyup", async (evt) => {
     const { value } = evt.target; // 获取输入内容
+    renderMarkdown(value);
+});
+
+async function renderMarkdown(value) {
     const response = await fetch('/mdreader/render', {
         method: 'POST',
         headers: {
@@ -108,4 +210,70 @@ textEditor.addEventListener("keyup", async (evt) => {
     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
     // 使用 highlight.js 对新渲染的代码块进行高亮
     hljs.highlightAll();
+}
+
+// 监听粘贴事件
+textEditor.addEventListener('paste', async (event) => {
+    const items = event.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file' && items[i].type.startsWith('image/')) {
+            const file = items[i].getAsFile();
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/image/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.error) {
+                    console.error('Image upload failed:', data.error);
+                } else {
+                    const imageUrl = data.imageUrl;
+                    const markdownImage = `![](${imageUrl})`;
+                    const cursorPos = textEditor.selectionStart;
+                    const text = textEditor.value;
+                    textEditor.value = text.substring(0, cursorPos) + markdownImage + text.substring(cursorPos);
+                    textEditor.selectionStart = textEditor.selectionEnd = cursorPos + markdownImage.length;
+                    textEditor.dispatchEvent(new Event('input'));
+                }
+            } catch (error) {
+                console.error('Error uploading image:', error);
+            }
+        }
+    }
 });
+
+// 撤回功能
+function undo() {
+    if (historyStack.length > 1) {
+        redoStack.push(historyStack.pop());
+        isUndoing = true;
+        textEditor.value = historyStack[historyStack.length - 1];
+        textEditor.dispatchEvent(new Event('input'));
+    }
+}
+
+// 重做功能
+function redo() {
+    if (redoStack.length > 0) {
+        historyStack.push(redoStack.pop());
+        isRedoing = true;
+        textEditor.value = historyStack[historyStack.length - 1];
+        textEditor.dispatchEvent(new Event('input'));
+    }
+}
+
+// 页面加载时获取文件内容
+window.addEventListener('DOMContentLoaded', loadFileContent);
+
+window.onbeforeunload = function (e) {
+    if(textEditor.value == lastSavedContent) return ;
+    var message = 'leave?';
+    e = e || window.event;
+    if (e) {
+        e.returnValue = message;
+    }
+    return message;
+};

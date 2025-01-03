@@ -103,6 +103,12 @@
         );
         // 初次加载
         table.load(table);
+        
+        window.addEventListener('DOMContentLoaded', (event) => {
+            if (window.location.pathname === '/problemlist') {
+                history.replaceState(null, '', '/problem/list');
+            }
+        });
     </script>
 </body>
 </html>

@@ -91,7 +91,10 @@
                     <td>${problem.submit_num}</td>
                     <td>${problem.score}</td>
                     <td>${problem.author}</td>
-                    <td><button onclick="deleteProblem(${problem.id})">删除</button></td>
+                    <td>
+                        <button onclick="editProblem('${problem.file_path}')">修改</button>
+                        <button onclick="deleteProblem(${problem.id})">删除</button>
+                    </td>    
                 `;
             },
             (tb)=>{
@@ -105,6 +108,10 @@
             }
         );
 
+        function editProblem(filePath) {
+                window.location.href = `/mdeditor?file=${filePath}`;
+        }
+        
         function deleteProblem(problemId) {
             if (confirm('确定要删除这个题目吗？')) {
                 fetch(`/problems/${problemId}`, {
@@ -123,6 +130,12 @@
         }
         // 初次加载
         table.load(table);
+
+        window.addEventListener('DOMContentLoaded', (event) => {
+            if (window.location.pathname === '/problemlist_edit') {
+                history.replaceState(null, '', '/problem/list/edit');
+            }
+        });
     </script>
 </body>
 </html>

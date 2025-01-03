@@ -44,6 +44,7 @@ function problemcount(req,res){
         res.json(results[0]);
     });
 }
+
 function init(app){
     app.get('/problems', problemlist);
     app.get('/problems/count', problemcount);

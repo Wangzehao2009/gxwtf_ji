@@ -9,7 +9,8 @@
 
 简单初中课内题
 
-![](https://files.mdnice.com/user/39921/6cb2b9e6-3f33-42a7-8c00-a838ba4c8b63.png)
+
+![](http://localhost:3000/uploads/1735910003091-998145716.png)
 
 
 # 第二问
@@ -17,7 +18,7 @@
 我们可以使用电阻进行四则运算
 
 
-![](https://files.mdnice.com/user/39921/9a143e7b-e183-44c7-801c-4a3aa3cc4b65.png)
+![](http://localhost:3000/uploads/1735910013972-10331275.png)
 
 
 # 第三问
@@ -25,4 +26,4 @@
 计算以下问题
 
 
-![](https://files.mdnice.com/user/39921/9645f1bd-421c-45f4-b2be-8a2e3d7463cd.png)
+![](http://localhost:3000/uploads/1735910030016-211949250.png)

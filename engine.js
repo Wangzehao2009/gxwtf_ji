@@ -30,6 +30,19 @@ function engineInit(app) {
             });
         });
     });
+
+    // 保存文件的 API
+    app.post('/save', (req, res) => {
+        const { filePath, content } = req.body;
+        const fullPath = path.join(__dirname, filePath);
+        fs.writeFile(fullPath, content, (err) => {
+            if (err) {
+                console.error('文件保存失败:', err);
+                return res.status(500).json({ error: '文件保存失败' });
+            }
+            res.status(200).json({ message: '文件已保存' });
+        });
+    });
 }
 
 module.exports = engineInit;
