@@ -46,7 +46,9 @@
                 "credentials": "include"
             });
             userId = await userId.json();
+            console.log(userId);
             userId = userId.userId;
+            console.log(userId);
             document.getElementById('userId').value = userId;
         };
 

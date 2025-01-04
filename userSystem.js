@@ -64,7 +64,7 @@ function loginStatus(req, res) {
                 return res.status(401).json({ error: '未授权访问，请登录' });
             }
             const username = results[0].username;
-            res.json({ message: `欢迎回来，用户ID：${userId}`, userId: username });
+            res.json({ userId: userId, userName: username });
         });
     } else {
         res.status(401).json({ error: '未授权访问，请登录' });
