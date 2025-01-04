@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Problem List</title>
-    <script src="../../basic.js"></script>
-    <script src="../../table.js"></script>
-    <link rel="stylesheet" href="../../table.css">
-    <link rel="stylesheet" href="../../banner.css">
+    <title>Issue Management</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script src="../table.js"></script>
+    <link rel="stylesheet" href="../banner.css">
+    <link rel="stylesheet" href="../table.css">
 </head>
 <body>
     <a href="/" class="banner-link">
@@ -17,6 +17,19 @@
             <div class="english">Class 14·Xuguang Olympiad Workshop</div>
         </div>
     </a>
+    <h2>Issue 基本信息</h2>
+    <div class="name">
+        <p>Issue 名称:</p>
+        <input id="name">
+    </div>
+    <button id="saveBasicInfo">保存</button>
+
+    <h2>添加题目</h2>
+    <form id="addProblemById">
+        <label for="problemId">用ID添加（多个题目用半角逗号分隔）：</label>
+        <input type="text" id="problemId" name="problemId" required>
+        <button type="submit">添加</button>
+    </form>
 
     <h2>题目列表</h2>
     <div>
@@ -46,6 +59,7 @@
                 <th class="sortable-header" onclick="table.sortTable('submit_num')">提交次数 <span class="arrow">▲▼</span></th>
                 <th class="sortable-header" onclick="table.sortTable('score')">评分 <span class="arrow">▲▼</span></th>
                 <th>作者</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -55,38 +69,31 @@
 
     <ul class="pagination" id="pagination"></ul>
 
+    <h2>当前 Issue 中的题目</h2>
+    <ul id="issueProblems" class="sortable"></ul>
+    <button id="saveIssue">保存题单</button>
     <script>
-        const table=new Table('tbody',
-            (problem)=>{
-                var file_path=problem.file_path;
-                file_path=file_path.substring(file_path.lastIndexOf('/')+1);
-                return `
-                    <td>${problem.id}</td>
-                    <td>${problem.time}</td>
-                    <td><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></td>
-                    <td>${problem.subject}</td>
-                    <td>${problem.submit_num}</td>
-                    <td>${problem.score}</td>
-                    <td>${problem.author}</td>
-                `;
-            },
-            (tb)=>{
-                const subject = document.getElementById('subject').value;
-                const search = document.getElementById('search').value;
-                const problemId = document.getElementById('problemIdInput').value;
-                let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        url=`/problems/count?id=${problemId}&subject=${subject}&search=${search}`;
-                        fetch(url)
-                            .then(response => response.json())
-                            .then(count => {tb.generate(data,count.count)});
-                    });
-            }
-        );
-        // 初次加载
-        table.load(table);
+        document.getElementById('saveIssue').addEventListener('click', async function () {
+        if (issueId !== -1) {
+            const response = await fetch('/saveIssue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ issueId: issueId, problemIds: problems })
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        } else {
+            const response = await fetch('/newissue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: document.getElementById('name').value, problemIds: problems })
+            });
+            const result = await response.json();
+            if (response.ok) issueId = result.issueId;
+            alert(result.message || result.error);
+        }
+    });
     </script>
+    <script src="issue.js"></script>
 </body>
 </html>

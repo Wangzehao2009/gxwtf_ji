@@ -32,3 +32,6 @@ body {
     font-size: 2vh;
     margin-top: 10px; /* 调整两行之间的间距 */
 }
+a {
+    text-decoration: none;
+}

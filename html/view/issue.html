@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Problem List</title>
-    <script src="../../basic.js"></script>
-    <script src="../../table.js"></script>
-    <link rel="stylesheet" href="../../table.css">
-    <link rel="stylesheet" href="../../banner.css">
+    <title>View Issue</title>
+    <link rel="stylesheet" href="../table.css">
+    <link rel="stylesheet" href="../banner.css">
+    <script src="../table.js"></script>
 </head>
 <body>
     <a href="/" class="banner-link">
@@ -18,25 +17,8 @@
         </div>
     </a>
 
-    <h2>题目列表</h2>
-    <div>
-        <label for="subject">选择学科:</label>
-        <select id="subject" onchange="table.reset()">
-            <option value="">全部</option>
-            <option value="数学">数学</option>
-            <option value="物理">物理</option>
-            <option value="化学">化学</option>
-            <option value="生物">生物</option>
-            <option value="信息">信息</option>
-        </select>
-        
-        <input type="text" id="search" placeholder="搜索题目或作者">
-        <input type="text" id="problemIdInput" placeholder="输入题目ID">
-        
-        <button onclick="table.reset()">查询</button>
-    </div>
-    
-    <table id="problemsTable">
+    <h2>Issue 题目列表</h2>
+    <table id="issuesTable">
         <thead>
             <tr>
                 <th class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow">▲▼</span></th>
@@ -56,10 +38,18 @@
     <ul class="pagination" id="pagination"></ul>
 
     <script>
-        const table=new Table('tbody',
-            (problem)=>{
-                var file_path=problem.file_path;
-                file_path=file_path.substring(file_path.lastIndexOf('/')+1);
+        var issueId = -1;
+
+        // 获取 URL 参数
+        function getIssueIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('issueId');
+        }
+
+        const table = new Table('tbody',
+            (problem) => {
+                var file_path = problem.file_path;
+                file_path = file_path.substring(file_path.lastIndexOf('/') + 1);
                 return `
                     <td>${problem.id}</td>
                     <td>${problem.time}</td>
@@ -70,23 +60,23 @@
                     <td>${problem.author}</td>
                 `;
             },
-            (tb)=>{
-                const subject = document.getElementById('subject').value;
-                const search = document.getElementById('search').value;
-                const problemId = document.getElementById('problemIdInput').value;
-                let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
+            (tb) => {
+                issueId = getIssueIdFromUrl();
+                console.log(issueId);
+                let url = `/getProblemsInIssue?issueId=${issueId}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                        url=`/problems/count?id=${problemId}&subject=${subject}&search=${search}`;
+                        url = `/getProblemsInIssue/count?issueId=${issueId}`;
                         fetch(url)
                             .then(response => response.json())
-                            .then(count => {tb.generate(data,count.count)});
+                            .then(count => { tb.generate(data, count.count); });
                     });
             }
         );
+
         // 初次加载
-        table.load(table);
+        table.reset(table);
     </script>
 </body>
 </html>

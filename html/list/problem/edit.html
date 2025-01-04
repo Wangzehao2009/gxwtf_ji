@@ -5,16 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Problem List</title>
     <script src="../../basic.js"></script>
-    <script src="../table.js"></script>
-    <link rel="stylesheet" href="../table.css">
+    <script src="../../table.js"></script>
+    <link rel="stylesheet" href="../../table.css">
     <link rel="stylesheet" href="../../banner.css">
 </head>
 <body>
-    <div class="banner">
-        <img src="http://localhost:3000/uploads/1735823331237-841608623.png" alt="Logo">
-        <div>竞赛贯通·广学五题坊</div>
-        <div class="english">Class 14·Xuguang Olympiad Workshop</div>
-    </div>
+    <a href="/" class="banner-link">
+        <div class="banner">
+            <img src="http://localhost:3000/uploads/1735823331237-841608623.png" alt="Logo">
+            <div>竞赛贯通·广学五题坊</div>
+            <div class="english">Class 14·Xuguang Olympiad Workshop</div>
+        </div>
+    </a>
 
     <h2>题目列表</h2>
     <div>
@@ -80,7 +82,12 @@
                 let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
                 fetch(url)
                     .then(response => response.json())
-                    .then(data => {tb.generate(data);});
+                    .then(data => {
+                        url=`/problems/count?id=${problemId}&subject=${subject}&search=${search}`;
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(count => {tb.generate(data,count.count)});
+                    });
             }
         );
 
@@ -97,7 +104,7 @@
                 .then(data => {
                     if (data.success) {
                         alert('题目删除成功');
-                        table.loadProblems();
+                        table.load(table);
                     } else {
                         alert('删除失败: ' + data.error);
                     }

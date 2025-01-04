@@ -173,6 +173,24 @@ async function getProblemsInIssue(req, res) {
     }
 }
 
+// 获取某个 issue 中包含的题目的总数
+async function getProblemsInIssueCount(req, res) {
+    const { issueId } = req.query;
+    try {
+        db.query(
+            'SELECT COUNT(*) AS count FROM issue_problem_graph WHERE issue_id = ?',
+            [issueId],
+            (err, results) => {
+                if (err) return res.status(500).json({ error: '数据库错误' + err });
+                return res.status(200).json(results[0]);
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+}
+
 // 保存题单
 async function saveIssue(req, res) {
     const { issueId, problemIds } = req.body;
@@ -260,6 +278,7 @@ function init(app, fileStorage) {
     app.post('/addProblemToIssue', addProblemToIssue);
     app.post('/removeProblemFromIssue', removeProblemFromIssue);
     app.get('/getProblemsInIssue', getProblemsInIssue);
+    app.get('/getProblemsInIssue/count', getProblemsInIssueCount); // 添加获取某个 issue 中包含的题目总数的路由
     app.post('/saveIssue', saveIssue);
     app.get('/issues', issueList); // 添加获取 issue 列表的路由
     app.get('/issues/count', issueCount); // 添加获取 issue 总数的路由
