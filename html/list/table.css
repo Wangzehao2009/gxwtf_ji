@@ -1,0 +1,22 @@
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+table, th, td { border: 0px solid black; }
+th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pagination { list-style-type: none; display: flex; }
+.pagination li { margin: 5px; cursor: pointer; }
+.sortable-header { cursor: pointer; }
+.sortable-header .arrow { color: black; }
+.sortable-header.sorted .arrow { color: red; }
+a {
+    color:#a31f23d7;
+    text-decoration: none;
+}
+a:hover {
+    color: #7b1a15;
+    text-decoration: none;
+}
+.sortable-header {
+    cursor: pointer;
+}
+.arrow {
+    font-size: 0.8em;
+}

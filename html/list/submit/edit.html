@@ -4,34 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>提交记录列表</title>
-    <style>
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        table, th, td { border: 0px solid black; }
-        th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .pagination { list-style-type: none; display: flex; }
-        .pagination li { margin: 5px; cursor: pointer; }
-        .sortable-header { cursor: pointer; }
-        .sortable-header .arrow { color: black; }
-        .sortable-header.sorted .arrow { color: red; }
-        a {
-            color:#a31f23d7;
-            text-decoration: none;
-        }
-        a:hover {
-            color: #7b1a15;
-            text-decoration: none;
-        }
-        .sortable-header {
-            cursor: pointer;
-        }
-        .arrow {
-            font-size: 0.8em;
-        }
-    </style>
-    <script src="basic.js"></script>
-    <script src="table.js"></script>
-    <link rel="stylesheet" href="banner.css">
-
+    <script src="../../basic.js"></script>
+    <script src="../table.js"></script>
+    <link rel="stylesheet" href="../table.css">
+    <link rel="stylesheet" href="../../banner.css">
 </head>
 <body>
     <div class="banner">
@@ -68,6 +44,7 @@
                 <th>issue</th>
                 <th>problem</th>
                 <th>学科</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -87,6 +64,7 @@
                     <td>${submission.issue_name}</td>
                     <td>${submission.problem_name}</td>
                     <td>${submission.subject}</td>
+                    <td><button onclick="deleteSubmission(${submission.id})">删除</button></td>
                 `;
             },
             (tb)=>{
@@ -97,15 +75,27 @@
                 let url = `/submissions?subject=${subject}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}&userId=${searchUser}&issue_id=${searchIssue}&problem_id=${searchProblem}`;
                 fetch(url)
                     .then(response => response.json())
-                    .then(data => {
-                        url=`/submissions/count?subject=${subject}&userId=${searchUser}&issue_id=${searchIssue}&problem_id=${searchProblem}`;
-                        fetch(url)
-                            .then(response => response.json())
-                            .then(count => {tb.generate(data,count.count)});
-                    });
+                    .then(data => {tb.generate(data);});
             }
         )
 
+        //删除提交记录
+        function deleteSubmission(submissionId) {
+            if (confirm('确定要删除这个提交记录吗？')) {
+                fetch(`/submissions/${submissionId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('提交记录删除成功');
+                        table.loadProblems();
+                    } else {
+                        alert('删除失败: ' + data.error);
+                    }
+                });
+            }
+        }
         // 初次加载
         table.load(table);
     </script>

@@ -4,34 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Problem List</title>
-    <style>
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        table, th, td { border: 0px solid black; }
-        th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .pagination { list-style-type: none; display: flex; }
-        .pagination li { margin: 5px; cursor: pointer; }
-        .sortable-header { cursor: pointer; }
-        .sortable-header .arrow { color: black; }
-        .sortable-header.sorted .arrow { color: red; }
-        a {
-            color:#a31f23d7;
-            text-decoration: none;
-        }
-        a:hover {
-            color: #7b1a15;
-            text-decoration: none;
-        }
-        .sortable-header {
-            cursor: pointer;
-        }
-        .arrow {
-            font-size: 0.8em;
-        }
-    </style>
-    <script src="basic.js"></script>
-    <script src="table.js"></script>
-    <link rel="stylesheet" href="banner.css">
-
+    <script src="../../basic.js"></script>
+    <script src="../table.js"></script>
+    <link rel="stylesheet" href="../table.css">
+    <link rel="stylesheet" href="../../banner.css">
 </head>
 <body>
     <div class="banner">
@@ -68,7 +44,6 @@
                 <th class="sortable-header" onclick="table.sortTable('submit_num')">提交次数 <span class="arrow">▲▼</span></th>
                 <th class="sortable-header" onclick="table.sortTable('score')">评分 <span class="arrow">▲▼</span></th>
                 <th>作者</th>
-                <th>操作</th>
             </tr>
         </thead>
         <tbody id="tbody">
@@ -91,10 +66,6 @@
                     <td>${problem.submit_num}</td>
                     <td>${problem.score}</td>
                     <td>${problem.author}</td>
-                    <td>
-                        <button onclick="editProblem('${problem.file_path}')">修改</button>
-                        <button onclick="deleteProblem(${problem.id})">删除</button>
-                    </td>    
                 `;
             },
             (tb)=>{
@@ -104,38 +75,16 @@
                 let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
                 fetch(url)
                     .then(response => response.json())
-                    .then(data => {tb.generate(data);});
+                    .then(data => {
+                        url=`/problems/count?id=${problemId}&subject=${subject}&search=${search}`;
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(count => {tb.generate(data,count.count)});
+                    });
             }
         );
-
-        function editProblem(filePath) {
-                window.location.href = `/mdeditor?file=${filePath}`;
-        }
-        
-        function deleteProblem(problemId) {
-            if (confirm('确定要删除这个题目吗？')) {
-                fetch(`/problems/${problemId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('题目删除成功');
-                        table.loadProblems();
-                    } else {
-                        alert('删除失败: ' + data.error);
-                    }
-                });
-            }
-        }
         // 初次加载
         table.load(table);
-
-        window.addEventListener('DOMContentLoaded', (event) => {
-            if (window.location.pathname === '/problemlist_edit') {
-                history.replaceState(null, '', '/problem/list/edit');
-            }
-        });
     </script>
 </body>
 </html>
