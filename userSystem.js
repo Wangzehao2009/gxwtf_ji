@@ -88,12 +88,25 @@ function userList(req, res) {
     });
 }
 
+// 获取提交记录总数
+function userCount(req, res) {
+
+    let query = 'SELECT COUNT(*) AS count FROM users';
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: '查询失败', details: err });
+        }
+        res.json(results[0]);
+    });
+}
+
 function init(app) {
     app.post('/register', register);
     app.post('/login', login);
     app.get('/logout', logout);
     app.get('/dashboard', loginStatus);
     app.get('/users', userList);
+    app.get('/users/count',userCount);
 }
 
 module.exports = init;

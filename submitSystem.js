@@ -121,7 +121,7 @@ async function submitlist(req, res) {
 
 // 获取提交记录总数
 function submitcount(req, res) {
-    const { userId, issue_id, submission_id} = req.query;
+    const { userId, issue_id, submission_id, subject, excel } = req.query;
     let query = 'SELECT COUNT(*) AS count FROM submissions WHERE 1=1';
     if (userId) {
         query += ` AND user_id = ${db.escape(userId)}`;
@@ -131,6 +131,12 @@ function submitcount(req, res) {
     }
     if (submission_id) {
         query += ` AND problem_id = ${db.escape(submission_id)}`;
+    }
+    if (subject){
+        query += ` AND subject= ${db.escape(subject)}`;
+    }
+    if (excel){
+        query += `AND is_excel_answer = 1`;
     }
     db.query(query, (err, results) => {
         if (err) {

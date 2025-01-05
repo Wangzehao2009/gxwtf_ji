@@ -20,7 +20,8 @@ CREATE TABLE submissions (
     problem_id INT NOT NULL,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     subject VARCHAR(255),
-    file_path VARCHAR(255)
+    file_path VARCHAR(255),
+    is_excel_answer BOOLEAN DEFAULT 0
 );
 
 CREATE TABLE issues (

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户提交总分排名</title>
+    <script src="../table.js"></script>
+    <link rel="stylesheet" href="../table.css">
+    <link rel="stylesheet" href="../banner.css">
+</head>
+<body>
+    <a href="/" class="banner-link">
+        <div class="banner">
+            <img src="http://localhost:3000/uploads/1735823331237-841608623.png" alt="Logo">
+            <div>竞赛贯通·广学五题坊</div>
+            <div class="english">Class 14·Xuguang Olympiad Workshop</div>
+        </div>
+    </a>
+    <h2>用户提交总分排名</h2>
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th>排名</th>
+                <th>用户名</th>
+                <th class="sortable-header" onclick="table.sortTable('totScore')">总分<span class="arrow">▲▼</span></th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+    
+    <ul id="pagination" class="pagination"></ul>
+
+    <script>
+        let rank=0;
+        function translate(user) {
+            ++rank;
+            return `
+                <td>${rank}</td>
+                <td>${user.username}</td>
+                <td>${user.totScore}</td>
+            `;
+        }
+        async function fetchUsers() {
+            rank = 0;
+            try {
+                const response = await fetch('/users');
+                const users = await response.json();
+
+                const userScores = await Promise.all(users.map(async (user) => {
+                    const scoreResponse = await fetch(`/rank/submissions?user_id=${user.id}`);
+                    const scoreData = await scoreResponse.json();
+                    return { ...user, totScore: scoreData.totScore };
+                }));
+            
+                if(table.sortOrder == "DESC") userScores.sort((a, b) => b.totScore - a.totScore);
+                else userScores.sort((b, a) => b.totScore - a.totScore);
+
+                table.generate(userScores, userScores.length);
+            } catch (error) {
+                console.error('获取用户数据失败:', error);
+            }
+        }
+
+        const table = new Table('tableBody', translate, fetchUsers);
+
+        table.load(table);
+    </script>
+</body>
+</html>

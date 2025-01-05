@@ -8,6 +8,7 @@ const problemSystem = require('./problemSystem.js');
 const issueSystem = require('./issueSystem.js');
 const mdreader = require('./mdreader.js');
 const imageUpload = require('./imageUpload.js');
+const rankSystem = require('./rankSystem.js');
 
 const app = express();
 app.use(express.text());
@@ -26,6 +27,7 @@ submitSystem(app, fileStorage); // 提交系统
 problemSystem(app, fileStorage); // 题目系统
 issueSystem(app, fileStorage); // 期刊系统
 mdreader(app); // Markdown 阅读器
+rankSystem(app); // 排名系统
 app.use('/image', imageUpload); // 图床功能
 // 提供静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
