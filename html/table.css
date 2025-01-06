@@ -5,7 +5,7 @@ th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden
 .pagination li { margin: 5px; cursor: pointer; }
 .sortable-header { cursor: pointer; }
 .sortable-header .arrow { color: black; }
-.sortable-header.sorted .arrow { color: red; }
+.sortable-header.sorted .arrow { color: #a31f23d7; }
 a {
     color:#a31f23d7;
     text-decoration: none;

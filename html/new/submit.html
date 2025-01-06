@@ -62,12 +62,14 @@
         let problems = [];
 
         window.onload = async function(event) {
-            var userId = await fetch("http://localhost:3000/dashboard", {
+            let userId = await fetch("/dashboard", {
                 "mode": "cors",
                 "credentials": "include"
             });
             userId = await userId.json();
             userId = userId.userId;
+            console.log(userId);
+
             document.getElementById('userId').value = userId;
 
             // 加载期号
@@ -140,7 +142,7 @@
             console.log('提交表单数据:', formData);
             const response = await fetch('/submit', {
                 method: 'POST',
-                body: formData
+                body: formData,
             });
             const result = await response.json();
             console.log('提交结果:', result);

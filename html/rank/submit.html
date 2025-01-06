@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户提交总分排名</title>
+    <title>光学提交榜</title>
     <script src="../table.js"></script>
     <link rel="stylesheet" href="../table.css">
     <link rel="stylesheet" href="../banner.css">
+    <style>
+        table{ width: 60%; margin: auto;}
+    </style>
 </head>
 <body>
     <a href="/" class="banner-link">
@@ -17,6 +20,17 @@
         </div>
     </a>
     <h2>用户提交总分排名</h2>
+    <div>
+        <label for="subject">选择学科:</label>
+        <select id="subject" onchange="table.reset()">
+            <option value="totScore">总分</option>
+            <option value="数学">数学</option>
+            <option value="物理">物理</option>
+            <option value="化学">化学</option>
+            <option value="生物">生物</option>
+            <option value="信息">信息</option>
+        </select>
+    </div>
     <table id="userTable">
         <thead>
             <tr>
@@ -46,14 +60,15 @@
             try {
                 const response = await fetch('/users');
                 const users = await response.json();
+                const subject = document.getElementById('subject').value;
 
                 const userScores = await Promise.all(users.map(async (user) => {
-                    const scoreResponse = await fetch(`/rank/submissions?user_id=${user.id}`);
+                    const scoreResponse = await fetch(`/rank/submissions?user_id=${user.id}&type=${subject}`);
                     const scoreData = await scoreResponse.json();
-                    return { ...user, totScore: scoreData.totScore };
+                    if(scoreData.score) return { ...user, totScore: scoreData.score };
                 }));
             
-                if(table.sortOrder == "DESC") userScores.sort((a, b) => b.totScore - a.totScore);
+                if(table.sortOrder === "DESC") userScores.sort((a, b) => b.totScore - a.totScore);
                 else userScores.sort((b, a) => b.totScore - a.totScore);
 
                 table.generate(userScores, userScores.length);

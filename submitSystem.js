@@ -7,7 +7,6 @@ const path = require('path');
 async function submit(req, res) {
     const { userId, issue_id, problem_id } = req.body;
     const file_path = req.file ? req.file.path : null;
-
     // 检查 problem_id 是否属于 issue_id
     db.query(
         'SELECT * FROM issue_problem_graph WHERE issue_id = ? AND problem_id = ?',
