@@ -1,0 +1,1 @@
+取 $\triangle ABC$。$D$ 为 $\angle A$ 的平分线与 $BC$ 的交点。$X$ 与 $A$ 在直线 $BC$ 的异侧，满足 $XB=XD$ 且 $\angle BXD$ 等于 $\angle ACB$；$Y$ 亦与 $A$ 在直线 $BC$ 的异侧，满足 $YC=YD$ 且 $\angle CYD$ 等于 $\angle ABC$。证明 $XY$ 垂直于 $AD$。

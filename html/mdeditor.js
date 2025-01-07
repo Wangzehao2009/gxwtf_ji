@@ -103,36 +103,49 @@ async function loadFileContent() {
 textEditor.addEventListener('keydown', async (event) => {
     if (event.metaKey && event.key === 's') {
         event.preventDefault(); // 阻止默认保存行为
-
+    
         const urlParams = new URLSearchParams(window.location.search);
-        const filePath = urlParams.get('file');
-        if (!filePath) {
-            console.error('File name is null or undefined');
-            return;
-        }
+        let filePath = urlParams.get('file');
         const content = textEditor.value;
-
-        try {
-            const response = await fetch('/save', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ filePath, content })
-            });
-
-            if (response.ok) {
-                lastSavedContent = content;
-                console.log('File saved successfully'); // 调试信息
-                alert('文件已保存');
-            } else {
-                console.error('Failed to save file'); // 调试信息
+    
+        // 定义一个函数来保存文件
+        const saveFile = async (filePath, content) => {
+            try {
+                const response = await fetch('/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ filePath, content })
+                });
+    
+                if (response.ok) {
+                    lastSavedContent = content;
+                    alert('文件已保存');
+                    // 如果文件名不存在，跳转到新 URL
+                    if (!urlParams.get('file')) {
+                        window.location.href = `/mdeditor?file=${encodeURIComponent(filePath)}`;
+                    }
+                } else if (response.status === 400) {
+                    // 如果服务器返回状态 400，提示用户输入文件名
+                    const newFileName = prompt('文件未命名，请输入文件名：');
+                    if (newFileName && newFileName.trim() !== '') {
+                        // 如果用户输入了有效的文件名，递归调用保存文件
+                        filePath = "uploads/"+newFileName.trim()+".md"; // 更新 filePath
+                        saveFile(filePath, content);
+                    } else {
+                        alert('文件名无效，保存失败');
+                    }
+                } else {
+                    alert('保存失败');
+                }
+            } catch (error) {
                 alert('保存失败');
             }
-        } catch (error) {
-            console.error('Error saving file:', error); // 调试信息
-            alert('保存失败');
-        }
+        };
+    
+        // 初始保存调用
+        saveFile(filePath, content);
     }
 
     if (event.metaKey && event.key === 'z') {

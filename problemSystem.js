@@ -14,8 +14,9 @@ function getLatestProblemId(req, res) {
 
 // 新建题目
 async function newproblem(req, res) {
-    const { name, subject, author } = req.body;
-    const file_path = req.file ? req.file.path : null;
+    const { name, subject, author , filePath} = req.body;
+    let file_path = req.file ? req.file.path : null;
+    if(filePath) file_path = filePath;
     try {
         db.query(
             'INSERT INTO problems (name, subject, author, file_path) VALUES (?, ?, ?, ?)',

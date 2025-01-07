@@ -23,9 +23,7 @@
                 <div class="form-row">
                     <div>
                         <label for="name">题目名称</label>
-                        <div class="dropdown">
-                            <input type="text" id="name" name="name" required>
-                        </div>
+                        <div class="dropdown"><input type="text" id="name" name="name" required></div>
                     </div>
                     <div>
                         <label for="subject">学科</label>
@@ -45,11 +43,24 @@
                             <input type="text" id="author" name="author" required>
                         </div>
                     </div>
-                    <div>
+
+                    <!-- 文件上传与在线编辑选择 -->
+                    <div class="file-options">
+                        <label><input type="radio" name="fileOption" value="upload" checked> 上传文件</label>
+                        <label><input type="radio" name="fileOption" value="edit" id="editOption"> 在线编辑</label>
+                    </div>
+
+                    <!-- 上传文件输入框 -->
+                    <div id="uploadFile" style="display: block;">
                         <label for="file">上传文件</label>
                         <div class="dropdown">
-                            <input type="file" id="file" name="file" reuired>
+                            <input type="file" id="file" name="file">
                         </div>
+                    </div>
+
+                    <!-- 在线编辑 -->
+                    <div id="editFile">
+                        <label type="text" id="createDocument"></label>
                     </div>
                     
                     <button type="submit">提交</button>
@@ -60,34 +71,80 @@
 
     <script>
         window.onload = async function(event) {
-            var userId = await fetch("http://localhost:3000/dashboard", {
+            var userId = await fetch("/dashboard", {
                 "mode": "cors",
                 "credentials": "include"
             });
             userId = await userId.json();
-            console.log(userId);
             userId = userId.userId;
-            console.log(userId);
             document.getElementById('userId').value = userId;
+
+            // 默认选择文件上传方式
+            toggleFileOption();
         };
+
+        // 监听文件选择方式变化
+        document.querySelectorAll('input[name="fileOption"]').forEach(function(radioButton) {
+            radioButton.addEventListener('change', function() {
+                toggleFileOption();
+            });
+        });
+
+        // 创建一个空文件并跳转到mdeditor页面
+        async function createEmptyFile(fileName) {
+            const response = await fetch('/createEmptyFile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileName })
+            });
+            const data = await response.json();
+            if (data.success) 
+            {
+                document.getElementById('createDocument').value = "题目已编辑";
+                window.open(`/mdeditor?file=${data.filePath}`, "_blank");
+            }
+            else alert('文件创建失败');
+        }
+
+        // 切换上传文件和在线编辑的显示状态
+        async function toggleFileOption() {
+            const fileOption = document.querySelector('input[name="fileOption"]:checked').value;
+            if (fileOption === 'upload') {
+                document.getElementById('uploadFile').style.display = 'block';
+                document.getElementById('editFile').style.display = 'none';
+            } else if (fileOption === 'edit') {
+                if(!confirm("确认要在线编辑")) return ;
+                document.getElementById('uploadFile').style.display = 'none';
+                document.getElementById('editFile').style.display = 'block';
+
+                // 自动生成文件名并创建空文件
+                const response = await fetch('/problems/latestId');
+                const result = await response.json();
+                const problemId = result.latestId + 1;
+                const fileName = `problem_${problemId}.md`;
+                createEmptyFile(fileName);
+            }
+        }
 
         document.getElementById('newproblemForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const formData = new FormData(this);
 
-            // 获取最新的 problem_id
+            // 获取当前选择的文件选项
+            const fileOption = document.querySelector('input[name="fileOption"]:checked').value;
+
             const response = await fetch('/problems/latestId');
             const result = await response.json();
             const problemId = result.latestId + 1;
-
-            // 重命名文件
-            const fileInput = document.getElementById('file');
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
+            if (fileOption === 'upload' && fileInput.files.length > 0) {
                 const newFileName = `problem_${problemId}${file.name.substring(file.name.lastIndexOf('.'))}`;
-                formData.set('file', new File([file], newFileName, { type: file.type }));
+                const file = fileInput.files[0];
+                formData.set('file', new File([file], newfileName, { type: file.type }));
+            } else if (fileOption === 'edit') {
+                const filePath = `uploads/problem_${problemId}.md`;
+                formData.set('filePath',filePath);
             }
-
+            // 提交表单
             const submitResponse = await fetch('/newproblem', {
                 method: 'POST',
                 body: formData
