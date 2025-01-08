@@ -4,21 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学校提交榜</title>
-    <script src="../table.js"></script>
-    <link rel="stylesheet" href="../table.css">
-    <link rel="stylesheet" href="../banner.css">
+    <script src="/table.js"></script>
+    <script src="/basic.js"></script>
+    <link rel="stylesheet" href="/table.css">
+    <link rel="stylesheet" href="/banner.css">
     <style>
         table { width: 60%; margin: auto; }
     </style>
 </head>
 <body>
-    <a href="/" class="banner-link">
+    <!-- <a href="/" class="banner-link">
         <div class="banner">
             <img src="http://localhost:3000/uploads/1735823331237-841608623.png" alt="Logo">
             <div>竞赛贯通·学校排名</div>
             <div class="english">Class 14·Xuguang Olympiad Workshop</div>
         </div>
-    </a>
+    </a> -->
     <h2>学校总分排名</h2>
 
     <table id="schoolTable">
@@ -26,7 +27,7 @@
             <tr>
                 <th>排名</th>
                 <th>学校名称</th>
-                <th class="sortable-header" onclick="table.sortTable('score')">总分<span class="arrow">▲▼</span></th>
+                <th class="sortable-header" onclick="table.sortTable('score')" id="id">总分<span class="arrow">▲▼</span></th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -47,9 +48,9 @@
         }
 
         // 获取学校排名数据
-        async function fetchSchools() {
+        async function fetchSchools(table) {
             try {
-                const response = await fetch(`/rank/schools?sortOrder=${this.sortOrder}`);
+                const response = await fetch(`/rank/schools?sortOrder=${table.sortOrder}`);
                 const schools = await response.json();
                 table.generate(schools, schools.length);
             } catch (error) {
@@ -59,6 +60,7 @@
 
         // 初始化表格
         const table = new Table('tableBody', translate, fetchSchools);
+        table.sortField='score';
         
         // 加载学校数据
         table.load(table);
