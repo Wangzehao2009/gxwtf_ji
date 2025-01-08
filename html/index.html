@@ -19,16 +19,23 @@
         .navbar a:hover {
             text-decoration: underline;
         }
+        /* 下拉菜单样式 */
         .dropdown {
             position: relative;
             display: inline-block;
+        }
+        .dropdown-button {
+            font-weight: normal;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
         }
         .dropdown-content {
             display: none;
             position: absolute;
             background-color: #f9f9f9;
             min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
             z-index: 1;
         }
         .dropdown-content a {
@@ -40,11 +47,12 @@
         .dropdown-content a:hover {
             background-color: #f1f1f1;
         }
-        .dropdown.show .dropdown-content {
+        .dropdown:hover .dropdown-content {
             display: block;
         }
     </style>
     <script>
+        // 检查用户登录状态
         async function checkLoginStatus() {
             const response = await fetch('/dashboard');
             const registerLink = document.querySelector('.register-link');
@@ -57,9 +65,6 @@
                 const userLink = document.createElement('a');
                 userLink.href = '#';
                 userLink.textContent = `欢迎, ${data.userName}`;
-                userLink.onclick = function() {
-                    dropdown.classList.toggle('show');
-                };
                 dropdown.appendChild(userLink);
                 const dropdownContent = document.createElement('div');
                 dropdownContent.className = 'dropdown-content';
@@ -85,18 +90,8 @@
                 loginLink.style.display = 'inline';
             }
         }
+
         window.onload = checkLoginStatus;
-        window.onclick = function(event) {
-            if (!event.target.matches('.dropdown a')) {
-                const dropdowns = document.getElementsByClassName('dropdown-content');
-                for (let i = 0; i < dropdowns.length; i++) {
-                    const openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
-        }
     </script>
 </head>
 <body>
@@ -112,7 +107,16 @@
         <a href="list/problem/view">题库</a>
         <a href="list/submit/view">提交记录</a>
         <a href="new/submit">提交</a>
-        <a href="rank/submit">排行榜</a>
+        
+        <!-- 下拉菜单改为普通文字样式 -->   
+        <div class="dropdown">
+            <a href="#" class="dropdown-button">排行榜</a>
+            <div class="dropdown-content">
+                <a href="rank/submit">个人提交榜</a>
+                <a href="rank/school">学校提交榜</a>
+            </div>
+        </div>
+
         <a href="admin">管理</a>
         <a href="/mdreader/preview?file=announcement.md">公告栏</a>
         <a href="login" class="login-link">登录</a>

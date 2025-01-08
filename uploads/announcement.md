@@ -22,5 +22,5 @@ $$score=\frac{\sum_{user \in  credit\_users} score_{user} \cdot point_{user}}{\s
 
 ## 学校分数：
 
-$$score_{school}=\ln^2{user\_count_{school}} \sum_{user \in school } score_{submit}$$
+$$score_{school}=\ln^2{(user\_count_{school}+2)} \sum_{user \in school } score_{submit}$$
 

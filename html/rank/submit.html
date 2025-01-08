@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>光学提交榜</title>
+    <title>广学提交榜</title>
     <script src="../table.js"></script>
     <link rel="stylesheet" href="../table.css">
     <link rel="stylesheet" href="../banner.css">
@@ -46,34 +46,20 @@
     <ul id="pagination" class="pagination"></ul>
 
     <script>
-        let rank=0;
         function translate(user) {
-            ++rank;
             return `
-                <td>${rank}</td>
+                <td>${user.rank}</td>
                 <td>${user.username}</td>
-                <td>${user.totScore}</td>
+                <td>${user.score.toFixed(2)}</td>
             `;
         }
         async function fetchUsers() {
-            rank = 0;
             try {
-                const response = await fetch('/users');
+                const response = await fetch(`/rank/submissions?sortOrder=${this.sortOrder}&type=${document.getElementById('subject').value}`);
                 const users = await response.json();
-                const subject = document.getElementById('subject').value;
-
-                const userScores = await Promise.all(users.map(async (user) => {
-                    const scoreResponse = await fetch(`/rank/submissions?user_id=${user.id}&type=${subject}`);
-                    const scoreData = await scoreResponse.json();
-                    if(scoreData.score) return { ...user, totScore: scoreData.score };
-                }));
-            
-                if(table.sortOrder === "DESC") userScores.sort((a, b) => b.totScore - a.totScore);
-                else userScores.sort((b, a) => b.totScore - a.totScore);
-
-                table.generate(userScores, userScores.length);
+                table.generate(users, users.length);
             } catch (error) {
-                console.error('获取用户数据失败:', error);
+                console.error('获取学校数据失败:', error);
             }
         }
 
