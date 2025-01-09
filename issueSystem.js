@@ -22,8 +22,6 @@ async function newEmptyIssue(req, res) {
 // 新建一期并插入多个题目
 async function newissue(req, res) {
     const { name, problemIds } = req.body; // 接收问题 ID 列表
-    console.log(name);
-    console.log(problemIds);
     try {
         db.query(
             'INSERT INTO issues (name) VALUES (?)',
@@ -85,12 +83,30 @@ async function deleteIssue(req, res) {
 
 // 保存 issue 基本信息
 async function saveIssueBasicInfo(req, res) {
-    const { issueId, name } = req.body;
+    const { issueId, name , trans} = req.body;
+    let query = `UPDATE issues SET `;
+    if(name) query +=`name = ${name}, `;
+    query+=`visible = visible ^ ${trans} WHERE id = ${issueId}`;
     try {
-        db.query(
-            'UPDATE issues SET name = ? WHERE id = ?',
-            [name, issueId],
-            (err, result) => {
+        db.query(query, (err, result) => {
+                if (err) return res.status(500).json({ error: '数据库错误' + err });
+                return res.status(200).json({ message: '基本信息保存成功' });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+}
+
+// 保存 issue 基本信息get
+async function saveIssueBasicInfoget(req, res) {
+    const { issueId, name , trans} = req.query;
+    let query = `UPDATE issues SET `;
+    if(name) query +=`name = ${name}, `;
+    query+=`visible = visible ^ ${trans} WHERE id = ${issueId}`;
+    try {
+        db.query(query, (err, result) => {
                 if (err) return res.status(500).json({ error: '数据库错误' + err });
                 return res.status(200).json({ message: '基本信息保存成功' });
             }
@@ -226,7 +242,7 @@ async function saveIssue(req, res) {
 
 // 获取 issue 列表
 async function issueList(req, res) {
-    const { sortField = 'id', sortOrder = 'DESC', page = 1, pageSize = 15, search, id } = req.query;
+    const { sortField = 'id', sortOrder = 'DESC', page = 1, pageSize = 15, search, id , visible } = req.query;
 
     // 构建 SQL 查询条件
     let query = 'SELECT * FROM issues WHERE 1=1';
@@ -235,6 +251,9 @@ async function issueList(req, res) {
     }
     if (search) {
         query += ` AND name LIKE ${db.escape('%' + search + '%')}`;
+    }
+    if(visible){
+        query += ` AND visible = ${visible}`;
     }
     // 排序
     query += ` ORDER BY ${sortField} ${sortOrder}`;
@@ -253,13 +272,16 @@ async function issueList(req, res) {
 
 // 获取 issue 总数
 async function issueCount(req, res) {
-    const { id,search } = req.query;
+    const { id, search, visible } = req.query;
     let query = 'SELECT COUNT(*) AS count FROM issues WHERE 1=1';
     if (id) {
         query += ` AND id=${id}`;
     }
     if (search) {
         query += ` AND name LIKE ${db.escape('%' + search + '%')}`;
+    }
+    if(visible){
+        query += ` AND visible = ${visible}`;
     }
     db.query(query, (err, results) => {
         if (err) {
@@ -269,11 +291,15 @@ async function issueCount(req, res) {
     });
 }
 
+//修改issue基本信息
+
+
 function init(app, fileStorage) {
     app.post('/newEmptyIssue', newEmptyIssue);
     app.post('/newissue', fileStorage.single('file'), newissue);
     app.get('/deleteissue', deleteIssue);
     app.post('/saveIssueBasicInfo', saveIssueBasicInfo);
+    app.get('/saveIssueBasicInfo', saveIssueBasicInfoget);
     app.get('/searchProblems', searchProblems);
     app.post('/addProblemToIssue', addProblemToIssue);
     app.post('/removeProblemFromIssue', removeProblemFromIssue);

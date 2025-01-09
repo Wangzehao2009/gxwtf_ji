@@ -6,66 +6,84 @@
     <title>Problem List</title>
     <script src="/basic.js"></script>
     <script src="/table.js"></script>
-    <link rel="stylesheet" href="/table.css">
     <link rel="stylesheet" href="/banner.css">
+    <link rel="stylesheet" href="/table.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-        <div id="banner"></div>
+    <div id="banner"></div>
 
-
-    <h2>题目列表</h2>
-    <div>
-        <label for="subject">选择学科:</label>
-        <select id="subject" onchange="table.reset()">
-            <option value="">全部</option>
-            <option value="数学">数学</option>
-            <option value="物理">物理</option>
-            <option value="化学">化学</option>
-            <option value="生物">生物</option>
-            <option value="信息">信息</option>
-        </select>
-        
-        <input type="text" id="search" placeholder="搜索题目或作者">
-        <input type="text" id="problemIdInput" placeholder="输入题目ID">
-        
-        <button onclick="table.reset()">查询</button>
+    <!-- 搜索栏 -->
+    <div class="search-card">
+        <h1>题目列表</h1>
+        <div class="search-content">
+            <div class="select-bar">
+                <select id="subject" onchange="table.reset()">
+                    <option value="">全部</option>
+                    <option value="数学">数学</option>
+                    <option value="物理">物理</option>
+                    <option value="化学">化学</option>
+                    <option value="生物">生物</option>
+                    <option value="信息">信息</option>
+                </select>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="search" placeholder="搜索题目或作者">
+            </div>
+            <div class="search-bar">
+                <input type="text" id="problemIdInput" placeholder="输入题目ID">
+            </div>
+            <button onclick="table.reset()">查询</button>
+        </div>
     </div>
-    
-    <table id="problemsTable">
-        <thead>
-            <tr>
-                <th class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="table.sortTable('time')">时间 <span class="arrow">▲▼</span></th>
-                <th>题目名称</th>
-                <th>学科</th>
-                <th class="sortable-header" onclick="table.sortTable('submit_num')">提交次数 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="table.sortTable('score')">评分 <span class="arrow">▲▼</span></th>
-                <th>作者</th>
-            </tr>
-        </thead>
-        <tbody id="tbody">
-            <!-- Data will be inserted here -->
-        </tbody>
-    </table>
 
+    <!-- 排序栏卡片（使用普通卡片外观） -->
+    <div class="card sort-bar">
+        <div class="card-content">
+            <div class="card-row">
+                <div class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow"></span></div>
+                <div class="sortable-header" onclick="table.sortTable('time')">时间 <span class="arrow"></span></div>
+                <div>题目名称</div>
+                <div>学科</div>
+                <div class="sortable-header" onclick="table.sortTable('submit_num')">提交次数 <span class="arrow"></span></div>
+                <div class="sortable-header" onclick="table.sortTable('score')">评分 <span class="arrow"></span></div>
+                <div>作者</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片列表 -->
+    <div class="card-list" id="tbody">
+        <!-- 动态生成卡片内容 -->
+    </div>
+
+    <!-- 分页 -->
     <ul class="pagination" id="pagination"></ul>
 
     <script>
-        const table=new Table('tbody',
-            (problem)=>{
-                var file_path=problem.file_path;
-                file_path=file_path.substring(file_path.lastIndexOf('/')+1);
+        const table = new Table('tbody',
+            (problem) => {
+                var file_path = problem.file_path;
+                file_path = file_path.substring(file_path.lastIndexOf('/') + 1);
+
+                // 更新卡片显示方式为一行，并合并操作按钮到最后一列
                 return `
-                    <td>${problem.id}</td>
-                    <td>${problem.time}</td>
-                    <td><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></td>
-                    <td>${problem.subject}</td>
-                    <td>${problem.submit_num}</td>
-                    <td>${problem.score}</td>
-                    <td>${problem.author}</td>
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-row">
+                                <div class="card-item">${problem.id}</div>
+                                <div class="card-item">${problem.time}</div>
+                                <div class="card-item"><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></div>
+                                <div class="card-item">${problem.subject}</div>
+                                <div class="card-item">${problem.submit_num}</div>
+                                <div class="card-item">${problem.score}</div>
+                                <div class="card-item">${problem.author}</div>
+                            </div>
+                        </div>
+                    </div>
                 `;
             },
-            (tb)=>{
+            (tb) => {
                 const subject = document.getElementById('subject').value;
                 const search = document.getElementById('search').value;
                 const problemId = document.getElementById('problemIdInput').value;
@@ -73,13 +91,14 @@
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                        url=`/problems/count?id=${problemId}&subject=${subject}&search=${search}`;
+                        url = `/problems/count?id=${problemId}&subject=${subject}&search=${search}`;
                         fetch(url)
                             .then(response => response.json())
-                            .then(count => {tb.generate(data,count.count)});
+                            .then(count => { tb.generate(data, count.count); });
                     });
             }
         );
+
         // 初次加载
         table.load(table);
     </script>

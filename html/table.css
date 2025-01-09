@@ -1,22 +1,198 @@
-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-table, th, td { border: 0px solid black; }
-th, td { padding: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pagination { list-style-type: none; display: flex; }
-.pagination li { margin: 5px; cursor: pointer; }
-.sortable-header { cursor: pointer; }
-.sortable-header .arrow { color: black; }
-.sortable-header.sorted .arrow { color: #a31f23d7; }
-a {
+/* 设置页面背景颜色 */
+body {
+    background-color: #eeefef;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* 搜索栏卡片样式 */
+.search-card {
+    background-color: #fff; /* 背景颜色为白色 */
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    padding: 20px; /* 内边距 */
+    margin: 20px; /* 外边距 */
+    border: 1px solid #ddd;
+}
+
+.search-content {
+    display: flex;
+    align-items: flex-end;  /* 让内容靠右对齐 */
+    gap: 10px;
+}
+
+.search-card button {
+    padding: 8px 16px;
+    background-color: #a31f23d7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-card button:hover {
+    background-color: #7b1a15;
+}
+
+.search-card h1 {
+    margin: 0;  /* 去掉默认的外边距 */
+    font-size: 1.5rem;  /* 设置标题的大小 */
+}
+
+/* 搜索栏样式 */
+.search-bar input {
+    width: 200px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Select栏样式 */
+.select-bar select {
+    width: 150px;
+    padding: 6px;
+    font-size: 1rem;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px; /* 圆角 */
+    box-sizing: border-box; /* 包括 padding 和 border */
+}
+
+/* 排序栏样式 */
+.sort-bar {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin: 0 20px;
+    font-weight: bold;
+}
+
+.card-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.card-row > div {
+    flex: 1; 
+    text-align: center;
+    padding: 8px;
+    cursor: pointer;
+}
+
+/* 可排序的表头样式 */
+.sortable-header {
+    color: #333;
+    cursor: pointer;
+}
+
+.sortable-header .arrow {
+    font-size: 1rem;
+    color: #aaa;
+}
+
+.sortable-header.sorted .arrow {
+    color: #a31f23d7;
+}
+
+/* 卡片列表样式 */
+.card-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+}
+
+/* 卡片样式 */
+.card {
+    min-height: 10px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 10px;
+    box-shadow: none;
+}
+
+/* 卡片内容样式 */
+.card-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.card-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.card-item {
+    flex: 1; /* 每个信息项宽度自适应 */
+    text-align: center;
+    padding: 5px;
+    min-width: 80px; /* 设置最小宽度 */
+}
+
+.card-item a {
     color:#a31f23d7;
     text-decoration: none;
 }
-a:hover {
+
+.card-item a:hover {
     color: #7b1a15;
     text-decoration: none;
 }
-.sortable-header {
+
+/* 操作按钮样式 */
+.card-item .operator button {
+    padding: 5px 10px;
+    background-color: transparent;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #a31f23d7;
+}
+
+.card-item .operator button:hover {
+    background-color: #a31f23d7;
+    color: white;
+}
+
+/* 操作按钮样式 */
+.card-item .toggle button {
+    padding: 5px 10px;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    color: #a31f23d7;
+    font-size: 1.5rem;
+}
+
+.card-item .toggle button:hover {
+    color: #7b1a15;
+}
+
+/* 分页样式 */
+.pagination {
+    display: flex;
+    justify-content: flex-start;  /* 修改为左对齐 */
+    gap: 10px;
+    list-style: none;
+}
+
+.pagination li {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     cursor: pointer;
 }
-.arrow {
-    font-size: 0.8em;
+
+.pagination li.active {
+    background-color: #a31f23d7;
+    color: white;
+    border-color: #a31f23d7;
+}
+
+.pagination li:hover {
+    background-color: #a31f23d7;
+    color: white;
 }

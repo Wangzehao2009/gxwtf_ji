@@ -27,7 +27,8 @@ CREATE TABLE submissions (
 CREATE TABLE issues (
     id INT AUTO_INCREMENT PRIMARY KEY,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		name VARCHAR(255)
+	name VARCHAR(255),
+    visible BOOLEAN
 );
 
 CREATE TABLE problems (

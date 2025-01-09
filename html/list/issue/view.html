@@ -8,42 +8,54 @@
     <script src="/table.js"></script>
     <link rel="stylesheet" href="/banner.css">
     <link rel="stylesheet" href="/table.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-        <div id="banner"></div>
+    <div id="banner"></div>
 
-    
-    <h2>Issue 列表</h2>
-    <div>
-        <label for="search">搜索:</label>
-        <input type="text" id="search" placeholder="搜索 Issue">
-        <button onclick="table.reset()">查询</button>
+    <!-- 搜索栏 -->
+    <div class="search-card">
+        <h1>栏目列表</h1>
+        <div class="search-content">
+            <div class="search-bar">
+                <input type="text" id="search" placeholder="搜索栏目">
+            </div>
+            <button onclick="table.reset()">查询</button>
+        </div>
     </div>
-    
-    <table id="issuesTable">
-        <thead>
-            <tr>
-                <th class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="table.sortTable('time')">创建时间 <span class="arrow">▲▼</span></th>
-                <th>名称</th>
-            </tr>
-        </thead>
-        <tbody id="tbody">
-            <!-- Data will be inserted here -->
-        </tbody>
-    </table>
 
+    <!-- 排序栏卡片（使用普通卡片外观） -->
+    <div class="card sort-bar">
+        <div class="card-content">
+            <div class="card-row">
+                <div class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow">▲▼</span></div>
+                <div class="sortable-header" onclick="table.sortTable('time')">时间 <span class="arrow"></span></div>
+                <div>栏目名称</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片列表 -->
+    <div class="card-list" id="tbody">
+        <!-- 动态生成卡片内容 -->
+    </div>
+
+    <!-- 分页 -->
     <ul class="pagination" id="pagination"></ul>
-
 
     <script>
         const table = new Table('tbody',
             (issue) => {
                 return `
-                    <td>${issue.id}</td>
-                    <td>${issue.time}</td>
-                    <td><a href="/view/issue?issueId=${issue.id}">${issue.name}</a></td>
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-row">
+                                <div class="card-item">${issue.id}</div>
+                                <div class="card-item">${issue.time}</div>
+                                <div class="card-item"><a href="/view/issue?issueId=${issue.id}">${issue.name}</a></div>
+                            </div>
+                        </div>
+                    </div>
                 `;
             },
             (tb) => {
@@ -59,7 +71,7 @@
                     });
             }
         );
-
+        
         // 初次加载
         table.reset();
     </script>

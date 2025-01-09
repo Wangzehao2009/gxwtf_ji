@@ -8,48 +8,74 @@
     <script src="/table.js"></script>
     <link rel="stylesheet" href="/banner.css">
     <link rel="stylesheet" href="/table.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-        <div id="banner"></div>
+    <div id="banner"></div>
 
-    
-    <h2>Issue 列表</h2>
-    <div>
-        <label for="search">搜索:</label>
-        <input type="text" id="search" placeholder="搜索 Issue">
-        <button onclick="table.reset()">查询</button>
-        <button class="new-issue-button" onclick="window.location.href='/new/issue'">新建 Issue</button>
+    <!-- 搜索栏 -->
+    <div class="search-card">
+        <h1>栏目列表</h1>
+        <div class="search-content">
+            <div class="search-bar">
+                <input type="text" id="search" placeholder="搜索栏目">
+            </div>
+            <button onclick="table.reset()">查询</button>
+            <button onclick="window.location.href='/new/issue'">新建栏目</button>
+        </div>
     </div>
-    
-    <table id="issuesTable">
-        <thead>
-            <tr>
-                <th class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="table.sortTable('time')">创建时间 <span class="arrow">▲▼</span></th>
-                <th>名称</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="tbody">
-            <!-- Data will be inserted here -->
-        </tbody>
-    </table>
 
+    <!-- 排序栏卡片（使用普通卡片外观） -->
+    <div class="card sort-bar">
+        <div class="card-content">
+            <div class="card-row">
+                <div class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow">▲▼</span></div>
+                <div class="sortable-header" onclick="table.sortTable('time')">时间 <span class="arrow"></span></div>
+                <div>栏目名称</div>
+                <div>可见</div>
+                <div>操作</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片列表 -->
+    <div class="card-list" id="tbody">
+        <!-- 动态生成卡片内容 -->
+    </div>
+
+    <!-- 分页 -->
     <ul class="pagination" id="pagination"></ul>
-
 
     <script>
         const table = new Table('tbody',
             (issue) => {
                 return `
-                    <td>${issue.id}</td>
-                    <td>${issue.time}</td>
-                    <td><a href="/view/issue?issueId=${issue.id}">${issue.name}</a></td>
-                    <td>
-                        <button onclick=window.location.href="/edit/issue?issueId=${issue.id}";>编辑</button>
-                        <button onclick="deleteIssue(${issue.id})">删除</button>
-                    </td>
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-row">
+                                <div class="card-item">${issue.id}</div>
+                                <div class="card-item">${issue.time}</div>
+                                <div class="card-item"><a href="/view/issue?issueId=${issue.id}">${issue.name}</a></div>
+                                <div class="card-item">
+                                    <div class="toggle">
+                                        <button onclick="toggleVisibility(${issue.id}, ${issue.visible})">
+                                            <i class="fa-solid ${issue.visible ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-item">
+                                    <div class="operator">
+                                        <button onclick="window.location.href='/edit/issue?issueId=${issue.id}'">
+                                            <i class="fa-regular fa-pen-to-square"></i>
+                                        </button>
+                                        <button class="operation" onclick="deleteIssue(${issue.id})">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 `;
             },
             (tb) => {
@@ -66,6 +92,18 @@
             }
         );
 
+        function toggleVisibility(issueId, currentVisible) {
+            fetch(`/saveIssueBasicInfo?issueId=${issueId}&trans=1`)
+                .then(response => {
+                    if (response.ok) {
+                        table.reset(); // 重新加载表格数据
+                        alert('修改可见状态成功');
+                    } else {
+                        alert('修改可见状态失败，请稍后重试。');
+                    }
+                });
+        }
+
         function deleteIssue(issueId) {
             if (confirm('确定要删除这个issue吗？')) {
                 fetch(`/deleteissue?issueId=${issueId}`);
@@ -73,7 +111,7 @@
                 table.reset();
             }
         }
-
+        
         // 初次加载
         table.reset();
     </script>

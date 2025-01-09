@@ -1,0 +1,223 @@
+/* 设置页面背景颜色 */
+body {
+    background-color: #eeefef;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* 搜索栏卡片样式 */
+.search-card {
+    background-color: #fff; /* 背景颜色为白色 */
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd; /* 边框颜色 */
+    padding: 20px; /* 内边距 */
+    margin: 20px; /* 外边距 */
+}
+
+.search-card h1 {
+    margin: 0;  /* 去掉默认的外边距 */
+    font-size: 1.5rem;  /* 设置标题的大小 */
+}
+
+/* 搜索栏样式 */
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;  /* 搜索框和按钮右对齐 */
+}
+
+.search-bar input {
+    width: 200px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.search-bar button {
+    padding: 8px 16px;
+    background-color: #a31f23d7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    background-color: #7b1a15;
+}
+
+/* 排序栏样式 */
+.sort-bar {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin: 0 20px;
+    padding: 10px;
+    margin-bottom: 0; /* 去掉排序栏和卡片之间的缝隙 */
+}
+.sort-bar table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.sort-bar th {
+    text-align: left;
+    cursor: pointer;
+    padding: 8px;
+}
+.sort-bar .sortable-header {
+    cursor: pointer;
+}
+.sort-bar .sortable-header .arrow {
+    color: black;
+}
+.sort-bar .sortable-header.sorted .arrow {
+    color: #a31f23d7;
+}
+
+/* Select栏样式 */
+.select-bar {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin: 0 20px;
+    padding: 10px;
+    margin-bottom: 0; /* 去掉select栏和下面部分的缝隙 */
+    display: flex;
+    flex-direction: column; /* 确保label和select在垂直方向排列 */
+}
+
+/* 标签样式 */
+.select-bar label {
+    font-size: 1rem;
+    margin-bottom: 5px; /* 标签与下拉框之间的间距 */
+}
+
+/* 下拉框样式 */
+.select-bar select {
+    width: 100%; /* 使下拉框占满整个容器 */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+/* 鼠标悬停时的样式 */
+.select-bar select:hover {
+    border-color: #a31f23d7;
+}
+
+/* 聚焦时的样式 */
+.select-bar select:focus {
+    border-color: #a31f23d7;
+}
+
+/* 下拉框的每个选项 */
+.select-bar option {
+    padding: 8px;
+    font-size: 1rem;
+}
+
+/* 卡片列表样式 */
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    padding: 0 20px;
+    margin-top: 0; /* 确保卡片列表与上面元素紧密相连 */
+}
+/* 卡片样式 */
+.card {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 0; /* 去除圆角 */
+    box-shadow: none;
+    margin: 0; /* 确保卡片之间没有额外的空隙 */
+}
+.card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+.card-content .name {
+    font-size: 1rem;
+    font-weight: bold;
+}
+.card-content .name a {
+    color: #a31f23d7;
+    text-decoration: none;
+}
+.card-content .name a:hover {
+    color: #7b1a15;
+}
+.card-content .meta {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* 卡片操作栏样式 */
+.card-actions {
+    display: flex;
+    justify-content: center;  /* 水平方向居中 */
+    align-items: center;      /* 垂直方向居中 */
+    gap: 10px;  /* 如果有多个按钮，可以增加间距 */
+}
+
+.card-actions button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: transparent;  /* 去掉背景色 */
+    color: transparent;  /* 保持文字透明 */
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    height: auto;  /* 设置高度为自动，以适应图标大小 */
+}
+
+/* 图标样式 */
+.card-actions button i {
+    font-size: 1.5rem;  /* 设置较小的图标大小 */
+    color: #a31f23d7;  /* 默认红色 */
+    vertical-align: middle; /* 确保垂直居中 */
+    display: inline-block;  /* 使图标与按钮保持行内块状元素 */
+}
+
+/* 鼠标悬停或点击时的图标颜色 */
+.card-actions button:hover i,
+.card-actions button:active i {
+    color: #7b1a15;  /* 设置悬停或点击时的图标颜色 */
+}
+
+/* 分页样式 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    list-style: none;
+}
+.pagination li {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.pagination li.active {
+    background-color: #a31f23d7;
+    color: white;
+    border-color: #a31f23d7;
+}
+.pagination li:hover {
+    background-color: #7b1a15;
+    color: white;
+}
