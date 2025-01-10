@@ -34,7 +34,7 @@ async function newproblem(req, res) {
 
 // 题目列表
 function problemlist(req, res) {
-    const { id, subject, name, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 15 } = req.query;
+    const { id, subject, name, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 15 ,visible } = req.query;
 
     // 构建 SQL 查询条件
     let query = 'SELECT * FROM problems WHERE 1=1';
@@ -44,6 +44,7 @@ function problemlist(req, res) {
         if (subject) query += ` AND subject = '${subject}'`;
         if (search) query += ` AND (name LIKE '%${search}%' OR author LIKE '%${search}%')`;
     }
+    if(visible) query += ` AND visible = ${visible}`;
     // 排序
     query += ` ORDER BY ${sortField} ${sortOrder}`;
     // 分页
@@ -61,14 +62,16 @@ function problemlist(req, res) {
 
 // 题目总数
 function problemcount(req, res) {
-    const { subject, search = '' } = req.query;
+    const { id, subject, search = '' ,visible} = req.query;
     let query = 'SELECT COUNT(*) AS count FROM problems WHERE 1=1';
+    if (id) query += ` AND id = ${id}`;
     if (subject) {
         query += ` AND subject = '${subject}'`;
     }
     if (search) {
         query += ` AND (name LIKE '%${search}%' OR author LIKE '%${search}%')`;
     }
+    if(visible) query += ` AND visible = ${visible}`;
     db.query(query, (err, results) => {
         if (err) {
             return res.status(500).json({ error: '查询失败', details: err });
@@ -108,11 +111,30 @@ function deleteProblem(req, res) {
     });
 }
 
+// 保存 issue 基本信息get
+async function saveProblem(req, res) {
+    const { problemId, name , trans} = req.query;
+    let query = `UPDATE problems SET `;
+    if(name) query +=`name = ${name}, `;
+    query+=`visible = visible ^ ${trans} WHERE id = ${problemId}`;
+    try {
+        db.query(query, (err, result) => {
+                if (err) return res.status(500).json({ error: '数据库错误' + err });
+                return res.status(200).json({ message: '基本信息保存成功' });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '服务器错误' });
+    }
+}
+
 function init(app, fileStorage) {
     app.post('/newproblem', fileStorage.single('file'), newproblem);
     app.get('/problems', problemlist);
     app.get('/problems/count', problemcount);
     app.get('/problems/latestId', getLatestProblemId); // 添加获取最新 problem_id 的路由
+    app.get('/problems/save',saveProblem);
     app.delete('/problems/:id', deleteProblem);
 }
 

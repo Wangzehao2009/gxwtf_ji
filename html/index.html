@@ -16,9 +16,6 @@
             color: black;
             font-weight: bold;
         }
-        .navbar a:hover {
-            /* text-decoration: underline; */
-        }
         /* 下拉菜单样式 */
         .dropdown {
             position: relative;
@@ -91,6 +88,23 @@
             }
         }
 
+        document.addEventListener("DOMContentLoaded", function() {
+            // 发送 GET 请求到 /dashboard 获取权限信息
+            fetch('/dashboard')
+                .then(response => response.json())  // 解析返回的 JSON
+                .then(data => {
+                    // 检查是否返回的 admin 字段为 1，表示管理员权限
+                    if (data.admin === 1) {
+                        // 如果是管理员，显示管理链接
+                        const adminLink = document.getElementById("adminLink");
+                        adminLink.style.display = "inline";  // 显示链接
+                    }
+                })
+                .catch(error => {
+                    console.error('请求错误:', error);
+                });
+        });
+
         window.onload = checkLoginStatus;
     </script>
 </head>
@@ -118,8 +132,7 @@
                 <a href="rank/school">学校提交榜</a>
             </div>
         </div>
-
-        <a href="admin">管理</a>
+        <a href="admin" id="adminLink" style="display: none;">管理</a>
         <a href="/mdreader/preview?file=announcement.md">公告栏</a>
         <a href="login" class="login-link">登录</a>
         <a href="register" class="register-link">注册</a>

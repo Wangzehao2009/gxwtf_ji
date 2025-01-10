@@ -10,7 +10,8 @@ CREATE TABLE users (
     grade VARCHAR(20),
     phone VARCHAR(20),
     email VARCHAR(100),
-    password VARCHAR(255) NOT NULL
+    password VARCHAR(255) NOT NULL,
+    admin BOOLEAN DEFAULT 0
 );
 
 CREATE TABLE submissions (
@@ -28,7 +29,7 @@ CREATE TABLE issues (
     id INT AUTO_INCREMENT PRIMARY KEY,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	name VARCHAR(255),
-    visible BOOLEAN
+    visible BOOLEAN DEFAULT 0
 );
 
 CREATE TABLE problems (
@@ -39,6 +40,7 @@ CREATE TABLE problems (
     submit_num INT DEFAULT 0,
     score INT DEFAULT 0,
     author VARCHAR(255),
+    visible BOOLEAN DEFAULT 0,
     file_path VARCHAR(255)
 );
 

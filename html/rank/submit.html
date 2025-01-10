@@ -3,50 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>广学提交榜</title>
+    <title>个人提交榜</title>
     <script src="/table.js"></script>
     <script src="/basic.js"></script>
     <link rel="stylesheet" href="/table.css">
     <link rel="stylesheet" href="/banner.css">
-    <style>
-        table{ width: 60%; margin: auto;}
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-        <div id="banner"></div>
+    <div id="banner"></div>
 
-    <h2>用户提交总分排名</h2>
-    <div>
-        <label for="subject">选择学科:</label>
-        <select id="subject" onchange="table.reset()">
-            <option value="totScore">总分</option>
-            <option value="数学">数学</option>
-            <option value="物理">物理</option>
-            <option value="化学">化学</option>
-            <option value="生物">生物</option>
-            <option value="信息">信息</option>
-        </select>
+    <!-- 搜索栏 -->
+    <div class="search-card">
+        <h1>个人提交榜</h1>
+        <div class="search-content">
+            <div class="select-bar">
+                <select id="subject" onchange="table.reset()">
+                    <option value="">全部</option>
+                    <option value="数学">数学</option>
+                    <option value="物理">物理</option>
+                    <option value="化学">化学</option>
+                    <option value="生物">生物</option>
+                    <option value="信息">信息</option>
+                </select>
+            </div>
+        </div>
     </div>
-    <table id="userTable">
-        <thead>
-            <tr>
-                <th>排名</th>
-                <th>用户名</th>
-                <th class="sortable-header" onclick="table.sortTable('score')">总分<span class="arrow">▲▼</span></th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-        </tbody>
-    </table>
-    
-    <ul id="pagination" class="pagination"></ul>
+
+    <!-- 排序栏卡片（使用普通卡片外观） -->
+    <div class="card sort-bar">
+        <div class="card-content">
+            <div class="card-row">
+                <div>排名</div>
+                <div>用户名</div>
+                <div class="sortable-header" onclick="table.sortTable('score')">总分 <span class="arrow"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片列表 -->
+    <div class="card-list" id="tbody">
+        <!-- 动态生成卡片内容 -->
+    </div>
+
+    <!-- 分页 -->
+    <ul class="pagination" id="pagination"></ul>
 
     <script>
         function translate(user) {
             return `
-                <td>${user.rank}</td>
-                <td>${user.username}</td>
-                <td>${user.score.toFixed(2)}</td>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-row">
+                            <div class="card-item">${user.rank}</div>
+                            <div class="card-item">${user.username}</div>
+                            <div class="card-item">${user.score.toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
             `;
         }
         async function fetchUsers(table) {
@@ -59,7 +73,7 @@
             }
         }
 
-        const table = new Table('tableBody', translate, fetchUsers);
+        const table = new Table('tbody', translate, fetchUsers);
         table.sortField='score';
 
         table.load(table);

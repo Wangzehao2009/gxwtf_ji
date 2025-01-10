@@ -58,13 +58,14 @@ function logout(req, res) {
 function loginStatus(req, res) {
     const userId = req.cookies.userId;
     if (userId) {
-        const query = 'SELECT username FROM users WHERE id = ?';
+        const query = 'SELECT * FROM users WHERE id = ?';
         db.query(query, [userId], (err, results) => {
             if (err || results.length === 0) {
                 return res.status(401).json({ error: '未授权访问，请登录' });
             }
             const username = results[0].username;
-            res.json({ userId: userId, userName: username });
+            const admin = results[0].admin;
+            res.json({ userId: userId, userName: username, admin: admin});
         });
     } else {
         res.status(401).json({ error: '未授权访问，请登录' });

@@ -8,42 +8,49 @@
     <script src="/basic.js"></script>
     <link rel="stylesheet" href="/table.css">
     <link rel="stylesheet" href="/banner.css">
-    <style>
-        table { width: 60%; margin: auto; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- <a href="/" class="banner-link">
-        <div class="banner">
-            <img src="http://localhost:3000/uploads/1735823331237-841608623.png" alt="Logo">
-            <div>竞赛贯通·学校排名</div>
-            <div class="english">Class 14·Xuguang Olympiad Workshop</div>
+    <div id="banner"></div>
+
+    <!-- 搜索栏 -->
+    <div class="search-card">
+        <h1>学校提交榜</h1>
+    </div>
+
+    <!-- 排序栏卡片（使用普通卡片外观） -->
+    <div class="card sort-bar">
+        <div class="card-content">
+            <div class="card-row">
+                <div>排名</div>
+                <div>学校</div>
+                <div class="sortable-header" onclick="table.sortTable('score')">总分 <span class="arrow"></span></div>
+            </div>
         </div>
-    </a> -->
-    <h2>学校总分排名</h2>
+    </div>
 
-    <table id="schoolTable">
-        <thead>
-            <tr>
-                <th>排名</th>
-                <th>学校名称</th>
-                <th class="sortable-header" onclick="table.sortTable('score')" id="id">总分<span class="arrow">▲▼</span></th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-        </tbody>
-    </table>
+    <!-- 卡片列表 -->
+    <div class="card-list" id="tbody">
+        <!-- 动态生成卡片内容 -->
+    </div>
 
-    <ul id="pagination" class="pagination"></ul>
+    <!-- 分页 -->
+    <ul class="pagination" id="pagination"></ul>
 
     <script>
         
         // 函数：将学校数据转换为表格行
         function translate(school) {
             return `
-                <td>${school.rank}</td>
-                <td>${school.school}</td>
-                <td>${school.score.toFixed(2)}</td>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-row">
+                            <div class="card-item">${school.rank}</div>
+                            <div class="card-item">${school.school}</div>
+                            <div class="card-item">${school.score.toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
             `;
         }
 
@@ -59,7 +66,7 @@
         }
 
         // 初始化表格
-        const table = new Table('tableBody', translate, fetchSchools);
+        const table = new Table('tbody', translate, fetchSchools);
         table.sortField='score';
         
         // 加载学校数据

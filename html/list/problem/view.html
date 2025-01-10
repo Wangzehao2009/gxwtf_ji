@@ -73,7 +73,7 @@
                             <div class="card-row">
                                 <div class="card-item">${problem.id}</div>
                                 <div class="card-item">${problem.time}</div>
-                                <div class="card-item"><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></div>
+                                <div class="card-item"><a href="/preview?file=${encodeURIComponent(problem.file_path)}">${problem.name}</a></div>
                                 <div class="card-item">${problem.subject}</div>
                                 <div class="card-item">${problem.submit_num}</div>
                                 <div class="card-item">${problem.score}</div>
@@ -87,11 +87,11 @@
                 const subject = document.getElementById('subject').value;
                 const search = document.getElementById('search').value;
                 const problemId = document.getElementById('problemIdInput').value;
-                let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
+                let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}&visible=1`;
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                        url = `/problems/count?id=${problemId}&subject=${subject}&search=${search}`;
+                        url = `/problems/count?id=${problemId}&subject=${subject}&search=${search}&visible=1`;
                         fetch(url)
                             .then(response => response.json())
                             .then(count => { tb.generate(data, count.count); });

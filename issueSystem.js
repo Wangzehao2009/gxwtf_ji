@@ -173,12 +173,22 @@ async function removeProblemFromIssue(req, res) {
 
 // 查询某个 issue 中包含的题目
 async function getProblemsInIssue(req, res) {
-    const { issueId } = req.query;
+    const { issueId , problemId, subject, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 15 } = req.query;
+    let query = `SELECT problems.* FROM problems JOIN issue_problem_graph ON problems.id = issue_problem_graph.problem_id`;
+    if (problemId) {
+        query += ` AND problems.id = ${problemId}`;
+    } else {
+        if (subject) query += ` AND problems.subject = '${subject}'`;
+        if (search) query += ` AND (name LIKE '%${search}%' OR author LIKE '%${search}%')`;
+    }
+    query += ` WHERE issue_problem_graph.issue_id = ${issueId}`;
+    // 排序
+    query += ` ORDER BY ${sortField} ${sortOrder}`;
+    // 分页
+    const offset = (page - 1) * pageSize;
+    query += ` LIMIT ${pageSize} OFFSET ${offset}`;
     try {
-        db.query(
-            'SELECT problems.* FROM problems JOIN issue_problem_graph ON problems.id = issue_problem_graph.problem_id WHERE issue_problem_graph.issue_id = ?',
-            [issueId],
-            (err, results) => {
+        db.query(query, (err, results) => {
                 if (err) return res.status(500).json({ error: '数据库错误' + err });
                 return res.status(200).json(results);
             }
@@ -191,12 +201,17 @@ async function getProblemsInIssue(req, res) {
 
 // 获取某个 issue 中包含的题目的总数
 async function getProblemsInIssueCount(req, res) {
-    const { issueId } = req.query;
+    const { issueId , problemId, subject , search=''} = req.query;
+    let query = `SELECT problems.* FROM problems JOIN issue_problem_graph ON problems.id = issue_problem_graph.problem_id`;
+    if (problemId) {
+        query += ` AND problems.id = ${problemId}`;
+    } else {
+        if (subject) query += ` AND problems.subject = '${subject}'`;
+        if (search) query += ` AND (name LIKE '%${search}%' OR author LIKE '%${search}%')`;
+    }
+    query += ` WHERE issue_problem_graph.issue_id = ${issueId}`;
     try {
-        db.query(
-            'SELECT COUNT(*) AS count FROM issue_problem_graph WHERE issue_id = ?',
-            [issueId],
-            (err, results) => {
+        db.query(query, (err, results) => {
                 if (err) return res.status(500).json({ error: '数据库错误' + err });
                 return res.status(200).json(results[0]);
             }

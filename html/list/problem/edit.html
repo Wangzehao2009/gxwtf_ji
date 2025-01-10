@@ -49,6 +49,7 @@
                 <div class="sortable-header" onclick="table.sortTable('submit_num')">提交次数 <span class="arrow"></span></div>
                 <div class="sortable-header" onclick="table.sortTable('score')">评分 <span class="arrow"></span></div>
                 <div>作者</div>
+                <div>可见</div>
                 <div>操作</div>
             </div>
         </div>
@@ -75,18 +76,27 @@
                             <div class="card-row">
                                 <div class="card-item">${problem.id}</div>
                                 <div class="card-item">${problem.time}</div>
-                                <div class="card-item"><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></div>
+                                <div class="card-item"><a href="/preview?file=${encodeURIComponent(problem.file_path)}">${problem.name}</a></div>
                                 <div class="card-item">${problem.subject}</div>
                                 <div class="card-item">${problem.submit_num}</div>
                                 <div class="card-item">${problem.score}</div>
                                 <div class="card-item">${problem.author}</div>
                                 <div class="card-item">
-                                    <button onclick="editProblem('${problem.file_path}')">
-                                        <i class="fa-regular fa-pen-to-square"></i>
-                                    </button>
-                                    <button onclick="deleteProblem(${problem.id})">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
+                                    <div class="toggle">
+                                        <button onclick="toggleVisibility(${problem.id}, ${problem.visible})">
+                                            <i class="fa-solid ${problem.visible ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-item">
+                                    <div class="operator">
+                                        <button onclick="window.location.href='/mdeditor?file=${problem.file_path}'">
+                                            <i class="fa-regular fa-pen-to-square"></i>
+                                        </button>
+                                        <button onclick="deleteProblem(${problem.id})">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -109,8 +119,16 @@
             }
         );
 
-        function editProblem(filePath) {
-            window.location.href = `/mdeditor?file=${filePath}`;
+        function toggleVisibility(problemId, currentVisible) {
+            fetch(`/problems/save?problemId=${problemId}&trans=1`)
+                .then(response => {
+                    if (response.ok) {
+                        table.reset(); // 重新加载表格数据
+                        alert('修改可见状态成功');
+                    } else {
+                        alert('修改可见状态失败，请稍后重试。');
+                    }
+                });
         }
 
         function deleteProblem(problemId) {

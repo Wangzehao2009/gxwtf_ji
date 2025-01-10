@@ -9,6 +9,8 @@ const issueSystem = require('./issueSystem.js');
 const mdreader = require('./mdreader.js');
 const imageUpload = require('./imageUpload.js');
 const rankSystem = require('./rankSystem.js');
+const previewSystem = require('./previewSystem.js');
+
 const cors = require('cors');
 
 const app = express();
@@ -22,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // 引擎
 const engine = require('./engine.js');
+
 engine(app);
 
 userSystem(app); // 用户系统
@@ -30,6 +33,7 @@ problemSystem(app, fileStorage); // 题目系统
 issueSystem(app, fileStorage); // 期刊系统
 mdreader(app); // Markdown 阅读器
 rankSystem(app); // 排名系统
+previewSystem(app); //预览系统
 app.use('/image', imageUpload); // 图床功能
 // 提供静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));

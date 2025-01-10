@@ -10,13 +10,11 @@ function homePage(req, res) {
 }
 
 function previewPage(req, res) {
-    const fileName = req.query.file;
+    const filePath = req.query.file;
     
-    if (!fileName || !fileName.endsWith('.md')) {
+    if (!filePath || !filePath.endsWith('.md')) {
         return res.status(400).send('请提供有效的 Markdown 文件');
     }
-
-    const filePath = path.join(__dirname, 'uploads', fileName);
 
     // 检查文件是否存在
     if (!fs.existsSync(filePath)) {
