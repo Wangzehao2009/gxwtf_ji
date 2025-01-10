@@ -6,8 +6,8 @@
     <title>Submission List</title>
     <script src="/basic.js"></script>
     <script src="/table.js"></script>
-    <link rel="stylesheet" href="/table.css">
-    <link rel="stylesheet" href="/banner.css">
+    <link rel="stylesheet" href="/css/table.css">
+    <link rel="stylesheet" href="/css/banner.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -78,7 +78,7 @@
                                 <div class="card-item">${submission.problem_name}</div>
                                 <div class="card-item">${submission.subject}</div>
                                 <div class="card-item">
-                                    <button onclick="window.location.href='/preview?file=${encodeURIComponent(submission.file_path)}'">预览</button>
+                                    <button onclick="window.location.href='/markdown/edit?file=${encodeURIComponent(submission.file_path)}'">预览</button>
                                 </div>
                                 <div class="card-item">
                                     <div class="operator">

@@ -28,7 +28,7 @@ function preview(req,res){
 
     if (ext === '.md') {
         // Markdown 文件，重定向到渲染页面
-        res.redirect(`/mdreader/preview?file=${encodeURIComponent(decodedFile)}`);
+        res.redirect(`/markdown/preview?file=${encodeURIComponent(decodedFile)}`);
     } else if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg', '.pdf', '.txt'].includes(ext)) {
         // 图片、PDF 或 TXT 文件，返回文件
         res.sendFile(filePath);

@@ -6,8 +6,8 @@
     <title>Issue List</title>
     <script src="/basic.js"></script>
     <script src="/table.js"></script>
-    <link rel="stylesheet" href="/banner.css">
-    <link rel="stylesheet" href="/table.css">
+    <link rel="stylesheet" href="/css/banner.css">
+    <link rel="stylesheet" href="/css/table.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -21,7 +21,7 @@
                 <input type="text" id="search" placeholder="搜索栏目">
             </div>
             <button onclick="table.reset()">查询</button>
-            <button onclick="window.location.href='/new/issue'">新建栏目</button>
+            <button onclick="window.location.href='/issue/new'">新建栏目</button>
         </div>
     </div>
 
@@ -55,7 +55,7 @@
                             <div class="card-row">
                                 <div class="card-item">${issue.id}</div>
                                 <div class="card-item">${issue.time}</div>
-                                <div class="card-item"><a href="/view/issue?issueId=${issue.id}">${issue.name}</a></div>
+                                <div class="card-item"><a href="/issue/view?issueId=${issue.id}">${issue.name}</a></div>
                                 <div class="card-item">
                                     <div class="toggle">
                                         <button onclick="toggleVisibility(${issue.id}, ${issue.visible})">
@@ -65,7 +65,7 @@
                                 </div>
                                 <div class="card-item">
                                     <div class="operator">
-                                        <button onclick="window.location.href='/edit/issue?issueId=${issue.id}'">
+                                        <button onclick="window.location.href='/issue/edit?issueId=${issue.id}'">
                                             <i class="fa-regular fa-pen-to-square"></i>
                                         </button>
                                         <button class="operation" onclick="deleteIssue(${issue.id})">

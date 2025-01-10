@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新建题目</title>
     <script src="/basic.js"></script>
-    <link rel="stylesheet" href="/banner.css">
-    <link rel="stylesheet" href="form.css">
+    <link rel="stylesheet" href="/css/banner.css">
+    <link rel="stylesheet" href="/css/form.css">
 </head>
 <body>
         <div id="banner"></div>
@@ -97,7 +97,7 @@
             if (data.success) 
             {
                 document.getElementById('createDocument').value = "题目已编辑";
-                window.open(`/mdeditor?file=${data.filePath}`, "_blank");
+                window.open(`/markdown/edit?file=${data.filePath}`, "_blank");
             }
             else alert('文件创建失败');
         }

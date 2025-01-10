@@ -7,11 +7,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script src="/table.js"></script>
     <script src="/basic.js"></script>
-    <link rel="stylesheet" href="/banner.css">
-    <link rel="stylesheet" href="/table.css">
+    <link rel="stylesheet" href="/css/banner.css">
+    <link rel="stylesheet" href="/css/table.css">
 </head>
 <body>
-        <div id="banner"></div>
+    <div id="banner"></div>
 
     <h2>Issue 基本信息</h2>
     <div class="name">
@@ -70,22 +70,26 @@
     <button id="saveIssue">保存题单</button>
     <script>
         document.getElementById('saveIssue').addEventListener('click', async function () {
-            const name = document.getElementById('name').value;
-            const problemIds = problems;
+        if (issueId !== -1) {
+            const response = await fetch('/saveIssue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ issueId: issueId, problemIds: problems })
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        } else {
             const response = await fetch('/newissue', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, problemIds })
+                body: JSON.stringify({ name: document.getElementById('name').value, problemIds: problems })
             });
             const result = await response.json();
-            if (response.ok) {
-                const issueId = result.issueId;
-                window.location.href = `/edit/issue?issueId=${issueId}`;
-            } else {
-                alert(result.message || result.error);
-            }
-        });
+            if (response.ok) issueId = result.issueId;
+            alert(result.message || result.error);
+        }
+    });
     </script>
-    <script src="../edit/issue.js"></script>
+    <script src="edit.js"></script>
 </body>
 </html>

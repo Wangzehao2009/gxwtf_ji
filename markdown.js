@@ -59,28 +59,6 @@ function render(req, res)
     });
 }
 
-// 处理 /mdeditor 请求
-function mdEditorPage(req, res) {
-    const fileName = req.query.file;
-    
-    if (!fileName || !fileName.endsWith('.md')) {
-        return res.status(400).send('请提供有效的 Markdown 文件');
-    }
-
-    const filePath = path.join(__dirname,fileName);
-
-    // 检查文件是否存在
-    if (!fs.existsSync(filePath)) {
-        return res.status(404).send('文件未找到');
-    }
-
-    res.sendFile(path.join(__dirname, 'html', 'mdeditor.html'), {
-        headers: {
-            'X-File-Path': filePath
-        }
-    });
-}
-
 function getFileContent(req, res) {
     const fileName = req.params[0]; // 使用通配符获取文件路径
     
@@ -106,11 +84,9 @@ function getFileContent(req, res) {
 function init(app) {
     app.set('view engine', 'ejs'); // 设置视图引擎为 EJS
     app.set('views', path.join(__dirname, 'views')); // 设置视图目录
-    app.use(express.static(path.join(__dirname, 'public'))); // 设置静态文件目录
-    app.get('/mdreader', homePage); // 主页路由
-    app.get('/mdreader/preview', previewPage); // 预览路由
-    app.post('/mdreader/render', render); // 渲染路由
-    app.get('/mdeditor', mdEditorPage); // 修改为处理查询参数的路由
+    app.get('/markdown', homePage); // 主页路由
+    app.get('/markdown/preview', previewPage); // 预览路由
+    app.post('/markdown/render', render); // 渲染路由
     app.get('/filecontent/*', getFileContent); // 获取文件内容的路由，支持子目录
 }
 

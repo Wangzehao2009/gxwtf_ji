@@ -124,7 +124,7 @@ textEditor.addEventListener('keydown', async (event) => {
                     alert('文件已保存');
                     // 如果文件名不存在，跳转到新 URL
                     if (!urlParams.get('file')) {
-                        window.location.href = `/mdeditor?file=${encodeURIComponent(filePath)}`;
+                        window.location.href = `/markdown/edit?file=${encodeURIComponent(filePath)}`;
                     }
                 } else if (response.status === 400) {
                     // 如果服务器返回状态 400，提示用户输入文件名
@@ -208,7 +208,7 @@ textEditor.addEventListener("keyup", async (evt) => {
 });
 
 async function renderMarkdown(value) {
-    const response = await fetch('/mdreader/render', {
+    const response = await fetch('/markdown/render', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

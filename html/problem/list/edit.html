@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Issue</title>
-    <link rel="stylesheet" href="/table.css">
-    <link rel="stylesheet" href="/banner.css">
-    <script src="/table.js"></script>
+    <title>Problem List</title>
     <script src="/basic.js"></script>
+    <script src="/table.js"></script>
+    <link rel="stylesheet" href="/css/banner.css">
+    <link rel="stylesheet" href="/css/table.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -34,6 +34,7 @@
                 <input type="text" id="problemIdInput" placeholder="输入题目ID">
             </div>
             <button onclick="table.reset()">查询</button>
+            <button onclick="window.location.href='/problem/new'">新建题目</button>
         </div>
     </div>
 
@@ -48,6 +49,8 @@
                 <div class="sortable-header" onclick="table.sortTable('submit_num')">提交次数 <span class="arrow"></span></div>
                 <div class="sortable-header" onclick="table.sortTable('score')">评分 <span class="arrow"></span></div>
                 <div>作者</div>
+                <div>可见</div>
+                <div>操作</div>
             </div>
         </div>
     </div>
@@ -61,44 +64,54 @@
     <ul class="pagination" id="pagination"></ul>
 
     <script>
-        var issueId = -1;
-
-        // 获取 URL 参数
-        function getIssueIdFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('issueId');
-        }
-
         const table = new Table('tbody',
             (problem) => {
                 var file_path = problem.file_path;
                 file_path = file_path.substring(file_path.lastIndexOf('/') + 1);
+
+                // 更新卡片显示方式为一行，并合并操作按钮到最后一列
                 return `
                     <div class="card">
                         <div class="card-content">
                             <div class="card-row">
                                 <div class="card-item">${problem.id}</div>
                                 <div class="card-item">${problem.time}</div>
-                                <div class="card-item"><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></div>
+                                <div class="card-item"><a href="/preview?file=${encodeURIComponent(problem.file_path)}">${problem.name}</a></div>
                                 <div class="card-item">${problem.subject}</div>
                                 <div class="card-item">${problem.submit_num}</div>
                                 <div class="card-item">${problem.score}</div>
                                 <div class="card-item">${problem.author}</div>
+                                <div class="card-item">
+                                    <div class="toggle">
+                                        <button onclick="toggleVisibility(${problem.id}, ${problem.visible})">
+                                            <i class="fa-solid ${problem.visible ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-item">
+                                    <div class="operator">
+                                        <button onclick="window.location.href='/markdown/edit?file=${problem.file_path}'">
+                                            <i class="fa-regular fa-pen-to-square"></i>
+                                        </button>
+                                        <button onclick="deleteProblem(${problem.id})">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 `;
             },
             (tb) => {
-                issueId = getIssueIdFromUrl();
                 const subject = document.getElementById('subject').value;
                 const search = document.getElementById('search').value;
                 const problemId = document.getElementById('problemIdInput').value;
-                let url = `/getProblemsInIssue?issueId=${issueId}&problemId=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
+                let url = `/problems?id=${problemId}&subject=${subject}&search=${search}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}`;
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                        url = `/getProblemsInIssue/count?issueId=${issueId}&problemId=${problemId}&subject=${subject}&search=${search}`;
+                        url = `/problems/count?id=${problemId}&subject=${subject}&search=${search}`;
                         fetch(url)
                             .then(response => response.json())
                             .then(count => { tb.generate(data, count.count); });
@@ -106,8 +119,37 @@
             }
         );
 
+        function toggleVisibility(problemId, currentVisible) {
+            fetch(`/problems/save?problemId=${problemId}&trans=1`)
+                .then(response => {
+                    if (response.ok) {
+                        table.reset(); // 重新加载表格数据
+                        alert('修改可见状态成功');
+                    } else {
+                        alert('修改可见状态失败，请稍后重试。');
+                    }
+                });
+        }
+
+        function deleteProblem(problemId) {
+            if (confirm('确定要删除这个题目吗？')) {
+                fetch(`/problems/${problemId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('题目删除成功');
+                        table.load(table);
+                    } else {
+                        alert('删除失败: ' + data.error);
+                    }
+                });
+            }
+        }
+
         // 初次加载
-        table.reset(table);
+        table.load(table);
     </script>
 </body>
 </html>

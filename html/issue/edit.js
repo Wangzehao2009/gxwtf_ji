@@ -103,7 +103,7 @@ const table=new Table('tbody',
         return `
             <td>${problem.id}</td>
             <td>${problem.time}</td>
-            <td><a href="/mdreader/preview?file=${file_path}">${problem.name}</a></td>
+            <td><a href="/preview?file=${file_path}">${problem.name}</a></td>
             <td>${problem.subject}</td>
             <td>${problem.submit_num}</td>
             <td>${problem.score}</td>

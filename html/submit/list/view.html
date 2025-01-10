@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submission List</title>
+    <script src="/basic.js"></script>
+    <script src="/table.js"></script>
+    <link rel="stylesheet" href="/css/table.css">
+    <link rel="stylesheet" href="/css/banner.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div id="banner"></div>
+
+    <!-- 搜索栏 -->
+    <div class="search-card">
+        <h1>提交记录</h1>
+        <div class="search-content">
+            <div class="select-bar">
+                <select id="subject" onchange="table.reset()">
+                    <option value="">全部</option>
+                    <option value="数学">数学</option>
+                    <option value="物理">物理</option>
+                    <option value="化学">化学</option>
+                    <option value="生物">生物</option>
+                    <option value="信息">信息</option>
+                </select>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchUser" placeholder="搜索用户名或ID">
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchIssue" placeholder="搜索栏目名或栏目号">
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchProblem" placeholder="搜索题目名或题号">  
+            </div>
+            <button onclick="table.reset()">查询</button>
+        </div>
+    </div>
+
+    <!-- 排序栏卡片（使用普通卡片外观） -->
+    <div class="card sort-bar">
+        <div class="card-content">
+            <div class="card-row">
+                <div class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow"></span></div>
+                <div class="sortable-header" onclick="table.sortTable('time')">时间 <span class="arrow"></span></div>
+                <div>用户名</div>
+                <div>issue</div>
+                <div>problem</div>
+                <div>学科</div>
+                <div>预览</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片列表 -->
+    <div class="card-list" id="tbody">
+        <!-- 动态生成卡片内容 -->
+    </div>
+
+    <!-- 分页 -->
+    <ul class="pagination" id="pagination"></ul>
+
+    <script>
+        const table=new Table('tbody',
+            (submission) => {
+                return `
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-row">
+                                <div class="card-item">${submission.id}</div>
+                                <div class="card-item">${submission.time}</div>
+                                <div class="card-item">${submission.username}</div>
+                                <div class="card-item">${submission.issue_name}</div>
+                                <div class="card-item">${submission.problem_name}</div>
+                                <div class="card-item">${submission.subject}</div>
+                                <div class="card-item">
+                                    <button onclick="window.location.href='/preview?file=${encodeURIComponent(submission.file_path)}'">预览</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+            (tb)=>{
+                const subject = document.getElementById('subject').value;
+                const searchUser = document.getElementById('searchUser').value;
+                const searchIssue = document.getElementById('searchIssue').value;
+                const searchProblem = document.getElementById('searchProblem').value;
+                let url = `/submissions?subject=${subject}&sortField=${tb.sortField}&sortOrder=${tb.sortOrder}&page=${tb.currentPage}&pageSize=${tb.pageSize}&userId=${searchUser}&issue_id=${searchIssue}&problem_id=${searchProblem}`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        url=`/submissions/count?subject=${subject}&userId=${searchUser}&issue_id=${searchIssue}&problem_id=${searchProblem}`;
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(count => {tb.generate(data,count.count)});
+                    });
+            }
+        )
+
+        // 初次加载
+        table.load(table);
+    </script>
+</body>
+</html>
