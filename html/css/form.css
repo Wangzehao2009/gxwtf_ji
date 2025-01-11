@@ -40,14 +40,14 @@
 }
 .form-row button {
     padding: 10px 20px;
-    background-color: #a00;
+    background-color: #a31f23d7;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 .form-row button:hover {
-    background-color: #900;
+    background-color: #7b1a15;
 }
 .dropdown {
     width: 97%;

@@ -10,6 +10,7 @@ const markdown = require('./markdown.js');
 const imageUpload = require('./imageUpload.js');
 const rankSystem = require('./rankSystem.js');
 const previewSystem = require('./previewSystem.js');
+const announcementSystem = require('./announcementSystem.js');
 
 const cors = require('cors');
 
@@ -27,6 +28,7 @@ const engine = require('./engine.js');
 
 engine(app);
 
+announcementSystem(app);
 userSystem(app); // 用户系统
 submitSystem(app, fileStorage); // 提交系统
 problemSystem(app, fileStorage); // 题目系统

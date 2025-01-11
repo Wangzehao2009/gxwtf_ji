@@ -48,3 +48,12 @@ CREATE TABLE issue_problem_graph (
     issue_id INT,
     problem_id INT
 );
+
+CREATE TABLE announcements (
+    id INT NOT NULL,
+		time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    name VARCHAR(50) NOT NULL,
+		author VARCHAR(50),
+    visible BOOLEAN DEFAULT 0,
+		file_path VARCHAR(255) NOT NULL 
+);
