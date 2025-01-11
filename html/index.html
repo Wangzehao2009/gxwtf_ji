@@ -6,7 +6,11 @@
     <title>广学五题坊</title>
     <link rel="stylesheet" href="/css/banner.css">
     <link rel="stylesheet" href="/css/navbar.css">
-    
+    <style>
+        body{
+            background-color: rgba(239, 239, 239, 239);
+        }
+    </style>
     <script>
         // 检查用户登录状态
         async function checkLoginStatus() {
@@ -92,13 +96,12 @@
             </div>
         </div>
         <a href="/admin" id="adminLink" style="display: none;">管理</a>
-        <a href="/preview?file=uploads/announcement.md">公告栏</a>
         <a href="/login" class="login-link">登录</a>
         <a href="/register" class="register-link">注册</a>
     </div>
 
     <div class="announcement-card">
-        <h3 class="announcement-title">本站公告</h3>
+        <h2 class="announcement-title">公告栏</h2>
         <ul id="announcement-list">
           <!-- 公告列表动态生成 -->
         </ul>
@@ -106,34 +109,36 @@
       
       <style>
         .announcement-card {
-          background-color: #fff;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          padding: 16px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          max-width: 300px; /* 根据需求调整宽度 */
+        
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 250px; /* 根据需求调整宽度 */
+            margin-top: 30px;
+            margin-left: 10px;
         }
         .announcement-title {
-          margin: 0 0 12px;
-          font-size: 18px;
-          font-weight: bold;
-          color: #333;
+            margin: 0 0 12px;
+            /* font-size: 30px; */
+            font-weight: bold;
+            color: #333;
         }
         #announcement-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
         #announcement-list li {
-          margin-bottom: 8px;
+            margin-bottom: 8px;
         }
         #announcement-list a {
-          text-decoration: none;
-          color: #a31f23d7;
-          font-size: 14px;
+            text-decoration: none;
+            color: #a31f23d7;
+            /* font-size: 14px; */
         }
         #announcement-list a:hover {
-          color: #7b1a15;
+            color: #7b1a15;
         }
       </style>
       
