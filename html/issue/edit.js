@@ -45,6 +45,7 @@ document.getElementById('addProblemById').addEventListener('submit', async funct
     var problemId = data.problemId.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
     problems = problems.concat(problemId);
     loadIssueProblems();
+    alert("添加成功");
 });
 
 async function addProblemToIssue(problemId) {
@@ -63,7 +64,7 @@ async function loadIssueProblems() {
             .then(response => response.json())
             .then(problem => {
                 problem = problem[0];
-                listItem.textContent = `ID: ${problem.id}, Name: ${problem.name}`;
+                listItem.textContent = `${problem.id} ${problem.name}`;
                 const removeButton = document.createElement('button');
                 removeButton.textContent = '×';
                 (function (index) {
@@ -101,14 +102,22 @@ const table=new Table('tbody',
         var file_path=problem.file_path;
         file_path=file_path.substring(file_path.lastIndexOf('/')+1);
         return `
-            <td>${problem.id}</td>
-            <td>${problem.time}</td>
-            <td><a href="/preview?file=${file_path}">${problem.name}</a></td>
-            <td>${problem.subject}</td>
-            <td>${problem.submit_num}</td>
-            <td>${problem.score}</td>
-            <td>${problem.author}</td>
-            <td><button onclick="addProblemToIssue(${problem.id})">添加</button></td> 
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-row">
+                        <div class="card-item">${problem.id}</div>
+                        <div class="card-item">${problem.time}</div>
+                        <div class="card-item"><a href="/preview?file=${encodeURIComponent(problem.file_path)}">${problem.name}</a></div>
+                        <div class="card-item">${problem.subject}</div>
+                        <div class="card-item">${problem.submit_num}</div>
+                        <div class="card-item">${problem.score}</div>
+                        <div class="card-item">${problem.author}</div>
+                        <div class="card-item">
+                            <button onclick="addProblemToIssue(${problem.id})">添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
     },
     (tb)=>{
@@ -127,11 +136,33 @@ const table=new Table('tbody',
     }
 );
 
+document.getElementById('saveIssue').addEventListener('click', async function () {
+    if (issueId !== -1) {
+        const response = await fetch('/saveIssue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ issueId: issueId, problemIds: problems })
+        });
+        const result = await response.json();
+        alert(result.message || result.error);
+    } else {
+        const response = await fetch('/newissue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: document.getElementById('name').value, problemIds: problems })
+        });
+        const result = await response.json();
+        if (response.ok) issueId = result.issueId;
+        alert(result.message || result.error);
+    }
+});
+
 // 初次加载
 async function init() {
     loadIssueInfo();
     await initIssueProblems();
     await loadIssueProblems();
+    table.pageSize=5;
     table.reset();
 }
 

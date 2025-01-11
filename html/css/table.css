@@ -7,7 +7,7 @@ body {
 }
 
 /* 搜索栏卡片样式 */
-.search-card {
+.head-card {
     background-color: #fff; /* 背景颜色为白色 */
     justify-content: space-between;
     display: flex;
@@ -17,13 +17,13 @@ body {
     border: 1px solid #ddd;
 }
 
-.search-content {
+.head-content {
     display: flex;
     align-items: flex-end;  /* 让内容靠右对齐 */
     gap: 10px;
 }
 
-.search-card button {
+.head-card button {
     padding: 8px 16px;
     background-color: #a31f23d7;
     color: white;
@@ -32,11 +32,11 @@ body {
     cursor: pointer;
 }
 
-.search-card button:hover {
+.head-card button:hover {
     background-color: #7b1a15;
 }
 
-.search-card h1 {
+.head-card h1 {
     margin: 0;  /* 去掉默认的外边距 */
     font-size: 1.5rem;  /* 设置标题的大小 */
 }
@@ -47,6 +47,19 @@ body {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
+}
+
+.search-bar button {
+    padding: 8px 16px;
+    background-color: #a31f23d7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    background-color: #7b1a15;
 }
 
 /* Select栏样式 */
@@ -102,6 +115,20 @@ body {
     padding: 0 20px;
 }
 
+.card-list .default_button button {
+    padding: 8px;
+    width: 100%;
+    background-color: #a31f23d7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.card-list .default_button button:hover {
+    background-color: #7b1a15;
+}
+
 /* 卡片样式 */
 .card {
     min-height: 10px;
@@ -111,6 +138,15 @@ body {
     border: 1px solid #ddd;
     padding: 10px;
     box-shadow: none;
+}
+
+.card h2 {
+    line-height: 2; /* 为标题设置较小的行距 */
+}
+
+.card h2{
+    margin: 0;  /* 去掉默认的外边距 */
+    font-size: 1.3rem;  /* 设置标题的大小 */
 }
 
 /* 卡片内容样式 */

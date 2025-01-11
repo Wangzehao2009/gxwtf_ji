@@ -83,9 +83,9 @@ async function deleteIssue(req, res) {
 
 // 保存 issue 基本信息
 async function saveIssueBasicInfo(req, res) {
-    const { issueId, name , trans} = req.body;
+    const { issueId, name , trans=0} = req.body;
     let query = `UPDATE issues SET `;
-    if(name) query +=`name = ${name}, `;
+    if(name) query +=`name = '${name}', `;
     query+=`visible = visible ^ ${trans} WHERE id = ${issueId}`;
     try {
         db.query(query, (err, result) => {
@@ -101,9 +101,9 @@ async function saveIssueBasicInfo(req, res) {
 
 // 保存 issue 基本信息get
 async function saveIssueBasicInfoget(req, res) {
-    const { issueId, name , trans} = req.query;
+    const { issueId, name , trans=0} = req.query;
     let query = `UPDATE issues SET `;
-    if(name) query +=`name = ${name}, `;
+    if(name) query +=`name = '${name}', `;
     query+=`visible = visible ^ ${trans} WHERE id = ${issueId}`;
     try {
         db.query(query, (err, result) => {

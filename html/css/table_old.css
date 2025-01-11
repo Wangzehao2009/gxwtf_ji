@@ -7,7 +7,7 @@ body {
 }
 
 /* 搜索栏卡片样式 */
-.search-card {
+.head-card {
     background-color: #fff; /* 背景颜色为白色 */
     justify-content: space-between;
     display: flex;
@@ -17,7 +17,7 @@ body {
     margin: 20px; /* 外边距 */
 }
 
-.search-card h1 {
+.head-card h1 {
     margin: 0;  /* 去掉默认的外边距 */
     font-size: 1.5rem;  /* 设置标题的大小 */
 }
