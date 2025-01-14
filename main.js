@@ -11,6 +11,7 @@ const imageUpload = require('./imageUpload.js');
 const rankSystem = require('./rankSystem.js');
 const previewSystem = require('./previewSystem.js');
 const announcementSystem = require('./announcementSystem.js');
+const hangman = require("./hangman");
 
 const cors = require('cors');
 
@@ -27,7 +28,6 @@ app.use(express.urlencoded({ extended: true }));
 const engine = require('./engine.js');
 
 engine(app);
-
 announcementSystem(app);
 userSystem(app); // 用户系统
 submitSystem(app, fileStorage); // 提交系统
@@ -39,6 +39,9 @@ previewSystem(app); //预览系统
 app.use('/image', imageUpload); // 图床功能
 // 提供静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+hangman(app);
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'html', 'index.html'));
