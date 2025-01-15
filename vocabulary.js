@@ -6093,7 +6093,7 @@ const data = [
     {
         english: "film",
         phoneticSymbol: "[fɪlm]",
-        chinese: "n. 电影；影片；胶卷vt. 拍摄，把……拍成电影",
+        chinese: "n. 电影；影片；胶卷 vt. 拍摄，把……拍成电影",
     },
     {
         english: "final",
