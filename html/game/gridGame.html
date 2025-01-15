@@ -1,18 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>诗词九宫格</title>
     <style>
+        @font-face {
+            font-family: 'ZKTQKT';
+            src: url('/fonts/字酷堂清楷体.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'FZYanZQKSJF';
+            src: url('/fonts/FZYanZQKSJF.TTF') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'ZKTQKT', 'Times New Roman', Times, serif;
             text-align: center;
             margin: 20px;
         }
 
         #word {
-            font-size: 1.5em;
+            font-family: 'FZYanZQKSJF', 'Times New Roman', Times, serif;
+            font-size: 2em;
             margin: 20px 0;
             white-space: pre;
         }
@@ -22,9 +35,10 @@
         }
 
         #keyboard button {
+            font-family: 'FZYanZQKSJF', 'Times New Roman', Times, serif;
             margin: 2px;
             padding: 10px 15px;
-            font-size: 1em;
+            font-size: 1.5em;
         }
 
         #keyboard button.selected {
@@ -40,7 +54,7 @@
         #correctAnswer {
             display: none;  /* 默认隐藏正确答案 */
             margin-top: 20px;
-            font-size: 1.2em;
+            font-size: 1.3em;
         }
 
         #nextQuestionButton {
