@@ -98,9 +98,9 @@ function giveUp(req, res) {
 
 // 初始化路由
 function init(app) {
-  app.get("/start", startGame);
-  app.post("/guess", guessLetter);
-  app.post("/giveup", giveUp);
+  app.get("/game/hangman/start", startGame);
+  app.post("/game/hangman/guess", guessLetter);
+  app.post("/game/hangman/giveup", giveUp);
 }
 
 module.exports = init;

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诗词九宫格</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            text-align: center;
+            margin: 20px;
+        }
+
+        #word {
+            font-size: 1.5em;
+            margin: 20px 0;
+            white-space: pre;
+        }
+
+        #keyboard div {
+            margin: 5px 0;
+        }
+
+        #keyboard button {
+            margin: 2px;
+            padding: 10px 15px;
+            font-size: 1em;
+        }
+
+        #keyboard button.selected {
+            background-color: #a31f23d7;
+            color: white;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        #correctAnswer {
+            display: none;  /* 默认隐藏正确答案 */
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        #nextQuestionButton {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>诗词九宫格</h1>
+
+    <div id="keyboard">
+        <!-- 用于显示宫格的按钮 -->
+    </div>
+
+    <div id="word"></div>
+
+    <div id="status"></div>
+
+    <div id="correctAnswer">
+        <h2 id="poemLine"></h2>
+        <p id="poemInfo"></p>
+    </div>
+
+    <div id="actionButtons">
+        <button id="clearButton">清空</button>
+        <button id="deleteButton">删除</button>
+        <button id="giveUpButton">放弃</button>
+        <button id="submitButton">提交</button>
+    </div>
+
+    <button id="nextQuestionButton">下一题</button>
+
+    <script>
+        let n = 3;  // 网格的行数
+        let m = 3;  // 网格的列数
+        let selectedPoem = '';  // 用户已选的诗句
+        let correctAnswer = null;  // 存储正确答案的完整信息
+        const BASE_URL = "http://localhost:3000/game/gridGame";
+
+        // 获取游戏数据
+        function startGame() {
+            resetUI();  // 重置界面
+            fetch(`${BASE_URL}/start`)
+                .then(response => response.json())
+                .then(data => {
+                    const { gridData, correctAnswer: answer, n: rows, m: cols } = data;
+                    n = rows;  // 获取行数
+                    m = cols;  // 获取列数
+                    correctAnswer = answer;  // 保存完整的正确答案信息
+                    renderGrid(gridData);
+                    renderWord('');
+                    document.getElementById('submitButton').onclick = () => submitAnswer();
+                    document.getElementById('giveUpButton').onclick = () => giveUp();
+                    document.getElementById('deleteButton').onclick = () => deleteLastChar();
+                    document.getElementById('clearButton').onclick = () => clearSelection();
+                });
+        }
+
+        // 渲染格子
+        function renderGrid(gridData) {
+            const keyboard = document.getElementById('keyboard');
+            keyboard.innerHTML = '';
+            gridData.forEach((row, i) => {
+                const rowDiv = document.createElement('div');
+                row.forEach((char, j) => {
+                    const button = document.createElement('button');
+                    button.innerText = char;
+                    button.id = `button-${i}-${j}`;  // 给每个按钮一个唯一的ID
+                    button.onclick = () => selectPoem(char, i, j, button);  // 传递按钮作为参数
+                    rowDiv.appendChild(button);
+                });
+                keyboard.appendChild(rowDiv);
+            });
+        }
+
+        // 用户选择诗句的字
+        function selectPoem(char, row, col, button) {
+            selectedPoem += char;
+            renderWord(selectedPoem);
+
+            // 给按钮添加选中样式
+            button.classList.add('selected');
+            button.disabled = true;  // 禁用按钮，防止重复点击
+        }
+
+        // 渲染已选的诗句
+        function renderWord(word) {
+            document.getElementById('word').innerText = word;
+        }
+
+        // 提交答案
+        function submitAnswer() {
+            displayCorrectAnswer();
+            if (selectedPoem === correctAnswer.line) {
+                alert('回答正确！');
+            } else {
+                alert('回答错误！');
+            }
+            hideActionButtons();  // 隐藏操作按钮
+        }
+
+        // 放弃当前题目
+        function giveUp() {
+            displayCorrectAnswer();
+            alert('您放弃了本题');
+            hideActionButtons();  // 隐藏操作按钮
+        }
+
+        // 显示正确答案的相关信息
+        function displayCorrectAnswer() {
+            document.getElementById('correctAnswer').style.display = 'block';
+            document.getElementById('poemLine').innerText = correctAnswer.line;
+            document.getElementById('poemInfo').innerText = '《' + correctAnswer.name + '》 ' + correctAnswer.author;
+            document.getElementById('word').style.display = 'none';
+        }
+
+        // 删除已选字的最后一个字
+        function deleteLastChar() {
+            if (selectedPoem.length === 0) return;
+
+            const lastChar = selectedPoem[selectedPoem.length - 1];
+            selectedPoem = selectedPoem.slice(0, -1);
+            renderWord(selectedPoem);
+
+            const buttons = document.querySelectorAll('#keyboard button');
+            for (let button of buttons) {
+                if (button.innerText === lastChar && button.disabled) {
+                    button.classList.remove('selected');
+                    button.disabled = false;
+                    break;
+                }
+            }
+        }
+
+        // 清空所有已选字
+        function clearSelection() {
+            selectedPoem = '';  // 清空选中的诗句
+            renderWord(selectedPoem);
+
+            // 取消所有按钮的选中状态并启用
+            const buttons = document.querySelectorAll('#keyboard button');
+            for (let button of buttons) {
+                button.classList.remove('selected');
+                button.disabled = false;
+            }
+        }
+
+        // 隐藏操作按钮并显示下一题按钮
+        function hideActionButtons() {
+            document.getElementById('actionButtons').style.display = 'none';
+        }
+
+        // 重置界面
+        function resetUI() {
+            selectedPoem = '';
+            renderWord('');
+            document.getElementById('correctAnswer').style.display = 'none';
+            document.getElementById('word').style.display = 'block';
+            document.getElementById('actionButtons').style.display = 'block';
+        }
+
+        // 下一题按钮点击事件
+        document.getElementById('nextQuestionButton').onclick = () => startGame();
+
+        // 启动游戏
+        startGame();
+    </script>
+</body>
+</html>

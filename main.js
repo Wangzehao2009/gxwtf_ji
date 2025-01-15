@@ -11,7 +11,8 @@ const imageUpload = require('./imageUpload.js');
 const rankSystem = require('./rankSystem.js');
 const previewSystem = require('./previewSystem.js');
 const announcementSystem = require('./announcementSystem.js');
-const hangman = require("./hangman");
+const hangman = require("./hangman.js");
+const gridGame = require("./gridGame.js");
 
 const cors = require('cors');
 
@@ -41,6 +42,7 @@ app.use('/image', imageUpload); // 图床功能
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 hangman(app);
+gridGame(app);
 
 
 app.get('/', (req, res) => {
