@@ -1,13 +1,6 @@
-const data = [
-    { line: '床前明月光', name: '静夜思', author: '李白' },
-    { line: '明月几时有', name: '水调歌头·明月几时有', author: '苏轼' },
-    { line: '明月何时照我还', name: '114', author: '514' },
-    { line: '月明星稀', name: '111', author: '101' },
-    { line: '时间都去哪了', name: '123', author: '321' }
-    // 更多诗句
-];
+const { data } = require("./poem.js");
 
-const similarityThreshold = 1; // 设置相似度阈值
+const similarityThreshold = 0; // 设置相似度阈值
 const n = 3; // 网格的行数
 const m = 3; // 网格的列数
 
@@ -23,63 +16,152 @@ function calculateSimilarity(line1, line2) {
 // 生成游戏格子和正确答案
 function generateGame() {
     const maxPoemLength = Math.floor((n * m * 7) / 9);  // 限制最大诗句长度
-    let randomIndex = Math.floor(Math.random() * data.length);
-    let correctAnswer = data[randomIndex];
+    const minPoemLength = 4;
+    const specialCharRemovalRange = { l: 1, r: 2 }; // 设置丢弃的“特别的字”的数量范围
 
-    // 如果选中的诗句长度大于最大允许长度，则重新选取
-    while (correctAnswer.line.length > maxPoemLength) {
+    let correctAnswer;
+    let randomIndex;
+
+    // 生成随机答案，确保符合长度限制
+    do {
         randomIndex = Math.floor(Math.random() * data.length);
         correctAnswer = data[randomIndex];
-    }
+    } while (correctAnswer.line.length > maxPoemLength || correctAnswer.line.length < minPoemLength);
 
-    const correctLine = correctAnswer.line;
+    // 计算每首诗的相似度并排序，优先选择相似度大于阈值的诗句
+    const poemSimilarities = data.map(item => ({
+        poem: item,
+        similarity: calculateSimilarity(correctAnswer.line, item.line),
+    }));
 
-    // 找到与正确答案相似的诗句作为干扰项
-    const similarPoems = data.filter(item => {
-        const similarity = calculateSimilarity(correctLine, item.line);
-        return similarity >= similarityThreshold && item !== correctAnswer;
+    // 按照相似度从高到低排序
+    poemSimilarities.sort((a, b) => b.similarity - a.similarity);
+
+    let gridChars = correctAnswer.line.split('');  // 开始时，先将正确答案的每个字加入字库
+    let gridData = [];  // 用于存储生成的格子数据
+    let addedPoems = 0;  // 用于记录已添加的干扰诗句数量
+
+    // 先把正确答案的字填入gridData
+    gridChars.forEach(char => {
+        if (gridData.length < n * m) {
+            gridData.push(char);
+        }
     });
 
-    // 将正确答案的每个字加入到一个字库中
-    let gridChars = correctLine.split('');
+    let selectedPoems = [];  // 存储最终选择的干扰诗句
+    let selectedPoemLines = new Set();  // 用于记录已选择的诗句的行内容
 
-    // 从相似诗句中抽取字作为干扰项
-    similarPoems.forEach(poem => {
-        poem.line.split('').forEach(char => {
-            if (gridChars.length < n * m) { // 确保不会超过网格大小
-                gridChars.push(char);
+    // 添加相似度大于阈值的诗句，从第二个开始
+    poemSimilarities.forEach((item, index) => {
+        if (index > 0 && gridData.length < n * m && item.similarity >= similarityThreshold) {  // 跳过最相似的诗句
+            // 检查是否已经选择过这首诗句
+            if (!selectedPoemLines.has(item.poem.line)) {
+                const poemChars = item.poem.line.split('');
+                const specialChars = poemChars.filter(char => !correctAnswer.line.includes(char));
+
+                // 随机丢弃一些“特别的字”
+                const removalCount = Math.floor(Math.random() * (specialCharRemovalRange.r - specialCharRemovalRange.l + 1)) + specialCharRemovalRange.l;
+                const charsToRemove = getRandomChars(specialChars, removalCount);
+                selectedPoems.push(item);  // 记录作为干扰项的诗句
+                selectedPoemLines.add(item.poem.line);  // 将诗句添加到已选择的集合
+                addedPoems++;
+                poemChars.forEach(char => {
+                    if (gridData.length < n * m && !gridData.includes(char) && !charsToRemove.includes(char)) {
+                        gridData.push(char);
+                    }
+                });
+            }
+        }
+    });
+
+
+    // 如果相似度大于阈值的诗句不足以填满格子，则选择相似度小于阈值的诗句
+    if (gridData.length < n * m) {
+        poemSimilarities.forEach(item => {
+            if (item.similarity < similarityThreshold) {
+                // 检查是否已经选择过这首诗句
+                if (!selectedPoemLines.has(item.poem.line)) {
+                    const poemChars = item.poem.line.split('');
+                    const specialChars = poemChars.filter(char => !correctAnswer.line.includes(char));
+
+                    // 随机丢弃一些“特别的字”
+                    const removalCount = Math.floor(Math.random() * (specialCharRemovalRange.r - specialCharRemovalRange.l + 1)) + specialCharRemovalRange.l;
+                    const charsToRemove = getRandomChars(specialChars, removalCount);
+
+                    poemChars.forEach(char => {
+                        if (gridData.length < n * m && !gridData.includes(char) && !charsToRemove.includes(char)) {
+                            gridData.push(char);
+                            selectedPoems.push(item);  // 记录作为干扰项的诗句
+                            selectedPoemLines.add(item.poem.line);  // 将诗句添加到已选择的集合
+                        }
+                    });
+                }
             }
         });
-    });
+    }
 
-    // 如果字库不足以填满网格，则从所有诗句中继续添加
-    while (gridChars.length < n * m) {
-        const remainingPoems = data.filter(item => !gridChars.includes(item.line));
-        remainingPoems.forEach(poem => {
+
+    // 如果字库不足以填满网格，则继续从所有诗句中加入
+    while (gridData.length < n * m) {
+        data.forEach(poem => {
             poem.line.split('').forEach(char => {
-                if (gridChars.length < n * m) {
-                    gridChars.push(char);
+                if (gridData.length < n * m && !gridData.includes(char)) {
+                    gridData.push(char);
                 }
             });
         });
     }
 
+
     // 随机打乱字库中的字
-    gridChars = gridChars.sort(() => Math.random() - 0.5);
+    gridData = gridData.sort(() => Math.random() - 0.5);
 
     // 生成格子数据
-    const gridData = [];
+    const finalGridData = [];
     let currentIndex = 0;
     for (let i = 0; i < n; i++) {
         const row = [];
         for (let j = 0; j < m; j++) {
-            row.push(gridChars[currentIndex]);
+            row.push(gridData[currentIndex]);
             currentIndex++;
         }
-        gridData.push(row);
+        finalGridData.push(row);
     }
 
-    return { gridData, correctAnswer };
+    // 通过检查此网格生成的答案是否合法
+    if (!isValidGrid(finalGridData, selectedPoems)) {
+        return generateGame();  // 如果网格不合法，则重新生成
+    }
+    console.log("Correct Answer:", correctAnswer);
+    return { gridData: finalGridData, correctAnswer };
+}
+
+// 随机从数组中选择指定数量的元素
+function getRandomChars(chars, count) {
+    const randomChars = [];
+    while (randomChars.length < count && chars.length > 0) {
+        const index = Math.floor(Math.random() * chars.length);
+        randomChars.push(chars[index]);
+        chars.splice(index, 1); // 删除已选择的字符
+    }
+    return randomChars;
+}
+
+// 检查网格是否合法
+function isValidGrid(gridData, selectedPoems) {
+    const gridString = gridData.flat().join('');  // 将网格数据拼接成字符串
+
+    // 遍历每一个干扰项，检查其字是否都出现在网格中
+    for (const poem of selectedPoems) {
+        const poemChars = poem.poem.line.split('');
+        // 检查该干扰项的字符是否完全在网格中
+        if (poemChars.every(char => gridString.includes(char))) {
+            // 如果干扰项的字都在网格中，则表示答案不唯一
+            return false;
+        }
+    }
+
+    return true;  // 如果所有干扰项的字不能完全组成合法的答案，则合法
 }
 
 // 启动游戏
