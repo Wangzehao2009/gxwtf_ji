@@ -24,19 +24,28 @@
 }
 .form-row > div {
     width: 100%;
-    margin-bottom: 15px; /* 调整这里的值来控制距离 */
+    /* margin-bottom: 15px; 调整这里的值来控制距离 */
+    display: flex;
+    flex-direction: column;
+    justify-items: flex-start;
+    margin: 0px auto 15px auto;
 }
-.form-row > div:last-child {
+.dropdown{
+    width: 100%;
+    position: relative;
+}
+.dropdown > input{
+    width: calc(100% - 14px);
+    padding: 5px;
+    margin-bottom: 0px;
+}
+/* .form-row > div:last-child {
     width: 100%;
     margin-bottom: 0;
-}
+} */
 .form-row label {
     display: block;
     margin-bottom: 5px;
-}
-.form-row input[type="text"], .form-row select {
-    width: 100%;
-    padding: 5px;
 }
 .form-row button {
     padding: 10px 20px;
@@ -48,9 +57,6 @@
 }
 .form-row button:hover {
     background-color: #7b1a15;
-}
-.dropdown {
-    width: 97%;
 }
 .dropdown-content {
     width: 100%;
