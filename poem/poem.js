@@ -765,5 +765,4 @@ const data = [
 	{ line: '吹伤了那家', name: '《朝天子·咏喇叭》', author: '王磐' },
 	{ line: '只吹的水尽鹅飞罢', name: '《朝天子·咏喇叭》', author: '王磐' }
 ];
-
 module.exports = { data };
