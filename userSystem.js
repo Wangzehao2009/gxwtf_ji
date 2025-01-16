@@ -74,7 +74,7 @@ function loginStatus(req, res) {
 
 // 用户列表
 function userList(req, res) {
-    const { id, name, sortField = 'id', sortOrder = 'ASC', page = 1, pageSize = 15 } = req.query;
+    const { id, name, sortField = 'id', game, sortOrder = 'ASC', page = 1, pageSize = 15} = req.query;
     let query = 'SELECT * FROM users WHERE 1=1';
     if (id) query += ` AND id = ${id}`;
     if (name) query += ` AND (username = ${name} or real_name = ${name})`;

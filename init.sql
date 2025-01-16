@@ -11,7 +11,10 @@ CREATE TABLE users (
     phone VARCHAR(20),
     email VARCHAR(100),
     password VARCHAR(255) NOT NULL,
-    admin BOOLEAN DEFAULT 0
+    admin BOOLEAN DEFAULT 0,
+    hangman INT DEFAULT 0,
+    gridGame INT DEFAULT 0,
+    gameScore INT DEFAULT 0
 );
 
 CREATE TABLE submissions (
@@ -51,9 +54,9 @@ CREATE TABLE issue_problem_graph (
 
 CREATE TABLE announcements (
     id INT NOT NULL,
-		time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     name VARCHAR(50) NOT NULL,
-		author VARCHAR(50),
+    author VARCHAR(50),
     visible BOOLEAN DEFAULT 0,
-		file_path VARCHAR(255) NOT NULL 
+    file_path VARCHAR(255) NOT NULL 
 );

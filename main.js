@@ -13,6 +13,7 @@ const previewSystem = require('./previewSystem.js');
 const announcementSystem = require('./announcementSystem.js');
 const hangman = require("./hangman.js");
 const gridGame = require("./gridGame.js");
+const gameSystem = require("./gameSystem.js");
 
 const cors = require('cors');
 
@@ -43,6 +44,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 hangman(app);
 gridGame(app);
+gameSystem(app);
 
 
 app.get('/', (req, res) => {

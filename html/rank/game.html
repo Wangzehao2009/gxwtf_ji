@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学校提交榜</title>
+    <title>游戏排行榜</title>
     <script src="/table.js"></script>
     <script src="/basic.js"></script>
     <link rel="stylesheet" href="/css/table.css">
@@ -15,7 +15,16 @@
 
     <!-- 搜索栏 -->
     <div class="head-card">
-        <h1>学校提交榜</h1>
+        <h1>游戏排行榜</h1>
+        <div class="head-content">
+            <div class="select-bar">
+                <select id="game" onchange="table.reset()">
+                    <option value="gameScore">总分</option>
+                    <option value="hangman">hangman</option>
+                    <option value="gridGame">诗词九宫格</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <!-- 排序栏卡片（使用普通卡片外观） -->
@@ -23,7 +32,7 @@
         <div class="card-content">
             <div class="card-row">
                 <div>排名</div>
-                <div>学校</div>
+                <div>用户名</div>
                 <div class="sortable-header" onclick="table.sortTable('score')">分数 <span class="arrow"></span></div>
             </div>
         </div>
@@ -39,15 +48,14 @@
 
     <script>
         
-        // 函数：将学校数据转换为表格行
-        function translate(school) {
+        function translate(user) {
             return `
                 <div class="card">
                     <div class="card-content">
                         <div class="card-row">
-                            <div class="card-item">${school.rank}</div>
-                            <div class="card-item">${school.school}</div>
-                            <div class="card-item">${school.score.toFixed(2)}</div>
+                            <div class="card-item">${user.rank}</div>
+                            <div class="card-item">${user.username}</div>
+                            <div class="card-item">${user.score.toFixed(2)}</div>
                         </div>
                     </div>
                 </div>
@@ -55,18 +63,18 @@
         }
 
         // 获取学校排名数据
-        async function fetchSchools(table) {
+        async function fetchUsers(table) {
             try {
-                const response = await fetch(`/rank/schools?sortOrder=${table.sortOrder}`);
-                const schools = await response.json();
-                table.generate(schools, schools.length);
+                const response = await fetch(`/rank/games?game=${document.getElementById('game').value}&sortOrder=${table.sortOrder}`);
+                const users = await response.json();
+                table.generate(users, users.length);
             } catch (error) {
                 console.error('获取学校数据失败:', error);
             }
         }
 
         // 初始化表格
-        const table = new Table('tbody', translate, fetchSchools);
+        const table = new Table('tbody', translate, fetchUsers);
         table.sortField='score';
         
         // 加载学校数据

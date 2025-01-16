@@ -12,6 +12,37 @@
         body{
             background-color: rgba(239, 239, 239, 239);
         }
+        .white-card {       
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+            margin-left: 10px;
+            margin-bottom: 10px;
+        }
+        .announcement-title {
+            margin: 0 0 12px;
+            /* font-size: 30px; */
+            font-weight: bold;
+            color: #333;
+        }
+        #announcement-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #announcement-list li {
+            margin-bottom: 8px;
+        }
+        #announcement-list a {
+            text-decoration: none;
+            color: #a31f23d7;
+            /* font-size: 14px; */
+        }
+        #announcement-list a:hover {
+            color: #7b1a15;
+        }
     </style>
     <script>
         // 检查用户登录状态
@@ -95,6 +126,7 @@
             <div class="dropdown-content">
                 <a href="rank/submit">个人提交榜</a>
                 <a href="rank/school">学校提交榜</a>
+                <a href="rank/game">游戏排行榜</a>
             </div>
         </div>
         <div class="dropdown">
@@ -108,70 +140,36 @@
         <a href="/login" class="login-link">登录</a>
         <a href="/register" class="register-link">注册</a>
     </div>
-
-    <div class="announcement-card">
+    <div class="white-card" style="max-width: 250px;">
         <h2 class="announcement-title">公告栏</h2>
         <ul id="announcement-list">
           <!-- 公告列表动态生成 -->
         </ul>
-      </div>
-      
-      <style>
-        .announcement-card {
-        
-            background-color: #fff;
-            border: 1px solid #ddd;
-            padding: 16px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-width: 250px; /* 根据需求调整宽度 */
-            margin-top: 30px;
-            margin-left: 10px;
-            margin-bottom: 30px;
-        }
-        .announcement-title {
-            margin: 0 0 12px;
-            /* font-size: 30px; */
-            font-weight: bold;
-            color: #333;
-        }
-        #announcement-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        #announcement-list li {
-            margin-bottom: 8px;
-        }
-        #announcement-list a {
-            text-decoration: none;
-            color: #a31f23d7;
-            /* font-size: 14px; */
-        }
-        #announcement-list a:hover {
-            color: #7b1a15;
-        }
-      </style>
-      
-      <script>
-        // 获取公告列表
-        fetch('/announcement/list')
-          .then(response => response.json())
-          .then(data => {
-            const list = document.getElementById('announcement-list');
-            data.forEach(announcement => {
-              const li = document.createElement('li');
-              const a = document.createElement('a');
-              a.href = `/preview?file=${encodeURIComponent(announcement.file_path)}`;
-              a.textContent = announcement.name;
-              li.appendChild(a);
-              list.appendChild(li);
-            });
-          })
-          .catch(error => {
-            console.error('Error fetching announcements:', error);
-          });
-      </script>
-    <iframe src="/game/gridGame" height="450" style="border: 1px solid #ccc; margin-left: 10px;"></iframe>
-    <iframe src="/game/hangman" width="500" height="450" style="border: 1px solid #ccc; margin-left: 10px;"></iframe>
+    </div>
+    <style>
+    
+    </style>
+    
+    <script>
+    // 获取公告列表
+    fetch('/announcement/list')
+        .then(response => response.json())
+        .then(data => {
+        const list = document.getElementById('announcement-list');
+        data.forEach(announcement => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = `/preview?file=${encodeURIComponent(announcement.file_path)}`;
+            a.textContent = announcement.name;
+            li.appendChild(a);
+            list.appendChild(li);
+        });
+        })
+        .catch(error => {
+        console.error('Error fetching announcements:', error);
+        });
+    </script>
+    <iframe src="/game/gridGame" height="450" class="white-card"></iframe>
+    <iframe src="/game/hangman" width="500" height="450" class="white-card"></iframe>
 </body>
 </html>

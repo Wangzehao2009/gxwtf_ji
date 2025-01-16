@@ -93,6 +93,17 @@
         let selectedPoem = '';  // 用户已选的诗句
         let correctAnswer = null;  // 存储正确答案的完整信息
         const BASE_URL = "http://localhost:3000/game/gridGame";
+        var userId;
+        async function getUserId()
+        {
+            userId = await fetch("/dashboard", {
+                "mode": "cors",
+                "credentials": "include"
+            });
+            userId = await userId.json();
+            userId = userId.userId;
+        }
+        getUserId();
 
         // 获取游戏数据
         function startGame() {
@@ -149,6 +160,8 @@
         function submitAnswer() {
             displayCorrectAnswer();
             if (selectedPoem === correctAnswer.line) {
+                fetch(`/game/update?userId=${userId}&add=${n*m*1.0/9}&type=gridGame`);
+                fetch(`/game/update?userId=${userId}&add=${n*m*1.0/9}&type=gameScore`);
                 alert('回答正确！');
             } else {
                 alert('回答错误！');

@@ -25,7 +25,7 @@
     }
     #status {
       margin-top: 20px;
-      font-size: 1.2em;
+      font-size: 1.5em;
     }
   </style>
 </head>
@@ -44,6 +44,17 @@
         const BASE_URL = "http://localhost:3000/game/hangman";
         let wordState = [];
         let remainingAttempts = 6;
+        var userId;
+        async function getUserId()
+        {
+            userId = await fetch("/dashboard", {
+                "mode": "cors",
+                "credentials": "include"
+            });
+            userId = await userId.json();
+            userId = userId.userId;
+        }
+        getUserId();
     
         const renderWord = () => {
             document.getElementById("word").textContent = wordState.join(" ");
@@ -79,7 +90,20 @@
         };
     
         const updateStatus = (message) => {
-            document.getElementById("status").textContent = message;
+            const statusElement = document.getElementById("status");
+            statusElement.textContent = message;
+
+            // 根据消息内容改变文字颜色
+            if (message === "You win!") {
+                statusElement.style.color = "green";
+            } else if (message === "You lose...") {
+                statusElement.style.color = "red";
+            } else if (message === "You gave up") {
+                statusElement.style.color = "gray";
+            } else {
+                // 如果没有匹配的状态，可以恢复默认颜色
+                statusElement.style.color = "black";
+            }
         };
     
         const startGame = async () => {
@@ -110,6 +134,10 @@
     
             if (data.completed || remainingAttempts <= 0) {
                 const resultMessage = data.success ? "You win!" : "You lose...";
+                if(data.success){
+                    fetch(`/game/update?userId=${userId}&add=1&type=hangman`);
+                    fetch(`/game/update?userId=${userId}&add=1&type=gameScore`);
+                }
                 updateStatus(resultMessage);
     
                 // 显示提示和正确单词
@@ -138,8 +166,9 @@
     
         const showHint = (hint, correctWord) => {
             document.getElementById("info").style.display = "block";
-            document.getElementById("phonetic").textContent = hint.phoneticSymbol || "N/A";
-            document.getElementById("meaning").textContent = hint.chinese || "N/A";
+            if(!hint.phoneticSymbol) document.getElementById("phonetic").style.display = "none";
+            else document.getElementById("phonetic").textContent = hint.phoneticSymbol;
+            document.getElementById("meaning").textContent = hint.chinese;
     
             if (correctWord) {
                 document.getElementById("word").textContent = correctWord; // 显示正确单词

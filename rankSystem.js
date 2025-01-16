@@ -41,7 +41,13 @@ async function getSubmitRank(req, res) {
 
         userScores.sort((a, b) => b.score - a.score);
 
-        userScores.forEach((user, index) => {user.rank = index + 1;});
+        let rank = 1;
+        userScores.forEach((user, index) => {
+            user.rank = rank;
+            if (index < userScores.length - 1 && user.score !== userScores[index + 1].score) {
+                rank = index + 2;
+            }
+        });
 
         if (sortOrder === 'ASC') userScores.reverse();
 
@@ -96,7 +102,13 @@ async function getSchoolsRank(req, res) {
 
         sortedSchools.sort((a, b) => b.score - a.score);
 
-        sortedSchools.forEach((school, index) => {school.rank = index + 1;});
+        let rank = 1;
+        sortedSchools.forEach((school, index) => {
+            school.rank = rank;
+            if (index < sortedSchools.length - 1 && school.score !== sortedSchools[index + 1].score) {
+                rank = index + 2;
+            }
+        });
 
         if (sortOrder === 'ASC') sortedSchools.reverse();
 
@@ -104,10 +116,41 @@ async function getSchoolsRank(req, res) {
     } catch (err) {return res.status(500).json({ error: '服务器内部错误' });}
 }
 
+function getGamesRank(req, res) {
+    const columnName = req.query.game;
+    let sortOrder = req.query.sortOrder || 'DESC';
+
+    db.query(`SELECT * FROM users ORDER BY ${columnName} DESC`, (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Database query failed.' });
+        }
+
+        let rank = 1;
+        results.forEach((user, index) => {
+            user.rank = rank;
+            if (index < results.length - 1 && user[columnName] !== results[index + 1][columnName]) {
+                rank = index + 2;
+            }
+        });
+
+        let tableData = results.map(user => ({
+            rank: user.rank,
+            username: user.username,
+            score: user[columnName]
+        }));
+
+        if (sortOrder === 'ASC') tableData.reverse();
+
+        res.status(200).json(tableData);
+    });
+}
+
 
 function init(app){
     app.get('/rank/submissions',getSubmitRank);
     app.get('/rank/schools', getSchoolsRank);
+    app.get('/rank/games',getGamesRank);
 }
 
 module.exports = init;
