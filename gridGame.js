@@ -1,8 +1,8 @@
 const { data } = require("./poem/poem.js");
 
 const similarityThreshold = 0; // 设置相似度阈值
-const n = 3; // 网格的行数
-const m = 3; // 网格的列数
+let n = 3; // 网格的行数
+let m = 3; // 网格的列数
 
 // 计算两个诗句的相似度（字相同的个数）
 function calculateSimilarity(line1, line2) {
@@ -166,8 +166,9 @@ function isValidGrid(gridData, selectedPoems) {
 
 // 启动游戏
 function startGame(req, res) {
-    const { gridData, correctAnswer } = generateGame();
-    res.json({ gridData, correctAnswer, n, m }); // 返回完整的正确答案信息
+    n=req.query.n,m=req.query.m;
+    const { gridData, correctAnswer} = generateGame();
+    res.json({ gridData, correctAnswer}); // 返回完整的正确答案信息
 }
 
 // 用户猜测

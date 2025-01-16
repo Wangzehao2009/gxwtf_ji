@@ -86,6 +86,16 @@
     </div>
 
     <button id="nextQuestionButton">下一题</button>
+    <select id="gridSizex" onchange=startGame()>
+        <option value=3>3</option>
+        <option value=4>4</option>
+        <option value=5>5</option>
+    </select>
+    <select id="gridSizey" onchange=startGame()>
+        <option value=3>3</option>
+        <option value=4>4</option>
+        <option value=5>5</option>
+    </select>
 
     <script>
         let n = 3;  // 网格的行数
@@ -108,12 +118,13 @@
         // 获取游戏数据
         function startGame() {
             resetUI();  // 重置界面
-            fetch(`${BASE_URL}/start`)
+            n = document.getElementById('gridSizex').value || 3;
+            m = document.getElementById('gridSizey').value || 3;
+            console.log(n,m);
+            fetch(`${BASE_URL}/start?n=${n}&m=${m}`)
                 .then(response => response.json())
                 .then(data => {
-                    const { gridData, correctAnswer: answer, n: rows, m: cols } = data;
-                    n = rows;  // 获取行数
-                    m = cols;  // 获取列数
+                    const { gridData, correctAnswer: answer} = data;
                     correctAnswer = answer;  // 保存完整的正确答案信息
                     renderGrid(gridData);
                     renderWord('');
