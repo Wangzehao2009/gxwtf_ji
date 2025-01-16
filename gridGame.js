@@ -150,7 +150,6 @@ function getRandomChars(chars, count) {
 // 检查网格是否合法
 function isValidGrid(gridData, selectedPoems) {
     const gridString = gridData.flat().join('');  // 将网格数据拼接成字符串
-
     // 遍历每一个干扰项，检查其字是否都出现在网格中
     for (const poem of selectedPoems) {
         const poemChars = poem.poem.line.split('');

@@ -1,4 +1,9 @@
 const db = require('./mysql.js');
+const axios = require('axios');
+const jszip = require('jszip');
+const fs = require('fs');
+const path = require('path');
+
 
 // 新建 issue 并保存基本信息
 async function newEmptyIssue(req, res) {
@@ -306,7 +311,50 @@ async function issueCount(req, res) {
     });
 }
 
-//修改issue基本信息
+async function exportIssue(req, res) {
+    const { issueId } = req.query;
+    try {
+        // 使用完整的 URL，确保请求是有效的
+        const issueResponse = await axios.get(`http://localhost:3000/issues?id=${issueId}`);
+        const issue = issueResponse.data[0];
+
+        if (!issue) {
+            alert('Issue不存在');
+            return;
+        }
+
+        // 2. 获取题目列表
+        const problemsResponse = await axios.get(`http://localhost:3000/getProblemsInIssue?issueId=${issueId}`);
+        const problems = problemsResponse.data;
+
+        // 3. 创建zip对象
+        const zip = new jszip();
+
+        // 4. 遍历题目列表，按照要求重命名文件并加入zip
+        problems.forEach((problem, index) => {
+            const { subject, name, author, file_path } = problem;
+            const fileName = `${String(index + 1).padStart(2, '0')}_${subject}_${name}_${author}.md`;
+
+            // 使用 axios 获取文件内容并添加到 zip
+            const fileContent = fs.readFileSync(path.join(__dirname, file_path), 'utf8');
+            zip.file(fileName, fileContent);
+        });
+
+        // 打包成 zip 文件并发送给前端
+        const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+
+        // 对文件名进行 URL 编码，避免特殊字符问题
+        const encodedFileName = encodeURIComponent(issue.name) + '.zip';
+
+        // 设置 header 返回文件名
+        res.set('Content-Type', 'application/zip');
+        res.set('Content-Disposition', `attachment; filename="${encodedFileName}"`);
+        res.send(zipBuffer);
+    } catch (error) {
+        console.error('Error during issue export:', error);
+        res.status(500).send('服务器错误');
+    }
+}
 
 
 function init(app, fileStorage) {
@@ -323,6 +371,7 @@ function init(app, fileStorage) {
     app.post('/saveIssue', saveIssue);
     app.get('/issues', issueList); // 添加获取 issue 列表的路由
     app.get('/issues/count', issueCount); // 添加获取 issue 总数的路由
+    app.get('/downloadIssue',exportIssue);
 }
 
 module.exports = init;

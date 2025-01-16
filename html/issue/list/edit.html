@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/banner.css">
     <link rel="stylesheet" href="/css/table.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
     <div id="banner"></div>
@@ -47,6 +48,33 @@
     <ul class="pagination" id="pagination"></ul>
 
     <script>
+    async function exportIssue(issueId) {
+        try {
+            const response = await axios.get(`/downloadIssue?issueId=${issueId}`, {
+                responseType: 'blob'
+            });
+
+            // 获取文件名，假设后端已经在 header 中返回了正确的文件名
+            const disposition = response.headers['content-disposition'];
+            let fileName = disposition
+                ? disposition.split('filename=')[1].replace(/"/g, '')
+                : `${issueId}.zip`; // 默认使用 issueId 作为文件名
+
+            // 解码文件名（如果有 URL 编码）
+            fileName = decodeURIComponent(fileName);
+
+            // 创建下载链接
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName; // 使用解码后的文件名
+            link.click();
+            window.URL.revokeObjectURL(url); // 清除临时链接
+        } catch (error) {
+            console.error('导出失败:', error);
+            alert('导出失败，请稍后重试');
+        }
+    }
         const table = new Table('tbody',
             (issue) => {
                 return `
@@ -71,6 +99,7 @@
                                         <button class="operation" onclick="deleteIssue(${issue.id})">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
+                                        <button onclick="exportIssue(${issue.id})">一键导出</button>
                                     </div>
                                 </div>
                             </div>
