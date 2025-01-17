@@ -69,7 +69,7 @@ async function submitlist(req, res) {
         WHERE 1=1
     `;
     if (userId) {
-        await axios.get(`/users?name="${userId}"`)
+        await axios.get(`http://localhost:3000/users?name="${userId}"`)
         .then(response => {
             if(response.data.length === 0){
                 query += ` AND submissions.user_id = ${db.escape(userId)}`;
@@ -80,7 +80,7 @@ async function submitlist(req, res) {
         });
     }
     if (issue_id) {
-        await axios.get(`/issues?search=${issue_id}`)
+        await axios.get(`http://localhost:3000/issues?search=${issue_id}`)
             .then(response => {
                 if(response.data.length === 0){
                     query += ` AND submissions.issue_id = ${db.escape(issue_id)}`;
@@ -92,7 +92,7 @@ async function submitlist(req, res) {
     }
     if(subject) query+=` AND submissions.subject=${db.escape(subject)}`;
     if (problem_id) {
-        await axios.get(`/problems?search=${problem_id}`)
+        await axios.get(`http://localhost:3000/problems?search=${problem_id}`)
             .then(response => {
                 if(response.data.length === 0){
                     query += ` AND submissions.problem_id = ${db.escape(problem_id)}`;
