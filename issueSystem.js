@@ -325,6 +325,48 @@ async function exportIssue(req, res) {
             return res.status(404).send('Issue 不存在');
         }
 
+        // 封面图片目录
+        const coverDir = path.join(__dirname, 'public', 'covers', issue.name);
+
+        // 如果目录已存在，删除并重新创建
+        if (fs.existsSync(coverDir)) {
+            fs.rmSync(coverDir, { recursive: true, force: true });
+        }
+        fs.mkdirSync(coverDir, { recursive: true });
+
+        // 定义各个封面图片路径
+        const coverPath = path.join(coverDir, `original.png`);
+        const resized900x383Path = path.join(coverDir, `900x383.png`);
+        const resized383x383Path = path.join(coverDir, `383x383.png`);
+        const combinedImagePath = path.join(coverDir, `combined.png`);
+        const backgroundPath = path.join(__dirname, 'public', 'backgrounds', '1.png');
+
+        // 执行 Python 脚本生成图片
+        await new Promise((resolve, reject) => {
+            execFile(
+                'python3',
+                [
+                    './coverGenerators/coverGenerator2.py',
+                    '--text_line2', issue.name,
+                    '--background', backgroundPath,
+                    '--output_path', coverPath,
+                    '--output_path_b', resized900x383Path,
+                    '--output_path_c', resized383x383Path,
+                    '--combined_output_path', combinedImagePath,
+                    '--size_factor', '4'
+                ],
+                (error, stdout, stderr) => {
+                    if (error) {
+                        reject(`执行错误: ${error}`);
+                    } else if (stderr) {
+                        reject(`stderr: ${stderr}`);
+                    } else {
+                        resolve(stdout);
+                    }
+                }
+            );
+        });
+
         // 获取问题列表
         const problemsResponse = await axios.get(`http://localhost:3000/getProblemsInIssue?issueId=${issueId}`);
         const problems = problemsResponse.data;
@@ -332,44 +374,27 @@ async function exportIssue(req, res) {
         // 创建 ZIP 对象
         const zip = new jszip();
 
-        // 遍历题目列表，按要求添加到 ZIP 文件
-        problems.forEach((problem, index) => {
+        // 遍历问题列表，读取文件并添加到 ZIP 文件
+        for (const [index, problem] of problems.entries()) {
             const { subject, name, author, file_path } = problem;
             const fileName = `${String(index + 1).padStart(2, '0')}_${subject}_${name}_${author}.md`;
-            const fileContent = fs.readFileSync(path.join(__dirname, file_path), 'utf8');
-            zip.file(fileName, fileContent);
-        });
 
-        // 调用 Python 脚本生成封面
-        const coverPath = path.join(__dirname, 'temp', `${issue.name}_封面.png`);
-        const pythonScript = path.join(__dirname, 'coverGenerator.py');
+            // 检查文件路径是否存在
+            const fullFilePath = path.join(__dirname, file_path);
+            if (fs.existsSync(fullFilePath)) {
+                const fileContent = fs.readFileSync(fullFilePath, 'utf8');
+                zip.file(fileName, fileContent);
+            } else {
+                console.error(`文件不存在: ${fullFilePath}`);
+            }
+        }
 
-        await new Promise((resolve, reject) => {
-            execFile(
-                'python3',
-                [
-                    pythonScript,
-                    '--text',
-                    `广学五题坊｜${issue.name}`,
-                    '--logo',
-                    './public/uploads/1737036113673-726449805.png',
-                    '--output',
-                    coverPath,
-                    '--size_factor',
-                    '4',
-                ],
-                (error, stdout, stderr) => {
-                    if (error) {
-                        console.error('生成封面失败:', stderr);
-                        reject(error);
-                    } else {
-                        console.log('封面生成成功:', stdout);
-                        zip.file(`${issue.name}_封面.png`, fs.readFileSync(coverPath));
-                        resolve();
-                    }
-                }
-            );
-        });
+        // 创建封面文件夹并将封面图片添加到 ZIP
+        const coverFolder = zip.folder('封面');
+        coverFolder.file(`${issue.name}_original.png`, fs.readFileSync(coverPath));
+        coverFolder.file(`${issue.name}_900x383.png`, fs.readFileSync(resized900x383Path));
+        coverFolder.file(`${issue.name}_383x383.png`, fs.readFileSync(resized383x383Path));
+        coverFolder.file(`${issue.name}_combined.png`, fs.readFileSync(combinedImagePath));
 
         // 打包 ZIP 文件
         const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
@@ -384,7 +409,6 @@ async function exportIssue(req, res) {
         res.status(500).send('服务器错误');
     }
 }
-
 
 function init(app, fileStorage) {
     app.post('/newEmptyIssue', newEmptyIssue);
