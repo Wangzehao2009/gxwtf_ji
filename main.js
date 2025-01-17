@@ -11,9 +11,9 @@ const imageUpload = require('./imageUpload.js');
 const rankSystem = require('./rankSystem.js');
 const previewSystem = require('./previewSystem.js');
 const announcementSystem = require('./announcementSystem.js');
-const hangman = require("./hangman.js");
-const gridGame = require("./gridGame.js");
-const gameSystem = require("./gameSystem.js");
+const hangman = require("./game/hangman.js");
+const gridGame = require("./game/gridGame.js");
+const gameSystem = require("./game/gameSystem.js");
 
 const cors = require('cors');
 

@@ -1,4 +1,4 @@
-const db = require('./mysql');
+const db = require('../mysql');
 
 function updateGameScore(req,res)
 {

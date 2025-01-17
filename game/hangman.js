@@ -1,4 +1,4 @@
-const { data } = require("./vocabulary.js");
+const { data } = require("../vocabulary.js");
 
 let currentWord = null;
 let wordState = [];

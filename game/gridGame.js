@@ -1,4 +1,4 @@
-const { data } = require("./poem/poem.js");
+const { data } = require("../poem/poem.js");
 
 const similarityThreshold = 0; // 设置相似度阈值
 let n = 3; // 网格的行数
