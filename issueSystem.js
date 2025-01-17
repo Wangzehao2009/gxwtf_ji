@@ -3,6 +3,7 @@ const axios = require('axios');
 const jszip = require('jszip');
 const fs = require('fs');
 const path = require('path');
+const { execFile } = require('child_process');
 
 
 // 新建 issue 并保存基本信息
@@ -311,47 +312,75 @@ async function issueCount(req, res) {
     });
 }
 
+// 导出 Issue 的函数
 async function exportIssue(req, res) {
     const { issueId } = req.query;
+
     try {
-        // 使用完整的 URL，确保请求是有效的
+        // 获取 Issue 信息
         const issueResponse = await axios.get(`http://localhost:3000/issues?id=${issueId}`);
         const issue = issueResponse.data[0];
 
         if (!issue) {
-            alert('Issue不存在');
-            return;
+            return res.status(404).send('Issue 不存在');
         }
 
-        // 2. 获取题目列表
+        // 获取问题列表
         const problemsResponse = await axios.get(`http://localhost:3000/getProblemsInIssue?issueId=${issueId}`);
         const problems = problemsResponse.data;
 
-        // 3. 创建zip对象
+        // 创建 ZIP 对象
         const zip = new jszip();
 
-        // 4. 遍历题目列表，按照要求重命名文件并加入zip
+        // 遍历题目列表，按要求添加到 ZIP 文件
         problems.forEach((problem, index) => {
             const { subject, name, author, file_path } = problem;
             const fileName = `${String(index + 1).padStart(2, '0')}_${subject}_${name}_${author}.md`;
-
-            // 使用 axios 获取文件内容并添加到 zip
             const fileContent = fs.readFileSync(path.join(__dirname, file_path), 'utf8');
             zip.file(fileName, fileContent);
         });
 
-        // 打包成 zip 文件并发送给前端
+        // 调用 Python 脚本生成封面
+        const coverPath = path.join(__dirname, 'temp', `${issue.name}_封面.png`);
+        const pythonScript = path.join(__dirname, 'coverGenerator.py');
+
+        await new Promise((resolve, reject) => {
+            execFile(
+                'python3',
+                [
+                    pythonScript,
+                    '--text',
+                    `广学五题坊｜${issue.name}`,
+                    '--logo',
+                    './public/uploads/1737036113673-726449805.png',
+                    '--output',
+                    coverPath,
+                    '--size_factor',
+                    '4',
+                ],
+                (error, stdout, stderr) => {
+                    if (error) {
+                        console.error('生成封面失败:', stderr);
+                        reject(error);
+                    } else {
+                        console.log('封面生成成功:', stdout);
+                        zip.file(`${issue.name}_封面.png`, fs.readFileSync(coverPath));
+                        resolve();
+                    }
+                }
+            );
+        });
+
+        // 打包 ZIP 文件
         const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
 
-        // 对文件名进行 URL 编码，避免特殊字符问题
+        // 返回文件给客户端
         const encodedFileName = encodeURIComponent(issue.name) + '.zip';
-
-        // 设置 header 返回文件名
         res.set('Content-Type', 'application/zip');
         res.set('Content-Disposition', `attachment; filename="${encodedFileName}"`);
         res.send(zipBuffer);
     } catch (error) {
-        console.error('Error during issue export:', error);
+        console.error('导出 Issue 失败:', error);
         res.status(500).send('服务器错误');
     }
 }

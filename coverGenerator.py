@@ -1,9 +1,19 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
+import argparse
 
-def generate_image_with_text_and_logo(text, logo_path, size_factor=2, text_padding=40, font_path='public/fonts/FZYanZQKSJF.TTF', base_font_size=80, base_logo_size=200):
+def generate_image_with_text_and_logo(
+    text,
+    logo_path,
+    output_path,
+    size_factor=4,
+    text_padding=30,
+    font_path='public/fonts/FZYanZQKSJF.TTF',
+    base_font_size=40,
+    base_logo_size=250
+):
     # 获取字体的绝对路径
-    current_dir = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在目录
+    current_dir = os.path.dirname(os.path.abspath(__file__))
     font_absolute_path = os.path.join(current_dir, font_path)
 
     # 检查 Logo 是否存在
@@ -73,17 +83,26 @@ def generate_image_with_text_and_logo(text, logo_path, size_factor=2, text_paddi
     final_image.paste(large_cover, (0, 0))
     final_image.paste(small_cover, (width_large, 0))
 
-    # 保存最终图片
-    final_image.save('final_output_high_res.png')
-    print("高分辨率图片生成成功")
+    # 确保输出路径的目录存在
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-# 调用函数
-logo_path = './public/uploads/1737036113673-726449805.png'  # 本地路径
-generate_image_with_text_and_logo(
-    '广学五题坊｜第十期',
-    logo_path,
-    size_factor=4,  # 动态调整大小
-    text_padding=30,  # 基础文字和 Logo 间距
-    base_font_size=40,  # 基础字体大小
-    base_logo_size=250  # 基础 Logo 尺寸
-)
+    # 保存最终图片
+    final_image.save(output_path)
+    print(f"图片生成成功: {output_path}")
+
+if __name__ == "__main__":
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description="Generate cover image with text and logo")
+    parser.add_argument("--text", required=True, help="Text to display on the cover")
+    parser.add_argument("--logo", required=True, help="Path to the logo image")
+    parser.add_argument("--output", required=True, help="Output path for the generated cover image")
+    parser.add_argument("--size_factor", type=int, default=4, help="Scaling factor for the image size")
+    args = parser.parse_args()
+
+    # 调用函数生成图片
+    generate_image_with_text_and_logo(
+        text=args.text,
+        logo_path=args.logo,
+        output_path=args.output,
+        size_factor=args.size_factor
+    )
