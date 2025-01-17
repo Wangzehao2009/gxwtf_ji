@@ -3,7 +3,7 @@
     justify-content: center;
     align-items: center;
     min-height: calc(100vh - 100px);
-    background-image: url('http://localhost:3000/uploads/1735986558147-621009921.jpg');
+    background-image: url('/uploads/1735986558147-621009921.jpg');
     background-size: cover;
     background-position: top;
 }

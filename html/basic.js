@@ -18,7 +18,7 @@ window.onload = function() {
     const bannerHTML = `
         <a href="/" class="banner-link">
             <div class="banner">
-                <img src="http://localhost:3000/uploads/1735823331237-841608623.png" alt="Logo">
+                <img src="/uploads/1735823331237-841608623.png" alt="Logo">
                 <div>竞赛贯通·广学五题坊</div>
                 <div class="english">Class 14·Xuguang Olympiad Workshop</div>
             </div>

@@ -10,9 +10,9 @@ async function getUserSubmitRank(user_id,type)
     let totScore = 0, excel_count = 0;
     for (const subject of subjects) {
         try {
-            let response = await axios.get(`http://localhost:3000/submissions/count?userId=${user_id}&subject=${subject}`);
+            let response = await axios.get(`/submissions/count?userId=${user_id}&subject=${subject}`);
             totScore += Math.log(response.data.count+1);
-            response = await axios.get(`http://localhost:3000/submissions/count?userId=${user_id}&subject=${subject}&excel=1`);
+            response = await axios.get(`/submissions/count?userId=${user_id}&subject=${subject}&excel=1`);
             excel_count += response.data.count;
         } catch (err) {
             console.error(`查询 ${subject} 失败:`, err);
@@ -25,7 +25,7 @@ async function getUserSubmitRank(user_id,type)
 async function getSubmitRank(req, res) {
     const { sortOrder, type } = req.query;
     try {
-        const response = await axios.get('http://localhost:3000/users');
+        const response = await axios.get('/users');
         const users = response.data;
         const userScores = [];
 

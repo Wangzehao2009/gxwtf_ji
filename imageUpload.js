@@ -27,7 +27,7 @@ router.post('/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: '请上传图片文件' });
     }
-    const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+    const imageUrl = `/uploads/${req.file.filename}`;
     res.status(200).json({ message: '图片上传成功', imageUrl: imageUrl });
 });
 
@@ -47,7 +47,7 @@ router.get('/list', (req, res) => {
             const stats = fs.statSync(filePath);
             return {
                 name: file,
-                url: `http://localhost:3000/uploads/${file}`,
+                url: `/uploads/${file}`,
                 uploadTime: stats.mtime,
                 size: stats.size // 文件大小，单位为字节
             };

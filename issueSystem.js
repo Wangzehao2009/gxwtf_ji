@@ -318,7 +318,7 @@ async function exportIssue(req, res) {
 
     try {
         // 获取 Issue 信息
-        const issueResponse = await axios.get(`http://localhost:3000/issues?id=${issueId}`);
+        const issueResponse = await axios.get(`/issues?id=${issueId}`);
         const issue = issueResponse.data[0];
 
         if (!issue) {
@@ -368,7 +368,7 @@ async function exportIssue(req, res) {
         });
 
         // 获取问题列表
-        const problemsResponse = await axios.get(`http://localhost:3000/getProblemsInIssue?issueId=${issueId}`);
+        const problemsResponse = await axios.get(`/getProblemsInIssue?issueId=${issueId}`);
         const problems = problemsResponse.data;
 
         // 创建 ZIP 对象

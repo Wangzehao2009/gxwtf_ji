@@ -21,7 +21,7 @@ async function submit(req, res) {
             }
 
             // 查询 problem_id 所对应的 problem 的 subject
-            axios.get(`http://localhost:3000/problems?id=${problem_id}`)
+            axios.get(`/problems?id=${problem_id}`)
                 .then(response => {
                     const problem = response.data[0];
                     const subject = problem.subject;
@@ -69,7 +69,7 @@ async function submitlist(req, res) {
         WHERE 1=1
     `;
     if (userId) {
-        await axios.get(`http://localhost:3000/users?name="${userId}"`)
+        await axios.get(`/users?name="${userId}"`)
         .then(response => {
             if(response.data.length === 0){
                 query += ` AND submissions.user_id = ${db.escape(userId)}`;
@@ -80,7 +80,7 @@ async function submitlist(req, res) {
         });
     }
     if (issue_id) {
-        await axios.get(`http://localhost:3000/issues?search=${issue_id}`)
+        await axios.get(`/issues?search=${issue_id}`)
             .then(response => {
                 if(response.data.length === 0){
                     query += ` AND submissions.issue_id = ${db.escape(issue_id)}`;
@@ -92,7 +92,7 @@ async function submitlist(req, res) {
     }
     if(subject) query+=` AND submissions.subject=${db.escape(subject)}`;
     if (problem_id) {
-        await axios.get(`http://localhost:3000/problems?search=${problem_id}`)
+        await axios.get(`/problems?search=${problem_id}`)
             .then(response => {
                 if(response.data.length === 0){
                     query += ` AND submissions.problem_id = ${db.escape(problem_id)}`;
@@ -156,7 +156,7 @@ function deleteSubmission(req, res) {
         const submission = results[0];
         const filePath = submission.file_path;
         const problemId = submission.problem_id;
-        axios.get(`http://localhost:3000/problems?id=${problemId}`)
+        axios.get(`/problems?id=${problemId}`)
             .then(response => {
                 const problem = response.data[0];
                 // 删除题目记录
