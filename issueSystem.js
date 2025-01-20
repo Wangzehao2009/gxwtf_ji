@@ -356,6 +356,7 @@ async function exportIssue(req, res) {
                     '--size_factor', '4'
                 ],
                 (error, stdout, stderr) => {
+                    console.log(stdout);
                     if (error) {
                         reject(`执行错误: ${error}`);
                     } else if (stderr) {

@@ -4,7 +4,7 @@ import argparse
 
 def generate_custom_cover(
     text_line2, background_path, output_path,
-    font_path='public/fonts/FZYanZQKSJF.TTF',
+    font_path='../public/fonts/FZYanZQKSJF.TTF',
     base_width=1362, base_height=768,
     base_font_size_line1=100, base_font_size_line2=60,
     base_line_spacing=20, size_factor=1):
