@@ -71,15 +71,13 @@
 
         const table = new Table('tbody',
             (problem) => {
-                var file_path = problem.file_path;
-                file_path = file_path.substring(file_path.lastIndexOf('/') + 1);
                 return `
                     <div class="card">
                         <div class="card-content">
                             <div class="card-row">
                                 <div class="card-item">${problem.id}</div>
                                 <div class="card-item">${problem.time}</div>
-                                <div class="card-item"><a href="/preview?file=${file_path}">${problem.name}</a></div>
+                                <div class="card-item"><a href="/preview?file=${encodeURIComponent(problem.file_path)}">${problem.name}</a></div>
                                 <div class="card-item">${problem.subject}</div>
                                 <div class="card-item">${problem.submit_num}</div>
                                 <div class="card-item">${problem.score}</div>
