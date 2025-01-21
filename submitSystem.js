@@ -21,7 +21,7 @@ async function submit(req, res) {
             }
 
             // 查询 problem_id 所对应的 problem 的 subject
-            axios.get(`/problems?id=${problem_id}`)
+            axios.get(`http://localhost:3000/problems?id=${problem_id}`)
                 .then(response => {
                     const problem = response.data[0];
                     const subject = problem.subject;
