@@ -156,7 +156,7 @@ function deleteSubmission(req, res) {
         const submission = results[0];
         const filePath = submission.file_path;
         const problemId = submission.problem_id;
-        axios.get(`/problems?id=${problemId}`)
+        axios.get(`http://localhost:3000/problems?id=${problemId}`)
             .then(response => {
                 const problem = response.data[0];
                 // 删除题目记录
