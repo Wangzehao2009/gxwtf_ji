@@ -140,10 +140,11 @@
             const response = await fetch('/problems/latestId');
             const result = await response.json();
             const problemId = result.latestId + 1;
+            const fileInput = document.getElementById('file');
             if (fileOption === 'upload' && fileInput.files.length > 0) {
-                const newFileName = `problem_${problemId}${file.name.substring(file.name.lastIndexOf('.'))}`;
                 const file = fileInput.files[0];
-                formData.set('file', new File([file], newfileName, { type: file.type }));
+                const newFileName = `problem_${problemId}${file.name.substring(file.name.lastIndexOf('.'))}`;
+                formData.set('file', new File([file], newFileName, { type: file.type }));
             } else if (fileOption === 'edit') {
                 const filePath = `uploads/problem_${problemId}.md`;
                 formData.set('filePath',filePath);
