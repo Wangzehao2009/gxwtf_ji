@@ -9,65 +9,88 @@
     <script src="/basic.js"></script>
     <link rel="stylesheet" href="/css/banner.css">
     <link rel="stylesheet" href="/css/table.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-        <div id="banner"></div>
-
-    <h2>Issue 基本信息</h2>
-    <div class="name">
-        <p>Issue 名称:</p>
-        <input id="name">
+    <div id="banner"></div>
+    <div class="head-card">
+        <h1>Issue 基本信息</h1>
     </div>
-    <button id="saveBasicInfo">保存</button>
 
-    <h2>添加题目</h2>
-    <form id="addProblemById">
-        <label for="problemId">用ID添加（多个题目用半角逗号分隔）：</label>
-        <input type="text" id="problemId" name="problemId" required>
-        <button type="submit">添加</button>
-    </form>
+    <div class="card-list">
+        <div class="card">
+            <h2>栏目名称</h2>
+            <div class="search-bar">
+                <input id="name">
+                <button id="saveBasicInfo">保存</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="head-card">
+                <h2>添加题目</h2>
+                <div class="head-content">
+                    <div class="select-bar">
+                        <select id="subject" onchange="table.reset()">
+                            <option value="">全部</option>
+                            <option value="数学">数学</option>
+                            <option value="物理">物理</option>
+                            <option value="化学">化学</option>
+                            <option value="生物">生物</option>
+                            <option value="信息">信息</option>
+                        </select>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" id="search" placeholder="搜索题目或作者">
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" id="problemIdInput" placeholder="输入题号">
+                    </div>
+                    <button onclick="table.reset()">查询</button>
+                    <div class="search-bar">
+                        <form id="addProblemById">
+                            <input type="text" id="problemId" name="problemId" placeholder="输入题号（多题半角逗号分隔）" required>
+                            <button type="submit">添加</button>
+                        </form> 
+                    </div>
+                </div>
+            </div>
 
-    <h2>题目列表</h2>
-    <div>
-        <label for="subject">选择学科:</label>
-        <select id="subject" onchange="table.reset()">
-            <option value="">全部</option>
-            <option value="数学">数学</option>
-            <option value="物理">物理</option>
-            <option value="化学">化学</option>
-            <option value="生物">生物</option>
-            <option value="信息">信息</option>
-        </select>
-        
-        <input type="text" id="search" placeholder="搜索题目或作者">
-        <input type="text" id="problemIdInput" placeholder="输入题目ID">
-        
-        <button onclick="table.reset()">查询</button>
+            <!-- 排序栏卡片（使用普通卡片外观） -->
+            <div class="card sort-bar">
+                <div class="card-content">
+                    <div class="card-row">
+                        <div class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow"></span></div>
+                        <div class="sortable-header" onclick="table.sortTable('time')">时间 <span class="arrow"></span></div>
+                        <div>题目名称</div>
+                        <div>学科</div>
+                        <div class="sortable-header" onclick="table.sortTable('submit_num')">提交次数 <span class="arrow"></span></div>
+                        <div class="sortable-header" onclick="table.sortTable('score')">评分 <span class="arrow"></span></div>
+                        <div>作者</div>
+                        <div>操作</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 卡片列表 -->
+            <div class="card-list" id="tbody">
+                <!-- 动态生成卡片内容 -->
+            </div>
+
+            <!-- 分页 -->
+            <ul class="pagination" id="pagination"></ul>
+
+        </div>
+
+        <div class="card">
+            <h2>题目列表</h2>
+            <div class="card-list">
+                <ul id="issueProblems" class="sortable"></ul>
+            </div>
+        </div>
+        <div class="default_button">
+            <button id="saveIssue">保存题单</button>
+        </div>
     </div>
-    
-    <table id="problemsTable">
-        <thead>
-            <tr>
-                <th class="sortable-header" onclick="table.sortTable('id')">编号 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="table.sortTable('time')">时间 <span class="arrow">▲▼</span></th>
-                <th>题目名称</th>
-                <th>学科</th>
-                <th class="sortable-header" onclick="table.sortTable('submit_num')">提交次数 <span class="arrow">▲▼</span></th>
-                <th class="sortable-header" onclick="table.sortTable('score')">评分 <span class="arrow">▲▼</span></th>
-                <th>作者</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="tbody">
-            <!-- Data will be inserted here -->
-        </tbody>
-    </table>
-
-    <ul class="pagination" id="pagination"></ul>
-
-    <h2>当前 Issue 中的题目</h2>
-    <ul id="issueProblems" class="sortable"></ul>
-    <button id="saveIssue">保存题单</button>
     <script>
         document.getElementById('saveIssue').addEventListener('click', async function () {
             const name = document.getElementById('name').value;
@@ -80,12 +103,12 @@
             const result = await response.json();
             if (response.ok) {
                 const issueId = result.issueId;
-                window.location.href = `/edit/issue?issueId=${issueId}`;
+                window.location.href = `/issue/edit?issueId=${issueId}`;
             } else {
                 alert(result.message || result.error);
             }
         });
     </script>
-    <script src="issue.js"></script>
+    <script src="edit.js"></script>
 </body>
 </html>
