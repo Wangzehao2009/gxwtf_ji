@@ -7,12 +7,24 @@
     <title>注册页面</title>
     <style>
         body { font-family: Arial, sans-serif;}
-        .container { max-width: 400px; margin: auto; margin: auto; padding: 70px;}
+        .container { max-width: 400px; margin: auto; padding: 70px; }
         input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {
             width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box;
         }
         button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #218838; }
+        .agreement-container {
+            display: flex; align-items: center; margin: 10px 0;
+        }
+        .agreement-container label {
+            margin-left: 5px;
+        }
+        .agreement-container a {
+            text-decoration: none; color: #007bff; margin-left: 5px;
+        }
+        .agreement-container a:hover {
+            text-decoration: underline;
+        }
     </style>
     <script src="/basic.js"></script>
     <link rel="stylesheet" href="/css/banner.css">
@@ -29,13 +41,20 @@
     <div class="container">
         <h2>用户注册</h2>
         <form id="registerForm">
-            <input type="text" placeholder="用户名" name="username" required><br>
-            <input type="text" placeholder="真实姓名" name="real_name" required><br>
-            <input type="text" placeholder="学校" name="school" required><br>
-            <input type="text" placeholder="年级" name="grade" required><br>
-            <input type="tel" placeholder="手机号" name="phone" required><br>
-            <input type="email" placeholder="电子邮箱" name="email" required><br>
-            <input type="password" placeholder="密码" name="password" required><br>
+            <input type="text" placeholder="用户名*" name="username" required><br>
+            <input type="text" placeholder="真实姓名" name="real_name"><br>
+            <input type="text" placeholder="学校" name="school"><br>
+            <input type="text" placeholder="年级" name="grade"><br>
+            <input type="tel" placeholder="手机号" name="phone"><br>
+            <input type="email" placeholder="电子邮箱*" name="email"><br>
+            <input type="password" placeholder="密码*" name="password" required><br>
+
+            <div class="agreement-container">
+                <input type="checkbox" id="agreement" name="agreement">
+                <label for="agreement">我已阅读并同意广学五题坊的</label>
+                <a href="/preview?file=public%2Fannouncements%2FuserAgreement.md" target="_blank">《用户许可协议》</a>
+            </div>
+
             <button type="submit">注册</button>
         </form>
         <p id="message"></p>
@@ -43,13 +62,19 @@
 
     <script>
         document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            const agreementChecked = document.getElementById('agreement').checked;
+            if (!agreementChecked) {
+                event.preventDefault();
+                alert('请先阅读并同意《用户许可协议》');
+                return;
+            }
             event.preventDefault();
             const formData = new FormData(event.target);
             const data = Object.fromEntries(formData);
-            connect('/register',JSON.stringify(data),(data)=>{
-                document.getElementById('message').textContent=data.message;
-            },(data)=>{
-                document.getElementById('message').textContent=data.error;
+            connect('/register', JSON.stringify(data), (data) => {
+                document.getElementById('message').textContent = data.message;
+            }, (data) => {
+                document.getElementById('message').textContent = data.error;
             });
         });
     </script>
