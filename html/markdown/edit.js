@@ -4,6 +4,10 @@ const preview = document.querySelector('.markdown-body');
 let isSyncing = false; // 用于防止循环滚动同步
 let editorInstance = null;
 
+
+// 判断是否为 Mac 系统
+const isMac = /macintosh|mac os x/i.test(navigator.userAgent);
+
 // 选择 textarea 和预览容器
 
 // 初始化编辑器
@@ -76,12 +80,10 @@ async function loadFileContent() {
         return;
     }
     const filePath = `/filecontent/${fileName}`;
-    console.log(`Fetching file from: ${filePath}`); // 调试信息
     try {
         const response = await fetch(filePath);
         if (response.ok) {
             const data = await response.json();
-            console.log('File content loaded successfully'); // 调试信息
             textEditor.value = data.content;
             lastContent = data.content;
             lastSavedContent = data.content;
@@ -90,18 +92,24 @@ async function loadFileContent() {
             // 初始化历史记录
             historyStack.push(data.content);
         } else {
-            console.error('Failed to load file content'); // 调试信息
             alert('无法加载文件内容');
         }
     } catch (error) {
-        console.error('Error fetching file:', error); // 调试信息
         alert('无法加载文件内容');
     }
 }
-
+function contrlkey(event)
+{
+    if(isMac) {
+        return event.metaKey;
+    }
+    else {
+        return event.ctrlKey;
+    }
+}
 // 监听 command+s 组合键
 textEditor.addEventListener('keydown', async (event) => {
-    if (event.metaKey && event.key === 's') {
+    if (contrlkey(event) && event.key === 's') {
         event.preventDefault(); // 阻止默认保存行为
     
         const urlParams = new URLSearchParams(window.location.search);
@@ -148,12 +156,12 @@ textEditor.addEventListener('keydown', async (event) => {
         saveFile(filePath, content);
     }
 
-    if (event.metaKey && event.key === 'z') {
+    if (contrlkey(event) && event.key === 'z') {
         event.preventDefault(); // 阻止默认撤回行为
         undo();
     }
 
-    if (event.metaKey && event.key === 'y') {
+    if (contrlkey(event) && event.key === 'y') {
         event.preventDefault(); // 阻止默认重做行为
         redo();
     }
