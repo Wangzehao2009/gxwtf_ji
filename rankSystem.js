@@ -121,7 +121,7 @@ function getGamesRank(req, res) {
     const columnName = req.query.game;
     let sortOrder = req.query.sortOrder || 'DESC';
 
-    db.query(`SELECT * FROM users ORDER BY ${columnName} DESC`, (err, results) => {
+    db.query(`SELECT * FROM users WHERE ${columnName} > 0 ORDER BY ${columnName} DESC`, (err, results) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: 'Database query failed.' });
