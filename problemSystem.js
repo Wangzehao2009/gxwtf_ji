@@ -46,7 +46,7 @@ function problemlist(req, res) {
     }
     if(visible) query += ` AND visible = ${visible}`;
     // 排序
-    query += ` ORDER BY ${sortField} ${sortOrder}`;
+    if(sortField) query += ` ORDER BY ${sortField} ${sortOrder}`;
     // 分页
     const offset = (page - 1) * pageSize;
     query += ` LIMIT ${pageSize} OFFSET ${offset}`;

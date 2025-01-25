@@ -78,7 +78,7 @@ function userList(req, res) {
     let query = 'SELECT * FROM users WHERE 1=1';
     if (id) query += ` AND id = ${id}`;
     if (name) query += ` AND (username = ${name} or real_name = ${name})`;
-    query += ` ORDER BY ${sortField} ${sortOrder}`;
+    if(sortField) query += ` ORDER BY ${sortField} ${sortOrder}`;
     const offset = (page - 1) * pageSize;
     query += ` LIMIT ${pageSize} OFFSET ${offset}`;
     db.query(query, (err, results) => {

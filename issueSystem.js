@@ -189,7 +189,7 @@ async function getProblemsInIssue(req, res) {
     }
     query += ` WHERE issue_problem_graph.issue_id = ${issueId}`;
     // 排序
-    query += ` ORDER BY ${sortField} ${sortOrder}`;
+    if(sortField) query += ` ORDER BY ${sortField} ${sortOrder}`;
     // 分页
     const offset = (page - 1) * pageSize;
     query += ` LIMIT ${pageSize} OFFSET ${offset}`;
@@ -277,7 +277,7 @@ async function issueList(req, res) {
         query += ` AND visible = ${visible}`;
     }
     // 排序
-    query += ` ORDER BY ${sortField} ${sortOrder}`;
+    if(sortField) query += ` ORDER BY ${sortField} ${sortOrder}`;
     // 分页
     const offset = (page - 1) * pageSize;
     query += ` LIMIT ${pageSize} OFFSET ${offset}`;
