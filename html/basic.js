@@ -26,3 +26,5 @@ window.onload = function() {
     `;
     document.getElementById('banner').innerHTML = bannerHTML;
 }
+
+console.log('version 1.0.0');
