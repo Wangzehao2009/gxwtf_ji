@@ -160,6 +160,7 @@
 
                 document.getElementById("keyboard").innerHTML = "";
                 document.getElementById("giveUpButton").style.display = "none"; // 隐藏Give Up按钮
+                return correct;
             } else {
                 updateStatus(`Remaining attempts: ${remainingAttempts}`);
             }

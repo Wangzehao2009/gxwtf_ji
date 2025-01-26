@@ -17332,15 +17332,15 @@ const data = [
     },
     {
         english: "clear up",
-        chinese: "整理，收拾, (天气)放晴",
+        chinese: "整理，收拾, （天气）放晴",
     },
     {
         english: "come about",
         chinese: "发生，产生",
     },
     {
-        english: "come across (",
-        chinese: "偶然)遇见(或发现）",
+        english: "come across",
+        chinese: "（偶然）遇见（或发现）",
     },
     {
         english: "come back",
