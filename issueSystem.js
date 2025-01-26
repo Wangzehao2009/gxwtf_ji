@@ -378,12 +378,13 @@ async function exportIssue(req, res) {
         // 遍历问题列表，读取文件并添加到 ZIP 文件
         for (const [index, problem] of problems.entries()) {
             const { subject, name, author, file_path } = problem;
-            const fileName = `${String(index + 1).padStart(2, '0')}_${subject}_${name}_${author}.md`;
+            const extName = path.extname(file_path);
+            const fileName = `${String(index + 1).padStart(2, '0')}_${subject}_${name}_${author}.${extName}`;
 
             // 检查文件路径是否存在
             const fullFilePath = path.join(__dirname, file_path);
             if (fs.existsSync(fullFilePath)) {
-                const fileContent = fs.readFileSync(fullFilePath, 'utf8');
+                const fileContent = fs.readFileSync(fullFilePath);
                 zip.file(fileName, fileContent);
             } else {
                 console.error(`文件不存在: ${fullFilePath}`);
