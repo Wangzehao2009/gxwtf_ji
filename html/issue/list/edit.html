@@ -50,7 +50,7 @@
     <script>
     async function exportIssue(issueId) {
         try {
-            const response = await axios.get(`http://localhost:3000/downloadIssue?issueId=${issueId}`, {
+            const response = await axios.get(`/downloadIssue?issueId=${issueId}`, {
                 responseType: 'blob'
             });
 

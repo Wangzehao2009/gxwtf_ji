@@ -43,7 +43,7 @@ function login(req, res) {
             res.status(200).send(JSON.stringify({ message: '登录成功', userId: user.id }));
         });
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500).send(JSON.stringify({ error: '服务器错误' }));
     }
 }

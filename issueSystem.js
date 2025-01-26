@@ -35,7 +35,7 @@ async function newissue(req, res) {
             (err, result) => {
                 if (err) return res.status(500).json({ error: '未登录' });
                 const issueId = result.insertId;
-                console.log(issueId);
+                // console.log(issueId);
 
                 // 插入多个题目
                 if (problemIds && problemIds.length > 0) {
@@ -356,7 +356,8 @@ async function exportIssue(req, res) {
                     '--size_factor', '4'
                 ],
                 (error, stdout, stderr) => {
-                    console.log(stdout);
+                    // console.log(stdout);
+                    // console.error(stderr);
                     if (error) {
                         reject(`执行错误: ${error}`);
                     } else if (stderr) {

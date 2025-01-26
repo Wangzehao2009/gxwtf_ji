@@ -132,7 +132,7 @@ function generateGame() {
     if (!isValidGrid(finalGridData, selectedPoems)) {
         return generateGame();  // 如果网格不合法，则重新生成
     }
-    console.log("Correct Answer:", correctAnswer);
+    // console.log("Correct Answer:", correctAnswer);
     return { gridData: finalGridData, correctAnswer };
 }
 

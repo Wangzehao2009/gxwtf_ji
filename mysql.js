@@ -3,7 +3,7 @@ const mysql=require('mysql2');
 const db=mysql.createConnection({
     host:'localhost',
     user:'root',
-    password:'',
+    password:'gxwtf',
     database:'guangfang',
     dateStrings:true
 });
@@ -19,3 +19,4 @@ setTimeout(() => {
 }, 3000);
 
 module.exports=db;
+

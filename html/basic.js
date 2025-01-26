@@ -14,7 +14,7 @@ function connect(target,data,result,reject){
     })
 }
 
-window.onload = function() {
+window.addEventListener('load',function() {
     const bannerHTML = `
         <a href="/" class="banner-link">
             <div class="banner">
@@ -25,6 +25,6 @@ window.onload = function() {
         </a>
     `;
     document.getElementById('banner').innerHTML = bannerHTML;
-}
+});
 
 console.log('version 1.0.0');

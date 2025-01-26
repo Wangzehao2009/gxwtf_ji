@@ -89,7 +89,7 @@ function deleteProblem(req, res) {
             return res.status(500).json({ success: false, error: '查询失败', details: err });
         }
         const filePath = results[0].file_path;
-        console.log(filePath);
+        // console.log(filePath);
         // 删除题目记录
         db.query('DELETE FROM problems WHERE id = ?', [problemId], (err, result) => {
             if (err) {

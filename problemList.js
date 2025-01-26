@@ -3,7 +3,7 @@ const db = require('./mysql.js');
 // 题目列表
 function problemlist(req, res) {
     const { id, subject, sortField = 'id', sortOrder = 'ASC', search = '', page = 1, pageSize = 15 } = req.query;
-    console.log("enter");
+    // console.log("enter");
     // 构建 SQL 查询条件
     let query = 'SELECT * FROM problems WHERE 1=1';
     if (id) {

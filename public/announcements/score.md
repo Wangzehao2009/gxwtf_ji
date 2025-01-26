@@ -23,3 +23,15 @@ $$score=\frac{\sum_{user \in  credit\_users} score_{user} \cdot point_{user}}{\s
 ## 学校分数：
 
 $$score_{school}=\ln^2{(user\_count_{school}+2)} \sum_{user \in school } score_{submit}$$
+
+## 游戏分数
+
+以下游戏的分数之和为游戏总分
+
+### Hangman
+
+为猜出单词数量
+
+### 诗词九宫格
+
+为答对诗词的评分之和。答对一次的评分为：诗词方格面积（$n \times m$）除以 $9$，即 $\frac{1}{9}nm$
