@@ -44,9 +44,10 @@
         const BASE_URL = "/game/hangman";
         let wordState = [];
         let remainingAttempts = 6;
+        let currentWord = null;
         var userId;
-        async function getUserId()
-        {
+
+        async function getUserId() {
             userId = await fetch("/dashboard", {
                 "mode": "cors",
                 "credentials": "include"
@@ -55,11 +56,11 @@
             userId = userId.userId;
         }
         getUserId();
-    
+
         const renderWord = () => {
             document.getElementById("word").textContent = wordState.join(" ");
         };
-    
+
         const renderKeyboard = () => {
             const keyboardDiv = document.getElementById("keyboard");
             keyboardDiv.innerHTML = "";
@@ -77,8 +78,8 @@
                     button.textContent = letter;
                     button.style.backgroundColor = "#d3d3d3"; // 初始灰色
                     button.style.color = "black"; // 初始文字为黑色
-                    button.onclick = async () => {
-                        const result = await guessLetter(letter, button);
+                    button.onclick = () => {
+                        const result = guessLetter(letter, button);
                         button.disabled = true; // 禁用按钮
                         button.style.backgroundColor = result ? "green" : "red"; // 更新按钮背景颜色
                         button.style.color = "white"; // 更新文字颜色为白色
@@ -88,7 +89,7 @@
                 keyboardDiv.appendChild(rowDiv);
             });
         };
-    
+
         const updateStatus = (message) => {
             const statusElement = document.getElementById("status");
             statusElement.textContent = message;
@@ -105,78 +106,93 @@
                 statusElement.style.color = "black";
             }
         };
-    
+
         const startGame = async () => {
             const response = await fetch(`${BASE_URL}/start`);
             const data = await response.json();
+            currentWord = data.currentWord;
             wordState = data.wordState;
             remainingAttempts = data.remainingAttempts;
-    
+
             document.getElementById("info").style.display = "none"; // 隐藏提示信息
             document.getElementById("giveUpButton").style.display = "inline"; // 显示Give Up按钮
             renderWord();
             renderKeyboard();
             updateStatus(`Remaining attempts: ${remainingAttempts}`);
         };
-    
-        const guessLetter = async (letter, button) => {
-            const response = await fetch(`${BASE_URL}/guess`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ letter }),
+
+        const guessLetter = (letter, button) => {
+            const englishWord = currentWord.english.toLowerCase(); // 获取纯小写字母
+            let correct = false;
+
+            // 更新单词状态
+            englishWord.split("").forEach((char, index) => {
+                // 仅更新字母的位置，非字母位置（如符号和空格）保持原样
+                if (char === letter && wordState[index] === "_") {
+                    wordState[index] = letter;
+                    correct = true;
+                } else if (/[a-zA-Z]/.test(char) === false) {
+                    // 如果是非字母字符（如空格、符号等），保持原来的字符
+                    wordState[index] = currentWord.english[index];
+                }
             });
-            const data = await response.json();
-    
-            wordState = data.wordState;
-            remainingAttempts = data.remainingAttempts;
-    
-            renderWord();
-    
-            if (data.completed || remainingAttempts <= 0) {
-                const resultMessage = data.success ? "You win!" : "You lose...";
-                if(data.success){
+
+            if (!correct) {
+                remainingAttempts -= 1;
+            }
+
+            const completed = !wordState.includes("_");
+            const gameOver = completed || remainingAttempts <= 0;
+
+            if (gameOver) {
+                const resultMessage = completed ? "You win!" : "You lose...";
+                if (completed) {
                     fetch(`/game/update?userId=${userId}&add=1&type=hangman`);
                     fetch(`/game/update?userId=${userId}&add=1&type=gameScore`);
                 }
                 updateStatus(resultMessage);
-    
+
                 // 显示提示和正确单词
-                showHint(data.hint, data.correctWord);
-    
+                showHint({
+                    phoneticSymbol: currentWord.phoneticSymbol,
+                    chinese: currentWord.chinese
+                }, currentWord.english);
+
                 document.getElementById("keyboard").innerHTML = "";
                 document.getElementById("giveUpButton").style.display = "none"; // 隐藏Give Up按钮
             } else {
                 updateStatus(`Remaining attempts: ${remainingAttempts}`);
             }
-    
-            return data.correct; // 返回是否猜对
+
+            renderWord();
+            return correct; // 返回是否猜对
         };
-    
+
         const giveUp = async () => {
-            const response = await fetch(`${BASE_URL}/giveup`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-            });
-            const data = await response.json();
-            showHint(data.hint, data.correctWord);
+            showHint({
+                phoneticSymbol: currentWord.phoneticSymbol,
+                chinese: currentWord.chinese
+            }, currentWord.english);
             updateStatus("You gave up");
             document.getElementById("keyboard").innerHTML = "";
             document.getElementById("giveUpButton").style.display = "none"; // 隐藏Give Up按钮
         };
-    
+
         const showHint = (hint, correctWord) => {
             document.getElementById("info").style.display = "block";
-            if(!hint.phoneticSymbol) document.getElementById("phonetic").style.display = "none";
+            if (!hint.phoneticSymbol) document.getElementById("phonetic").style.display = "none";
             else document.getElementById("phonetic").textContent = hint.phoneticSymbol;
             document.getElementById("meaning").textContent = hint.chinese;
-    
+
             if (correctWord) {
                 document.getElementById("word").textContent = correctWord; // 显示正确单词
             }
         };
+
         const nextWord = () => {
             startGame();
         };
+
         startGame();
     </script>
 </body>
