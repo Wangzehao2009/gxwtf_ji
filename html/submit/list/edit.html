@@ -78,7 +78,9 @@
                                 <div class="card-item">${submission.problem_name}</div>
                                 <div class="card-item">${submission.subject}</div>
                                 <div class="card-item">
-                                    <button onclick="window.location.href='/preview?file=${encodeURIComponent(submission.file_path)}'">预览</button>
+                                    <div class="operator">
+                                        <button onclick="window.location.href='/preview?file=${encodeURIComponent(submission.file_path)}'">预览</button>
+                                    </div>
                                 </div>
                                 <div class="card-item">
                                     <div class="operator">

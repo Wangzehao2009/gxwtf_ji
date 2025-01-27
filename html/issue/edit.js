@@ -113,7 +113,9 @@ const table=new Table('tbody',
                         <div class="card-item">${problem.score}</div>
                         <div class="card-item">${problem.author}</div>
                         <div class="card-item">
-                            <button onclick="addProblemToIssue(${problem.id})">添加</button>
+                            <div class="operator">
+                                <button onclick="addProblemToIssue(${problem.id})">添加</button>
+                            </div>
                         </div>
                     </div>
                 </div>
