@@ -33,7 +33,8 @@ function preview(req,res){
         // 图片、PDF 或 TXT 文件，返回文件
         res.sendFile(filePath);
     } else {
-        res.status(415).send('Unsupported file type');
+        // 不支持预览的文件，直接下载
+        res.download(filePath, path.basename(filePath));
     }
 }
 
