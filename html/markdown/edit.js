@@ -61,7 +61,7 @@ const initPreviewSync = () => {
 // 当页面加载完成后，初始化编辑器
 window.addEventListener('DOMContentLoaded', (event) => {
     initEditor();
-    initPreviewSync();
+    // initPreviewSync();
 });
 
 let historyStack = [];
