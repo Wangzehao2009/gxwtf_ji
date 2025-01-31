@@ -101,6 +101,46 @@ function userCount(req, res) {
     });
 }
 
+//重制密码
+async function editPassword(req,res){
+    const { email, password } = req.body;
+    console.log(email,password);
+
+    // 检查邮箱和密码是否有效
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: "邮箱或密码不能为空" });
+    }
+
+    // 查询数据库是否存在该邮箱
+    db.query("SELECT * FROM users WHERE email = ?", [email], async (err, results) => {
+        if (err) {
+            console.error("数据库查询失败:", err);
+            return res.status(500).json({ success: false, message: "服务器错误" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: "邮箱未找到" });
+        }
+
+        try {
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+            // 更新用户密码
+            db.query("UPDATE users SET password = ? WHERE email = ?", [hashedPassword, email], (updateErr, updateResults) => {
+                if (updateErr) {
+                    console.error("密码更新失败:", updateErr);
+                    return res.status(500).json({ success: false, message: "密码更新失败" });
+                }
+
+                return res.json({ success: true, message: "密码重置成功" });
+            });
+        } catch (error) {
+            console.error("加密失败:", error);
+            return res.status(500).json({ success: false, message: "密码加密失败" });
+        }
+    });
+}
+
 function init(app) {
     app.post('/register', register);
     app.post('/login', login);
@@ -108,6 +148,7 @@ function init(app) {
     app.get('/dashboard', loginStatus);
     app.get('/users', userList);
     app.get('/users/count',userCount);
+    app.post('/editPassword',editPassword);
 }
 
 module.exports = init;

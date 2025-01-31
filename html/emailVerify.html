@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮箱验证码验证</title>
+    <style>
+        .container { font-family: 'Microsoft YaHei', sans-serif; max-width: 30%; margin: auto; padding: 70px 0; }
+        input{
+            width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box;
+        }
+        .submitButton { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        .submitBbutton:hover { background-color: #0056b3; }
+        .link{display: block; margin-top: 10px; color:#a31f23d7;}
+        .link:hover{color:#7b1a15;}
+        .captcha-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .captcha-container input {
+            flex: 1; /* 让输入框占满容器 */
+            padding-right: 110px; /* 预留按钮位置，避免文字被遮挡 */
+        }
+        #getCaptcha {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        #getCaptcha:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script src="/basic.js"></script>
+    <link rel="stylesheet" href="/css/banner.css">
+    <script>
+        let countdown = 0;
+        let generatedCaptcha = "";
+        let timer;
+
+        // 发送验证码请求
+        function sendCaptcha() {
+            if (countdown > 0) return; // 如果倒计时未结束，不能重新获取
+
+            const email = document.getElementById("email").value;
+            if (!email) {
+                alert("请输入邮箱");
+                return;
+            }
+
+            // 生成6位随机数字验证码
+            generatedCaptcha = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // 发送POST请求到服务器
+            fetch("/sendCaptcha", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email, captcha: generatedCaptcha })
+            }).then(response => response.json())
+              .then(data => {
+                  startCountdown();
+              }).catch(error => {
+                  alert("发送失败，请稍后再试");
+              });
+        }
+
+        // 启动倒计时
+        function startCountdown() {
+            countdown = 150; // 倒计时150秒
+            updateButton();
+            timer = setInterval(() => {
+                countdown--;
+                updateButton();
+                if (countdown <= 0) clearInterval(timer); // 倒计时结束
+            }, 1000);
+        }
+
+        // 更新按钮状态
+        function updateButton() {
+            const button = document.getElementById("getCaptcha");
+            button.innerText = countdown > 0 ? `${countdown}秒后重新获取` : "获取邮箱验证码";
+            button.disabled = countdown > 0; // 当倒计时未结束时禁用按钮
+        }
+
+        // 验证验证码
+        function verifyCaptcha() {
+            const inputCaptcha = document.getElementById("captcha").value;
+            if (inputCaptcha === generatedCaptcha) {
+                const email = document.getElementById("email").value;
+                window.location.href = `/resetPassword?email=${encodeURIComponent(email)}`;
+            } else {
+                alert("验证码错误，请重新输入");
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="banner"></div>
+    <div class="container">
+        <h2>邮箱验证</h2>
+        <input type="email" id="email" placeholder="请输入邮箱">
+        <div class="captcha-container">
+            <input type="text" id="captcha" placeholder="请输入验证码">
+            <button id="getCaptcha" onclick="sendCaptcha()">获取验证码</button>
+        </div>
+        <button class="submitButton" onclick="verifyCaptcha()">提交</button>
+    </div>
+</body>
+</html>

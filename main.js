@@ -14,6 +14,7 @@ const announcementSystem = require('./announcementSystem.js');
 const hangman = require("./game/hangman.js");
 const gridGame = require("./game/gridGame.js");
 const gameSystem = require("./game/gameSystem.js");
+const emailSystem = require('./emailSystem.js');
 
 const cors = require('cors');
 
@@ -38,6 +39,7 @@ issueSystem(app, fileStorage); // 期刊系统
 markdown(app); // Markdown 阅读器
 rankSystem(app); // 排名系统
 previewSystem(app); //预览系统
+emailSystem(app); // 邮件系统
 app.use('/image', imageUpload); // 图床功能
 // 提供静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));

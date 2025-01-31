@@ -12,6 +12,8 @@
         }
         button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #0056b3; }
+        .link{display: block; margin-top: 10px; color:#a31f23d7;}
+        .link:hover{color:#7b1a15;}
     </style>
     <script src="/basic.js"></script>
     <link rel="stylesheet" href="/css/banner.css">
@@ -24,6 +26,7 @@
             <input type="text" placeholder="用户名" name="username" required><br>
             <input type="password" placeholder="密码" name="password" required><br>
             <button type="submit">登录</button>
+            <a href="/emailVerify" class="link">忘记密码</a>
         </form>
         <p id="message"></p>
     </div>
